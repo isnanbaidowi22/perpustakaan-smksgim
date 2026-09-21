@@ -21,8 +21,16 @@
   --color-status-rusak: oklch(0.65 0.15 62);
   --color-status-hilang: oklch(0.44 0.02 258);
 
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Source Serif 4", ui-serif, Georgia, serif;
+  /* var(--font-inter) / var(--font-source-serif) datang dari next/font di
+     layout.tsx (mode variable). Harus dirujuk lewat var(), bukan literal
+     "Inter" — literal akan gagal cocok dengan font ter-self-host next/font
+     kecuali kebetulan. Diverifikasi: Tailwind v4 menyalin rujukan var() ini
+     apa adanya ke @layer theme (tidak diresolusi saat build), baik lewat
+     @theme biasa maupun @theme inline — keduanya diuji dan menghasilkan CSS
+     akhir yang identik untuk kasus ini, jadi @theme biasa dipertahankan
+     agar selaras dengan struktur token lain di berkas ini. */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-source-serif), ui-serif, Georgia, serif;
 }
 
 body {
