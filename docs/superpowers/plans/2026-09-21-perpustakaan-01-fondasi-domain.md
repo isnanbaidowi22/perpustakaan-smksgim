@@ -14,7 +14,7 @@
 
 ## Global Constraints
 
-- **Node.js ≥ 20.** Versi persis Next.js, React, dan Drizzle yang terpasang dicatat di Task 1 Step 7 setelah instalasi.
+- **Node.js ≥ 20.** Versi persis yang terpasang (`npm ls next react drizzle-orm vitest --depth=0`, Task 1 Step 7): `drizzle-orm@0.45.3`, `next@16.3.5`, `react@19.2.8`, `vitest@5.0.1`.
 - **TypeScript mode `strict`.** `any` implisit dan eksplisit dilarang.
 - **Seluruh tanggal kalender direpresentasikan sebagai untai `'YYYY-MM-DD'`, bukan objek `Date`.** Indonesia berada di UTC+7; memakai `Date` berarti sebuah peminjaman yang dicatat pukul 08:00 WIB tersimpan sebagai hari sebelumnya dalam UTC, dan perhitungan denda meleset satu hari. Untai kalender tidak punya zona waktu, jadi tidak bisa bergeser.
 - **`src/domain/**` dilarang mengimpor apa pun dari `src/server/**`, `src/app/**`, `src/components/**`, `drizzle-orm`, atau `@supabase/*`.** Ditegakkan aturan ESLint di Task 2.
