@@ -8,7 +8,7 @@ export default defineConfig({
     include: ['src/**/*.test.ts', 'tests/**/*.test.ts'],
     // Menulis hasil tes ke .claude/tdd-guard/data agar hook tdd-guard
     // menilai perubahan dari hasil tes sungguhan, bukan dari diff mentah.
-    reporters: ['default', new VitestReporter(resolve(__dirname))],
+    reporters: ['default', new VitestReporter({ projectRoot: resolve(__dirname) })],
   },
   resolve: {
     alias: { '@': resolve(__dirname, './src') },
