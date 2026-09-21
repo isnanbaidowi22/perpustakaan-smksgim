@@ -21,3 +21,6 @@ next-env.d.ts
 .DS_Store
 *.log
 *.lnk
+
+# Scratch runtime tdd-guard
+/.claude/tdd-guard/

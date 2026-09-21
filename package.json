@@ -34,6 +34,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.3.5",
     "tailwindcss": "^4",
+    "tdd-guard-vitest": "^0.2.0",
     "tsx": "^4.23.15",
     "typescript": "^5",
     "vitest": "^5.0.1"
