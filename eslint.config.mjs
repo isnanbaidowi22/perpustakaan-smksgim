@@ -11,9 +11,17 @@ const eslintConfig = defineConfig([
       'no-restricted-imports': ['error', {
         patterns: [{
           group: [
+            // Alias form: matches the resolved-looking specifier directly.
             '@/server/*', '@/app/*', '@/components/*',
+            // Relative form: '**' crosses path segments (including '..'),
+            // so this catches the same directories reached by a relative
+            // import (e.g. '../../server/db/client') that the alias-only
+            // patterns above would silently miss.
+            '**/server/*', '**/app/*', '**/components/*',
+            // Bare specifier and subpath both listed, since a pattern
+            // covering only one form leaves the other unenforced.
             'drizzle-orm', 'drizzle-orm/*',
-            '@supabase/*', 'postgres', 'next/*',
+            '@supabase/*', 'postgres', 'next', 'next/*',
           ],
           message:
             'Lapisan domain harus murni. Dilarang mengimpor database, jaringan, ' +

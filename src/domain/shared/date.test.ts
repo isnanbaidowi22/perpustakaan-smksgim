@@ -21,6 +21,10 @@ describe('addDays', () => {
   it('menolak tanggal yang tidak berformat YYYY-MM-DD', () => {
     expect(() => addDays('21/09/2026', 1)).toThrow('Tanggal tidak valid');
   });
+
+  it('menolak tanggal yang formatnya benar tetapi tidak ada dalam kalender', () => {
+    expect(() => addDays('2026-02-31', 1)).toThrow('bukan tanggal yang ada dalam kalender');
+  });
 });
 
 describe('diffDays', () => {
