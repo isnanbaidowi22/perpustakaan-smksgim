@@ -1,0 +1,49 @@
+import type { IsoDate } from './date';
+
+export type CopyStatus = 'TERSEDIA' | 'DIPINJAM' | 'RUSAK' | 'HILANG' | 'NONAKTIF';
+export type ReturnCondition = 'BAIK' | 'RUSAK' | 'HILANG';
+export type LoanStatus = 'AKTIF' | 'SEBAGIAN_KEMBALI' | 'SELESAI';
+export type UserRole = 'admin' | 'petugas';
+export type RecordStatus = 'active' | 'inactive';
+
+export interface LibrarySettings {
+  maxActiveLoans: number;
+  loanDurationDays: number;
+  finePerDay: number;
+  blockWhenOverdue: boolean;
+  blockWhenUnpaidFine: boolean;
+}
+
+export interface StudentSnapshot {
+  id: string;
+  nis: string;
+  name: string;
+  className: string;
+  status: RecordStatus;
+}
+
+/** Peminjaman yang masih memiliki eksemplar belum kembali. */
+export interface OpenLoanSnapshot {
+  id: string;
+  transactionNumber: string;
+  dueDate: IsoDate;
+  /** Jumlah eksemplar dalam peminjaman ini yang belum dikembalikan. */
+  openItemCount: number;
+  /** total_fine dikurangi jumlah pembayaran. Nol berarti lunas. */
+  unpaidFine: number;
+}
+
+export interface BorrowerSnapshot {
+  name: string;
+  nis: string;
+  dueDate: IsoDate;
+}
+
+export interface CopySnapshot {
+  id: string;
+  barcode: string;
+  status: CopyStatus;
+  bookTitle: string;
+  /** Terisi hanya bila status DIPINJAM, untuk menyusun pesan galat. */
+  borrowedBy?: BorrowerSnapshot;
+}
