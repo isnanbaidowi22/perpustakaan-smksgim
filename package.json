@@ -12,7 +12,7 @@
     "test:integration": "vitest run tests/integration",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:seed": "tsx src/server/db/seed.ts"
+    "db:seed": "tsx --env-file=.env.local src/server/db/seed.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
