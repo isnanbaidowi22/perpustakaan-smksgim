@@ -24,3 +24,6 @@ next-env.d.ts
 
 # Scratch runtime tdd-guard
 /.claude/tdd-guard/
+
+# Artefak inkremental TypeScript
+tsconfig.tsbuildinfo
