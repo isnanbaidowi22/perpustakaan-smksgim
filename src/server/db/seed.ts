@@ -1,4 +1,21 @@
+import { and, eq } from 'drizzle-orm';
 import { db, schema } from './client';
+
+/**
+ * `books` tidak memiliki batasan unik (dua edisi berbeda boleh berbagi judul
+ * dan penulis), sehingga `onConflictDoNothing()` di situ tidak berlaku apa-apa.
+ * Skrip ini jujur soal itu: cari baris yang cocok dulu, baru sisipkan bila
+ * belum ada — supaya menjalankan ulang skrip ini tidak menggandakan judul.
+ */
+async function findOrCreateBook(values: typeof schema.books.$inferInsert) {
+  const [existing] = await db.select().from(schema.books)
+    .where(and(eq(schema.books.title, values.title), eq(schema.books.author, values.author)))
+    .limit(1);
+  if (existing) return existing;
+
+  const [created] = await db.insert(schema.books).values(values).returning();
+  return created;
+}
 
 async function seed() {
   console.log('Mengisi data awal…');
@@ -27,12 +44,12 @@ async function seed() {
     { code: 'A-3', name: 'Rak A Baris 3', location: 'Ruang Utama' },
   ]).onConflictDoNothing().returning();
 
-  const books = await db.insert(schema.books).values([
-    { title: 'Pemrograman Web', author: 'Budi Raharjo', publisher: 'Informatika',
-      publishYear: 2024, price: '85000', categoryId: categories[0]?.id, rackId: racks[1]?.id },
-    { title: 'Basis Data Lanjut', author: 'Siti Nurhaliza', publisher: 'Andi',
-      publishYear: 2023, price: '92000', categoryId: categories[0]?.id, rackId: racks[0]?.id },
-  ]).onConflictDoNothing().returning();
+  const books = await Promise.all([
+    findOrCreateBook({ title: 'Pemrograman Web', author: 'Budi Raharjo', publisher: 'Informatika',
+      publishYear: 2024, price: '85000', categoryId: categories[0]?.id, rackId: racks[1]?.id }),
+    findOrCreateBook({ title: 'Basis Data Lanjut', author: 'Siti Nurhaliza', publisher: 'Andi',
+      publishYear: 2023, price: '92000', categoryId: categories[0]?.id, rackId: racks[0]?.id }),
+  ]);
 
   // Tiga eksemplar per judul, cukup untuk menguji aturan kuota tiga buku.
   let sequence = 1;

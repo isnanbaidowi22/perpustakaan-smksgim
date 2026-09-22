@@ -6,7 +6,12 @@ import postgres from 'postgres';
 
 const sql = postgres(process.env.DATABASE_URL!, { prepare: false });
 
-afterAll(async () => { await sql.end(); });
+afterAll(async () => {
+  // Bersihkan sisa data pengujian agar suite ini tidak meninggalkan jejak
+  // (mis. buku 'Uji' bertabrakan dengan skema barcode skrip data awal).
+  await sql`truncate loan_items, loans, book_copies, books, students, academic_years restart identity cascade`;
+  await sql.end();
+});
 
 beforeEach(async () => {
   await sql`truncate loan_items, loans, book_copies, books, students, academic_years restart identity cascade`;
