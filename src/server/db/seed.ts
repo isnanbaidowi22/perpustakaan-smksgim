@@ -1,3 +1,4 @@
+import { createClient } from '@supabase/supabase-js';
 import { and, eq } from 'drizzle-orm';
 import { db, schema } from './client';
 
@@ -15,6 +16,38 @@ async function findOrCreateBook(values: typeof schema.books.$inferInsert) {
 
   const [created] = await db.insert(schema.books).values(values).returning();
   return created;
+}
+
+async function seedUsers() {
+  const admin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } },
+  );
+
+  const accounts = [
+    { username: 'admin', fullName: 'Administrator', role: 'admin' as const },
+    { username: 'petugas', fullName: 'Petugas Perpustakaan', role: 'petugas' as const },
+  ];
+
+  for (const account of accounts) {
+    const { data, error } = await admin.auth.admin.createUser({
+      email: `${account.username}@${process.env.INTERNAL_EMAIL_DOMAIN ?? 'perpus.local'}`,
+      password: 'perpus123',
+      email_confirm: true,
+    });
+    if (error) {
+      console.log(`  ${account.username}: ${error.message} — dilewati`);
+      continue;
+    }
+    await db.insert(schema.profiles).values({
+      id: data.user.id,
+      username: account.username,
+      fullName: account.fullName,
+      role: account.role,
+    }).onConflictDoNothing();
+    console.log(`  Akun dibuat: ${account.username} / perpus123`);
+  }
 }
 
 async function seed() {
@@ -68,6 +101,8 @@ async function seed() {
     { nis: '202600456', name: 'Siti Aminah', className: 'XI RPL 1', major: 'RPL',
       gender: 'P', academicYearId: year?.id },
   ]).onConflictDoNothing();
+
+  await seedUsers();
 
   console.log(`Selesai: ${books.length} judul, ${copies.length} eksemplar, 2 siswa.`);
   process.exit(0);
