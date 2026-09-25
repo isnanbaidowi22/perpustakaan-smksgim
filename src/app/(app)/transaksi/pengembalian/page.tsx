@@ -111,6 +111,7 @@ export default async function ReturnPage({ searchParams }: { searchParams: Searc
             }}
             today={today}
             finePerDay={settings.finePerDay}
+            searchQuery={q}
           />
         </section>
       )}

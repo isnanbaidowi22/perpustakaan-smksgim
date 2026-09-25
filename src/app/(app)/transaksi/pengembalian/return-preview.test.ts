@@ -25,6 +25,24 @@ describe('previewReturn', () => {
     });
   });
 
+  it('mencentang hanya buku yang cocok bila pencarian sama dengan barcode salah satu buku (I1)', () => {
+    expect(initialRows(items, 'BK-000002')).toEqual({
+      i1: { selected: false, condition: 'BAIK', replacementFee: '85000', note: '' },
+      i2: { selected: true, condition: 'BAIK', replacementFee: '0', note: '' },
+    });
+  });
+
+  it('mencocokkan barcode tanpa peduli huruf besar/kecil dan spasi di pinggir', () => {
+    expect(initialRows(items, ' bk-000001 ').i1.selected).toBe(true);
+    expect(initialRows(items, ' bk-000001 ').i2.selected).toBe(false);
+  });
+
+  it('mencentang semua buku bila pencarian bukan barcode salah satu buku (nomor transaksi, NIS, atau nama)', () => {
+    expect(initialRows(items, 'PJM-20900302-0001').i1.selected).toBe(true);
+    expect(initialRows(items, 'PJM-20900302-0001').i2.selected).toBe(true);
+    expect(initialRows(items, undefined).i1.selected).toBe(true);
+  });
+
   it('menghitung denda telat per eksemplar yang dicentang', () => {
     const rows = { ...initialRows(items), i2: { ...initialRows(items).i2, selected: false } };
 

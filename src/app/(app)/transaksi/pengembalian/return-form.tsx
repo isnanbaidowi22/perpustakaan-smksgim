@@ -16,12 +16,15 @@ export function ReturnForm({
   loan,
   today,
   finePerDay,
+  searchQuery,
 }: {
   loan: { id: string; dueDate: string; items: ReturnableItem[] };
   today: string;
   finePerDay: number;
+  /** Kata kunci pencarian pinjaman ini; dipakai untuk pencentangan awal (I1). */
+  searchQuery?: string;
 }) {
-  const [rows, setRows] = useState(() => initialRows(loan.items));
+  const [rows, setRows] = useState(() => initialRows(loan.items, searchQuery));
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const preview = previewReturn(loan.items, rows, { dueDate: loan.dueDate, today, finePerDay });

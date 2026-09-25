@@ -34,11 +34,26 @@ export interface ReturnPreview {
   warnings: string[];
 }
 
-/** Mengembalikan semua buku adalah kasus tersering, jadi semuanya tercentang. */
-export function initialRows(items: ReturnableItem[]): Record<string, ReturnRowState> {
+/**
+ * Mengembalikan semua buku adalah kasus tersering, jadi semuanya tercentang
+ * secara bawaan. Tetapi bila `query` (kolom pencarian pinjaman) sama persis
+ * dengan barcode salah satu buku dalam pinjaman ini, petugas baru saja
+ * memindai satu buku yang benar-benar dikembalikan — pencentangan lain
+ * (nomor transaksi, NIS, nama) tetap mencentang semuanya (I1).
+ */
+export function initialRows(items: ReturnableItem[], query?: string): Record<string, ReturnRowState> {
+  const normalized = query?.trim().toUpperCase();
+  const matchedId = normalized
+    ? items.find((item) => item.barcode.toUpperCase() === normalized)?.id
+    : undefined;
   return Object.fromEntries(items.map((item) => [
     item.id,
-    { selected: true, condition: 'BAIK' as ReturnCondition, replacementFee: String(item.bookPrice), note: '' },
+    {
+      selected: matchedId ? item.id === matchedId : true,
+      condition: 'BAIK' as ReturnCondition,
+      replacementFee: String(item.bookPrice),
+      note: '',
+    },
   ]));
 }
 

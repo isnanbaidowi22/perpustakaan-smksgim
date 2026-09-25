@@ -87,6 +87,19 @@ describe('ReturnPage', () => {
     expect(html).toContain('Tidak ada peminjaman yang masih berjalan untuk &quot;tidak-ada&quot;.');
   });
 
+  it('mencentang hanya buku yang dipindai bila pencarian sama dengan barcode salah satu buku (I1)', async () => {
+    const bothOpen = {
+      ...detail,
+      items: detail.items.map((item) => ({ ...item, returnedAt: null, returnCondition: null })),
+    };
+    mockDetail.mockResolvedValueOnce(bothOpen);
+
+    const html = await render({ q: 'BK-000002', pinjam: 'l1' });
+
+    expect(html).not.toMatch(/id="kembali-i1"[^>]*checked=""/);
+    expect(html).toMatch(/id="kembali-i2"[^>]*checked=""/);
+  });
+
   it('mengarahkan ke riwayat bila pinjaman yang dipilih sudah selesai', async () => {
     mockDetail.mockResolvedValueOnce({ ...detail, status: 'SELESAI' });
     const html = await render({ pinjam: 'l1' });
