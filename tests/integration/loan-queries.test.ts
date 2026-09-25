@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { finePayments } from '@/server/db/schema';
-import { findLoansForReturn, getLoanDetail } from '@/server/queries/loans';
+import { findLoansForReturn, getLoanDetail, listLoans } from '@/server/queries/loans';
 import { createLoan } from '@/server/services/loans';
 import { processReturn } from '@/server/services/returns';
-import { circulationFixture, TODAY } from './circulation-fixture';
+import { circulationFixture, seedLoan, TODAY } from './circulation-fixture';
 import { withRollback } from './helpers';
 
 describe('getLoanDetail', () => {
@@ -98,6 +98,57 @@ describe('findLoansForReturn', () => {
 
       expect(await findLoansForReturn('UJI-S1', TODAY, tx)).toEqual([]);
       expect(await findLoansForReturn('   ', TODAY, tx)).toEqual([]);
+    });
+  });
+});
+
+describe('listLoans', () => {
+  it('menyaring menurut status yang dihitung saat dibaca dan mencari siswa', async () => {
+    await withRollback(async (tx) => {
+      const fx = await circulationFixture(tx);
+      const late = await seedLoan(tx, fx, { student: 0, copies: [0], loanDate: '2090-02-20', dueDate: '2090-02-23' });
+      const onTime = await seedLoan(tx, fx, { student: 1, copies: [1, 2], loanDate: TODAY, dueDate: '2090-03-05', returned: [2] });
+      const unpaid = await seedLoan(tx, fx, { student: 1, copies: [3], loanDate: '2090-01-01', dueDate: '2090-01-04', returned: [3], totalFine: 2000 });
+
+      const idsFor = async (status: 'all' | 'open' | 'overdue' | 'unpaid' | 'done', q = '') =>
+        (await listLoans({ q, status, page: 1 }, TODAY, tx)).rows
+          .map((row) => row.id)
+          .filter((id) => [late.id, onTime.id, unpaid.id].includes(id));
+
+      expect(await idsFor('open')).toEqual(expect.arrayContaining([late.id, onTime.id]));
+      expect(await idsFor('open')).not.toContain(unpaid.id);
+      expect(await idsFor('overdue')).toEqual([late.id]);
+      expect(await idsFor('unpaid')).toEqual([unpaid.id]);
+      expect(await idsFor('done')).toEqual([unpaid.id]);
+      expect(await idsFor('all', 'uji siswa dua')).toEqual(expect.arrayContaining([onTime.id, unpaid.id]));
+      expect(await idsFor('all', late.transactionNumber.toLowerCase())).toEqual([late.id]);
+    });
+  });
+
+  it('merangkum jumlah buku, sisa denda, dan keterlambatan per baris', async () => {
+    await withRollback(async (tx) => {
+      const fx = await circulationFixture(tx);
+      const partial = await seedLoan(tx, fx, {
+        student: 0, copies: [0, 1], loanDate: '2090-02-20', dueDate: '2090-02-23', returned: [1], totalFine: 3000,
+      });
+
+      const { rows } = await listLoans({ q: partial.transactionNumber, status: 'all', page: 1 }, TODAY, tx);
+
+      expect(rows).toEqual([{
+        id: partial.id,
+        transactionNumber: partial.transactionNumber,
+        loanDate: '2090-02-20',
+        dueDate: '2090-02-23',
+        status: 'SEBAGIAN_KEMBALI',
+        studentName: 'UJI Siswa Satu',
+        studentNis: 'UJI-S1',
+        studentClass: 'XI UJI 1',
+        itemCount: 2,
+        openCount: 1,
+        totalFine: 3000,
+        unpaidFine: 3000,
+        daysOverdue: 7,
+      }]);
     });
   });
 });

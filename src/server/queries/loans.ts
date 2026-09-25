@@ -1,5 +1,7 @@
-import { and, asc, eq, ilike, inArray, isNull, or } from 'drizzle-orm';
+import { and, asc, desc, eq, ilike, inArray, isNull, lt, ne, or, sql } from 'drizzle-orm';
 import { diffDays, type IsoDate } from '@/domain/shared/date';
+import type { HistoryStatus } from '@/lib/circulation-labels';
+import { offsetOf, PAGE_SIZE } from '@/lib/pagination';
 import type { LoanStatus, ReturnCondition } from '@/domain/shared/types';
 import { db } from '@/server/db/client';
 import type { Executor } from '@/server/db/executor';
@@ -8,7 +10,7 @@ import {
 } from '@/server/db/schema';
 import { isUuid } from '@/server/validation/common';
 import { containsPattern } from './like';
-import { openItemCounts } from './loan-aggregates';
+import { openItemCounts, paidTotals } from './loan-aggregates';
 
 export interface LoanItemDetail {
   id: string;
@@ -206,4 +208,119 @@ export async function findLoansForReturn(
     openCount: Number(row.openCount),
     daysOverdue: overdueDays(status, row.dueDate, today),
   }));
+}
+
+export interface LoanRow {
+  id: string;
+  transactionNumber: string;
+  loanDate: string;
+  dueDate: string;
+  status: LoanStatus;
+  studentName: string;
+  studentNis: string;
+  studentClass: string;
+  itemCount: number;
+  openCount: number;
+  totalFine: number;
+  unpaidFine: number;
+  daysOverdue: number;
+}
+
+export interface LoanFilter {
+  q: string;
+  status: HistoryStatus;
+  page: number;
+}
+
+type PaidTotals = ReturnType<typeof paidTotals>;
+
+/** Status "terlambat" dan "belum lunas" dihitung saat dibaca (spec 4.2, 5.4). */
+function statusCondition(status: HistoryStatus, today: IsoDate, paid: PaidTotals) {
+  switch (status) {
+    case 'open':
+      return ne(loans.status, 'SELESAI');
+    case 'overdue':
+      return and(ne(loans.status, 'SELESAI'), lt(loans.dueDate, today));
+    case 'unpaid':
+      return sql`${loans.totalFine} > coalesce(${paid.paid}, 0)`;
+    case 'done':
+      return eq(loans.status, 'SELESAI');
+    case 'all':
+      return undefined;
+  }
+}
+
+export async function listLoans(
+  filter: LoanFilter,
+  today: IsoDate,
+  executor: Executor = db,
+): Promise<{ rows: LoanRow[]; total: number }> {
+  const paid = paidTotals(executor);
+  const itemCounts = executor
+    .select({
+      loanId: loanItems.loanId,
+      itemCount: sql<number>`count(*)::int`.as('item_count'),
+      openCount: sql<number>`(count(*) filter (where ${loanItems.returnedAt} is null))::int`.as('open_count'),
+    })
+    .from(loanItems)
+    .groupBy(loanItems.loanId)
+    .as('item_counts');
+
+  const keyword = filter.q.trim();
+  const where = and(
+    keyword
+      ? or(
+          eq(loans.transactionNumber, keyword.toUpperCase()),
+          eq(students.nis, keyword),
+          ilike(students.name, containsPattern(keyword)),
+        )
+      : undefined,
+    statusCondition(filter.status, today, paid),
+  );
+
+  const rows = await executor
+    .select({
+      id: loans.id,
+      transactionNumber: loans.transactionNumber,
+      loanDate: loans.loanDate,
+      dueDate: loans.dueDate,
+      status: loans.status,
+      studentName: students.name,
+      studentNis: students.nis,
+      studentClass: loans.studentClass,
+      itemCount: itemCounts.itemCount,
+      openCount: itemCounts.openCount,
+      totalFine: loans.totalFine,
+      paid: sql<string>`coalesce(${paid.paid}, 0)`,
+    })
+    .from(loans)
+    .innerJoin(students, eq(students.id, loans.studentId))
+    .innerJoin(itemCounts, eq(itemCounts.loanId, loans.id))
+    .leftJoin(paid, eq(paid.loanId, loans.id))
+    .where(where)
+    .orderBy(desc(loans.loanDate), desc(loans.transactionNumber))
+    .limit(PAGE_SIZE)
+    .offset(offsetOf(filter.page));
+
+  const [{ total }] = await executor
+    .select({ total: sql<number>`count(*)::int` })
+    .from(loans)
+    .innerJoin(students, eq(students.id, loans.studentId))
+    .leftJoin(paid, eq(paid.loanId, loans.id))
+    .where(where);
+
+  return {
+    rows: rows.map(({ paid: paidAmount, ...row }) => {
+      const totalFine = Number(row.totalFine);
+      return {
+        ...row,
+        itemCount: Number(row.itemCount),
+        openCount: Number(row.openCount),
+        totalFine,
+        unpaidFine: Math.max(0, totalFine - Number(paidAmount)),
+        daysOverdue: overdueDays(row.status, row.dueDate, today),
+      };
+    }),
+    total: Number(total),
+  };
 }
