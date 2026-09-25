@@ -42,14 +42,19 @@ export default async function LoanDetailPage({
       <PageHeader
         title={loan.transactionNumber}
         description={`${loan.studentName} · NIS ${loan.studentNis} · ${loan.studentClass}`}
-        actions={isOpen ? (
-          <Link
-            href={withQuery('/transaksi/pengembalian', { q: loan.transactionNumber, pinjam: loan.id })}
-            className={buttonClass('primary')}
-          >
-            Proses Pengembalian
-          </Link>
-        ) : undefined}
+        actions={(
+          <>
+            <Link href={`/cetak/struk/${loan.id}`} className={buttonClass('secondary')}>Cetak Struk</Link>
+            {isOpen && (
+              <Link
+                href={withQuery('/transaksi/pengembalian', { q: loan.transactionNumber, pinjam: loan.id })}
+                className={buttonClass('primary')}
+              >
+                Proses Pengembalian
+              </Link>
+            )}
+          </>
+        )}
       />
       <Flash message={firstValue(query.pesan)} />
 

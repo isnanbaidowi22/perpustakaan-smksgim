@@ -171,6 +171,14 @@ export function LoanDesk({ loanDate, dueDate, durationDays }: { loanDate: string
           <button type="button" autoFocus onClick={() => setOutcome(null)} className={buttonClass('primary')}>
             Peminjaman Baru
           </button>
+          <Link
+            href={`/cetak/struk/${outcome.loanId}`}
+            target="_blank"
+            rel="noopener"
+            className={buttonClass('secondary')}
+          >
+            Cetak Struk
+          </Link>
           <Link href={`/transaksi/riwayat/${outcome.loanId}`} className={buttonClass('secondary')}>Lihat Transaksi</Link>
         </div>
       </div>

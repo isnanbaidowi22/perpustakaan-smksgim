@@ -54,3 +54,10 @@ table, .tabular, .font-mono {
   outline: 2px solid var(--color-accent-600);
   outline-offset: 2px;
 }
+
+/* Halaman cetak: latar abu-abu aplikasi tidak ikut tercetak. */
+@media print {
+  body {
+    background: #fff;
+  }
+}

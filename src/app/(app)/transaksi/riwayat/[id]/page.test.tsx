@@ -103,4 +103,12 @@ describe('LoanDetailPage', () => {
     await expect(LoanDetailPage({ params: Promise.resolve({ id: 'x' }), searchParams: Promise.resolve({}) }))
       .rejects.toThrow('NEXT_NOT_FOUND');
   });
+
+  it('menawarkan cetak struk, juga untuk transaksi yang sudah selesai', async () => {
+    const open = await render(baseLoan);
+    expect(open).toContain('href="/cetak/struk/l1"');
+
+    const done = await render({ ...baseLoan, status: 'SELESAI', unpaidFine: 0, paidTotal: 54000, daysOverdue: 0 });
+    expect(done).toContain('href="/cetak/struk/l1"');
+  });
 });
