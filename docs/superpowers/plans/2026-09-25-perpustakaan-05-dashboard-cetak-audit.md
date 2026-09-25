@@ -106,7 +106,7 @@ Menutup temuan review akhir Rencana 04 yang berdampak langsung pada petugas. Gal
   - `MAX_REPLACEMENT_FEE = 99_999_999` di `src/server/validation/return.ts`
   - `parseRupiahInput` menerima awalan `Rp`/`Rp.` tanpa membedakan huruf besar-kecil
 
-- [ ] **Step 1: Tulis uji Server Action yang gagal**
+- [x] **Step 1: Tulis uji Server Action yang gagal**
 
 Tambahkan di akhir `describe` yang menguji `createLoanAction` di `src/server/actions/loans.test.ts` (setelah uji terakhirnya). Tambahkan juga `LOAN_SAVE_FAILED` ke impor, dari `@/lib/circulation-results`:
 
@@ -145,7 +145,7 @@ Tambahkan di akhir `describe('processReturnAction')` di `src/server/actions/retu
   });
 ```
 
-- [ ] **Step 2: Jalankan uji dan pastikan gagal**
+- [x] **Step 2: Jalankan uji dan pastikan gagal**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/server/actions/loans.test.ts src/server/actions/returns.test.ts
@@ -153,7 +153,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/server/actions/loans.test.ts 
 
 Harapan: FAIL. Impor `LOAN_SAVE_FAILED`/`RETURN_SAVE_FAILED` bernilai `undefined`, dan galat yang ditolak mock terlempar keluar dari action.
 
-- [ ] **Step 3: Tambahkan pesan dan tangkap galat di kedua action**
+- [x] **Step 3: Tambahkan pesan dan tangkap galat di kedua action**
 
 Tambahkan di akhir `src/lib/circulation-results.ts`:
 
@@ -216,7 +216,7 @@ Lalu ganti baris `const result = await processReturn(parsed.data, auth.actor, sc
 
 `redirect()` tetap di luar `try` (ia melempar sinyal navigasi yang tidak boleh ditangkap).
 
-- [ ] **Step 4: Jalankan uji dan pastikan lulus**
+- [x] **Step 4: Jalankan uji dan pastikan lulus**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/server/actions/loans.test.ts src/server/actions/returns.test.ts
@@ -224,7 +224,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/server/actions/loans.test.ts 
 
 Harapan: PASS, keluaran bersih (tanpa log `console.error` yang bocor).
 
-- [ ] **Step 5: Pertahankan daftar buku saat jaringan putus di meja peminjaman**
+- [x] **Step 5: Pertahankan daftar buku saat jaringan putus di meja peminjaman**
 
 Galat jaringan antara peramban dan server (Wi-Fi putus) melempar dari `await createLoanAction(...)` di sisi klien. Di `src/app/(app)/transaksi/peminjaman/loan-desk.tsx`, ubah impor `circulation-results` menjadi:
 
@@ -256,7 +256,7 @@ Layar pengembalian **tidak** diberi tangkapan serupa di sisi klien. `processRetu
 
 Komponen klien tidak dapat diuji tanpa jsdom (Global Constraints). Periksa perubahan ini dengan `npx tsc --noEmit` dan membaca ulang fungsinya.
 
-- [ ] **Step 6: Tulis uji batas biaya ganti dan awalan "Rp" yang gagal**
+- [x] **Step 6: Tulis uji batas biaya ganti dan awalan "Rp" yang gagal**
 
 Tambahkan di akhir `describe('returnSchema')` di `src/server/validation/return.test.ts`:
 
@@ -296,7 +296,7 @@ describe('parseRupiahInput', () => {
 });
 ```
 
-- [ ] **Step 7: Jalankan uji dan pastikan gagal**
+- [x] **Step 7: Jalankan uji dan pastikan gagal**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/server/validation/return.test.ts "src/app/(app)/transaksi/pengembalian/return-preview.test.ts"
@@ -304,7 +304,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/server/validation/return.test
 
 Harapan: FAIL. `100_000_000` masih diterima, dan `'Rp60.000'` menghasilkan `NaN`.
 
-- [ ] **Step 8: Terapkan batas dan awalan**
+- [x] **Step 8: Terapkan batas dan awalan**
 
 Di `src/server/validation/return.ts`, tambahkan di bawah konstanta `FEE`:
 
@@ -338,7 +338,7 @@ export function parseRupiahInput(raw: string): number | null {
 }
 ```
 
-- [ ] **Step 9: Jalankan uji dan pastikan lulus**
+- [x] **Step 9: Jalankan uji dan pastikan lulus**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/server/validation/return.test.ts "src/app/(app)/transaksi/pengembalian/return-preview.test.ts"
@@ -346,7 +346,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/server/validation/return.test
 
 Harapan: PASS. Bila ada uji lama di `return.test.ts` yang memakai nominal di atas `99_999_999` dan mengharapkan pesan `FEE`, ubah nominalnya menjadi nilai di bawah batas. Uji itu menguji bentuk angka, bukan batasnya.
 
-- [ ] **Step 10: Tulis uji pengembalian yang belum ada**
+- [x] **Step 10: Tulis uji pengembalian yang belum ada**
 
 Tambahkan di akhir `describe('processReturn')` di `tests/integration/returns.test.ts`:
 
@@ -414,7 +414,7 @@ Tambahkan di akhir `describe('processReturn')` di `tests/integration/returns.tes
   });
 ```
 
-- [ ] **Step 11: Jalankan uji integrasi pengembalian**
+- [x] **Step 11: Jalankan uji integrasi pengembalian**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm run test:integration -- tests/integration/returns.test.ts
@@ -422,7 +422,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm run test:integration -- tests/integration
 
 Harapan: PASS. Ketiga uji ini mengunci perilaku yang **sudah** benar (pertahanan regresi), jadi boleh langsung hijau. Bila ada yang merah, perilakunya menyimpang dari spec §6.2. Laporkan, jangan ubah harapan ujinya.
 
-- [ ] **Step 12: Ubah cabang yang tidak mungkin tercapai menjadi galat**
+- [x] **Step 12: Ubah cabang yang tidak mungkin tercapai menjadi galat**
 
 Di `src/server/services/returns.ts`, di dalam `for (const item of input.items)`, ganti:
 
@@ -447,7 +447,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm run test:integration -- tests/integration
 
 Harapan: PASS.
 
-- [ ] **Step 13: Revisi spec §8.1 Tipografi**
+- [x] **Step 13: Revisi spec §8.1 Tipografi**
 
 Di `docs/superpowers/specs/2026-09-21-sistem-peminjaman-perpustakaan-design.md`, ganti paragraf yang diawali `Tipografi: **Inter** untuk antarmuka` dengan:
 
@@ -455,7 +455,7 @@ Di `docs/superpowers/specs/2026-09-21-sistem-peminjaman-perpustakaan-design.md`,
 Tipografi: **Plus Jakarta Sans** untuk seluruh antarmuka — judul, teks, dan kode seperti barcode, NIS, dan nomor transaksi — dengan **angka tabular diaktifkan** pada seluruh tabel, kode, dan nominal. Kolom tanggal dan denda yang tidak sejajar secara vertikal jauh lebih lambat dipindai mata. *(Revisi 25 September 2026: pemilik produk mengganti Inter dan Source Serif 4 dengan satu keluarga font.)*
 ```
 
-- [ ] **Step 14: Jalankan seluruh pemeriksaan lalu commit**
+- [x] **Step 14: Jalankan seluruh pemeriksaan lalu commit**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test && npm run test:integration && npm run lint && npx tsc --noEmit
@@ -500,7 +500,7 @@ EOF
 
 Tabel berisi data sungguhan, jadi angka keseluruhan (total eksemplar, terlambat) diuji sebagai **selisih** sebelum dan sesudah fixture di transaksi yang sama. Angka "hari ini" diuji mutlak, karena tidak ada data sungguhan bertanggal 2090.
 
-- [ ] **Step 1: Tulis uji integrasi yang gagal**
+- [x] **Step 1: Tulis uji integrasi yang gagal**
 
 Buat `tests/integration/dashboard.test.ts`:
 
@@ -597,7 +597,7 @@ describe('listDueToday', () => {
 });
 ```
 
-- [ ] **Step 2: Jalankan uji dan pastikan gagal**
+- [x] **Step 2: Jalankan uji dan pastikan gagal**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm run test:integration -- tests/integration/dashboard.test.ts
@@ -605,7 +605,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm run test:integration -- tests/integration
 
 Harapan: FAIL dengan "Failed to resolve import '@/server/queries/dashboard'".
 
-- [ ] **Step 3: Tulis query dashboard**
+- [x] **Step 3: Tulis query dashboard**
 
 Buat `src/server/queries/dashboard.ts`:
 
@@ -725,7 +725,7 @@ export async function listDueToday(today: IsoDate, executor: Executor = db): Pro
 
 Catatan untuk pelaksana: `Promise.all` di atas menjalankan lima kueri pada executor yang sama. Di dalam transaksi uji (`tx`), postgres-js mengantrekannya pada satu koneksi, jadi aman. Jangan ganti dengan subquery berkorelasi: di drizzle 0.45 kolom di dalam template `sql` pada select satu tabel ditulis tanpa nama tabel (lihat komentar di `loan-aggregates.ts`).
 
-- [ ] **Step 4: Jalankan uji dan pastikan lulus**
+- [x] **Step 4: Jalankan uji dan pastikan lulus**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm run test:integration -- tests/integration/dashboard.test.ts
@@ -733,7 +733,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm run test:integration -- tests/integration
 
 Harapan: PASS, 4 uji.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm run lint && npx tsc --noEmit
@@ -757,7 +757,7 @@ EOF
 - Consumes: `getDashboardStats`, `listDueToday`, `DashboardStats`, `DueTodayRow` (Task 2); `listLoans`, `LoanRow` (`src/server/queries/loans.ts`); `LoanStatusBadge`; `schoolToday`; `formatDate`; `PageHeader`, `ScrollTable`, `TD`, `TH`, `buttonClass`
 - Produces: rute `/dashboard` dengan enam kartu angka, daftar "Jatuh Tempo Hari Ini", dan tabel "Transaksi Terbaru" (8 baris)
 
-- [ ] **Step 1: Tulis uji halaman yang gagal**
+- [x] **Step 1: Tulis uji halaman yang gagal**
 
 Buat `src/app/(app)/dashboard/page.test.tsx`:
 
@@ -879,7 +879,7 @@ describe('DashboardPage', () => {
 });
 ```
 
-- [ ] **Step 2: Jalankan uji dan pastikan gagal**
+- [x] **Step 2: Jalankan uji dan pastikan gagal**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- "src/app/(app)/dashboard/page.test.tsx"
@@ -887,7 +887,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- "src/app/(app)/dashboard/page.tes
 
 Harapan: FAIL. Halaman saat ini hanya menampilkan judul "Dashboard".
 
-- [ ] **Step 3: Tulis halaman dashboard**
+- [x] **Step 3: Tulis halaman dashboard**
 
 Ganti isi `src/app/(app)/dashboard/page.tsx`:
 
@@ -1026,7 +1026,7 @@ export default async function DashboardPage() {
 }
 ```
 
-- [ ] **Step 4: Jalankan uji dan pastikan lulus**
+- [x] **Step 4: Jalankan uji dan pastikan lulus**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- "src/app/(app)/dashboard/page.test.tsx"
@@ -1034,7 +1034,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- "src/app/(app)/dashboard/page.tes
 
 Harapan: PASS, 4 uji. Bila `'>9<'` gagal karena markup angka berbeda (misalnya ada spasi), periksa keluaran `html` lalu tegaskan angka 9 di dalam elemen nilainya. Jangan melonggarkan uji menjadi `toContain('9')`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test && npm run lint && npx tsc --noEmit
@@ -1066,7 +1066,7 @@ Spec §8.5 meminta barcode Code128. Pustaka barcode umum bergantung pada DOM ata
   - `code128Bars(text: string): BarcodeBars | null` — posisi bar dalam modul, termasuk zona sepi 10 modul di kiri dan kanan
   - `<Barcode value className? />` — `<svg role="img" aria-label="Barcode …">`, atau teks pengganti bila tidak dapat dikodekan
 
-- [ ] **Step 1: Tulis uji encoder yang gagal**
+- [x] **Step 1: Tulis uji encoder yang gagal**
 
 Buat `src/lib/code128.test.ts`:
 
@@ -1155,7 +1155,7 @@ describe('code128Bars', () => {
 });
 ```
 
-- [ ] **Step 2: Jalankan uji dan pastikan gagal**
+- [x] **Step 2: Jalankan uji dan pastikan gagal**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/lib/code128.test.ts
@@ -1163,7 +1163,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/lib/code128.test.ts
 
 Harapan: FAIL dengan "Failed to resolve import './code128'".
 
-- [ ] **Step 3: Tulis encoder**
+- [x] **Step 3: Tulis encoder**
 
 Buat `src/lib/code128.ts`. Salin tabel pola **persis**. Uji di Step 1 memeriksa panjang, keunikan, paritas, dan beberapa pola acuan, tetapi tidak dapat menangkap dua pola yang tertukar tempat.
 
@@ -1238,7 +1238,7 @@ export function code128Bars(text: string): BarcodeBars | null {
 }
 ```
 
-- [ ] **Step 4: Jalankan uji dan pastikan lulus**
+- [x] **Step 4: Jalankan uji dan pastikan lulus**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/lib/code128.test.ts
@@ -1246,7 +1246,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/lib/code128.test.ts
 
 Harapan: PASS. Bila uji paritas atau pola acuan gagal, **tabelnya salah ketik**. Bandingkan baris itu dengan tabel Code128 standar (lampiran spesifikasi ISO/IEC 15417). Jangan mengubah ujinya.
 
-- [ ] **Step 5: Tulis uji komponen yang gagal**
+- [x] **Step 5: Tulis uji komponen yang gagal**
 
 Buat `src/components/ui/barcode.test.tsx`:
 
@@ -1276,7 +1276,7 @@ describe('Barcode', () => {
 });
 ```
 
-- [ ] **Step 6: Jalankan uji dan pastikan gagal**
+- [x] **Step 6: Jalankan uji dan pastikan gagal**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/components/ui/barcode.test.tsx
@@ -1284,7 +1284,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/components/ui/barcode.test.ts
 
 Harapan: FAIL dengan "Failed to resolve import './barcode'".
 
-- [ ] **Step 7: Tulis komponen**
+- [x] **Step 7: Tulis komponen**
 
 Buat `src/components/ui/barcode.tsx`:
 
@@ -1327,7 +1327,7 @@ export function Barcode({ value, className }: { value: string; className?: strin
 }
 ```
 
-- [ ] **Step 8: Jalankan uji dan pastikan lulus**
+- [x] **Step 8: Jalankan uji dan pastikan lulus**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/components/ui/barcode.test.tsx src/lib/code128.test.ts
@@ -1335,7 +1335,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/components/ui/barcode.test.ts
 
 Harapan: PASS.
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm run lint && npx tsc --noEmit
@@ -1370,7 +1370,7 @@ Halaman cetak memakai grup rute `(cetak)` dengan layout sendiri. Halaman di dala
   - `type ReceiptWidth = 58 | 80`, `parseReceiptWidth(value: string): ReceiptWidth`, `receiptPageHeightMm(itemCount: number, hasFooter: boolean, hasNotes: boolean): number`, `receiptPageCss(width: ReceiptWidth, heightMm: number): string`
   - Rute `/cetak/struk/[id]` (`?lebar=80` untuk kertas 80 mm)
 
-- [ ] **Step 1: Tulis uji ukuran struk yang gagal**
+- [x] **Step 1: Tulis uji ukuran struk yang gagal**
 
 Buat `src/lib/receipt.test.ts`:
 
@@ -1403,7 +1403,7 @@ describe('receiptPageCss', () => {
 });
 ```
 
-- [ ] **Step 2: Jalankan uji dan pastikan gagal**
+- [x] **Step 2: Jalankan uji dan pastikan gagal**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/lib/receipt.test.ts
@@ -1411,7 +1411,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/lib/receipt.test.ts
 
 Harapan: FAIL dengan "Failed to resolve import './receipt'".
 
-- [ ] **Step 3: Tulis modul ukuran struk**
+- [x] **Step 3: Tulis modul ukuran struk**
 
 Buat `src/lib/receipt.ts`:
 
@@ -1442,7 +1442,7 @@ export function receiptPageCss(width: ReceiptWidth, heightMm: number): string {
 }
 ```
 
-- [ ] **Step 4: Jalankan uji dan pastikan lulus**
+- [x] **Step 4: Jalankan uji dan pastikan lulus**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/lib/receipt.test.ts
@@ -1450,7 +1450,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/lib/receipt.test.ts
 
 Harapan: PASS.
 
-- [ ] **Step 5: Tulis uji halaman struk yang gagal**
+- [x] **Step 5: Tulis uji halaman struk yang gagal**
 
 Buat `src/app/(cetak)/cetak/struk/[id]/page.test.tsx`:
 
@@ -1587,7 +1587,7 @@ describe('ReceiptPage', () => {
 
 Tinggi yang diharapkan untuk dua buku: 110 + 2 × 12 = 134 mm, ditambah 14 mm bila ada catatan kaki (148 mm).
 
-- [ ] **Step 6: Jalankan uji dan pastikan gagal**
+- [x] **Step 6: Jalankan uji dan pastikan gagal**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- "src/app/(cetak)/cetak/struk"
@@ -1595,7 +1595,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- "src/app/(cetak)/cetak/struk"
 
 Harapan: FAIL dengan "Failed to resolve import './page'".
 
-- [ ] **Step 7: Tulis layout cetak, toolbar, dan halaman struk**
+- [x] **Step 7: Tulis layout cetak, toolbar, dan halaman struk**
 
 Buat `src/app/(cetak)/layout.tsx`:
 
@@ -1745,7 +1745,7 @@ Tambahkan di akhir `src/app/globals.css`:
 }
 ```
 
-- [ ] **Step 8: Jalankan uji dan pastikan lulus**
+- [x] **Step 8: Jalankan uji dan pastikan lulus**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- "src/app/(cetak)/cetak/struk" src/lib/receipt.test.ts
@@ -1753,7 +1753,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- "src/app/(cetak)/cetak/struk" src
 
 Harapan: PASS, 5 uji halaman. Bila uji `@page` gagal karena React meloloskan (escape) isi `<style>`, periksa keluaran markup. React 19 tidak meloloskan teks di dalam `<style>`, jadi untai di uji harus muncul apa adanya.
 
-- [ ] **Step 9: Tulis uji tombol Cetak Struk yang gagal di detail transaksi**
+- [x] **Step 9: Tulis uji tombol Cetak Struk yang gagal di detail transaksi**
 
 Tambahkan di akhir `describe('LoanDetailPage')` di `src/app/(app)/transaksi/riwayat/[id]/page.test.tsx`:
 
@@ -1767,7 +1767,7 @@ Tambahkan di akhir `describe('LoanDetailPage')` di `src/app/(app)/transaksi/riwa
   });
 ```
 
-- [ ] **Step 10: Jalankan uji dan pastikan gagal**
+- [x] **Step 10: Jalankan uji dan pastikan gagal**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- "src/app/(app)/transaksi/riwayat/\[id\]"
@@ -1775,7 +1775,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- "src/app/(app)/transaksi/riwayat/
 
 Harapan: FAIL, tautan `/cetak/struk/l1` belum ada.
 
-- [ ] **Step 11: Tambahkan tombol Cetak Struk**
+- [x] **Step 11: Tambahkan tombol Cetak Struk**
 
 Di `src/app/(app)/transaksi/riwayat/[id]/page.tsx`, ganti prop `actions` pada `<PageHeader>` dengan:
 
@@ -1810,7 +1810,7 @@ Di `src/app/(app)/transaksi/peminjaman/loan-desk.tsx`, pada panel konfirmasi `ou
 
 Struk dibuka di tab baru agar meja peminjaman tetap siap untuk siswa berikutnya (spec 8.2: "dialog konfirmasi memuat nomor transaksi dan tombol Cetak Struk"). "Peminjaman Baru" tetap mendapat fokus awal.
 
-- [ ] **Step 12: Jalankan uji dan pastikan lulus**
+- [x] **Step 12: Jalankan uji dan pastikan lulus**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- "src/app/(app)/transaksi/riwayat/\[id\]"
@@ -1818,7 +1818,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- "src/app/(app)/transaksi/riwayat/
 
 Harapan: PASS. Uji lama "menyembunyikan … tombol pengembalian untuk transaksi selesai" tetap lulus, karena tautan struk tidak mengandung `/transaksi/pengembalian`.
 
-- [ ] **Step 13: Commit**
+- [x] **Step 13: Commit**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test && npm run lint && npx tsc --noEmit && npm run build
@@ -1858,7 +1858,7 @@ Spec §8.5: "halaman cetak berisi kisi label untuk ditempel pada eksemplar buku,
   - `findLabelCopies(query: { kind: 'book'; bookId: string } | { kind: 'range'; from: string; to: string }, executor?): Promise<{ copies: LabelCopy[]; total: number }>` — `copies` maks. `MAX_LABELS`, urut barcode; `total` = seluruh yang cocok
   - Rute `/cetak/label-barcode`
 
-- [ ] **Step 1: Tulis uji pembacaan permintaan label yang gagal**
+- [x] **Step 1: Tulis uji pembacaan permintaan label yang gagal**
 
 Buat `src/lib/label-request.test.ts`:
 
@@ -1905,7 +1905,7 @@ describe('parseLabelRequest', () => {
 });
 ```
 
-- [ ] **Step 2: Jalankan uji dan pastikan gagal**
+- [x] **Step 2: Jalankan uji dan pastikan gagal**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/lib/label-request.test.ts
@@ -1913,7 +1913,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/lib/label-request.test.ts
 
 Harapan: FAIL dengan "Failed to resolve import './label-request'".
 
-- [ ] **Step 3: Tulis pembaca permintaan label**
+- [x] **Step 3: Tulis pembaca permintaan label**
 
 Buat `src/lib/label-request.ts`:
 
@@ -1952,7 +1952,7 @@ export function parseLabelRequest(params: { buku: string; dari: string; sampai: 
 }
 ```
 
-- [ ] **Step 4: Jalankan uji dan pastikan lulus**
+- [x] **Step 4: Jalankan uji dan pastikan lulus**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/lib/label-request.test.ts
@@ -1960,7 +1960,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/lib/label-request.test.ts
 
 Harapan: PASS.
 
-- [ ] **Step 5: Tulis uji integrasi query label yang gagal**
+- [x] **Step 5: Tulis uji integrasi query label yang gagal**
 
 Buat `tests/integration/labels.test.ts`:
 
@@ -2019,7 +2019,7 @@ describe('findLabelCopies', () => {
 });
 ```
 
-- [ ] **Step 6: Jalankan uji dan pastikan gagal**
+- [x] **Step 6: Jalankan uji dan pastikan gagal**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm run test:integration -- tests/integration/labels.test.ts
@@ -2027,7 +2027,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm run test:integration -- tests/integration
 
 Harapan: FAIL dengan "Failed to resolve import '@/server/queries/labels'".
 
-- [ ] **Step 7: Tulis query label**
+- [x] **Step 7: Tulis query label**
 
 Buat `src/server/queries/labels.ts`:
 
@@ -2090,7 +2090,7 @@ export async function findLabelCopies(
 }
 ```
 
-- [ ] **Step 8: Jalankan uji dan pastikan lulus**
+- [x] **Step 8: Jalankan uji dan pastikan lulus**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm run test:integration -- tests/integration/labels.test.ts
@@ -2098,7 +2098,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm run test:integration -- tests/integration
 
 Harapan: PASS, 4 uji.
 
-- [ ] **Step 9: Tulis uji halaman label yang gagal**
+- [x] **Step 9: Tulis uji halaman label yang gagal**
 
 Buat `src/app/(cetak)/cetak/label-barcode/page.test.tsx`:
 
@@ -2207,7 +2207,7 @@ describe('LabelPage', () => {
 });
 ```
 
-- [ ] **Step 10: Jalankan uji dan pastikan gagal**
+- [x] **Step 10: Jalankan uji dan pastikan gagal**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- "src/app/(cetak)/cetak/label-barcode"
@@ -2215,7 +2215,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- "src/app/(cetak)/cetak/label-barc
 
 Harapan: FAIL dengan "Failed to resolve import './page'".
 
-- [ ] **Step 11: Tulis halaman label**
+- [x] **Step 11: Tulis halaman label**
 
 Buat `src/app/(cetak)/cetak/label-barcode/page.tsx`:
 
@@ -2329,7 +2329,7 @@ export default async function LabelPage({ searchParams }: { searchParams: Search
 
 Kotak putus-putus membantu melihat batas label di layar; `print:border-transparent` menyembunyikannya saat dicetak.
 
-- [ ] **Step 12: Jalankan uji dan pastikan lulus**
+- [x] **Step 12: Jalankan uji dan pastikan lulus**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- "src/app/(cetak)/cetak/label-barcode"
@@ -2337,7 +2337,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- "src/app/(cetak)/cetak/label-barc
 
 Harapan: PASS, 7 uji. React me-render tanda kutip di teks sebagai `&quot;`; uji per judul sudah memperhitungkannya.
 
-- [ ] **Step 13: Tulis uji tombol Cetak Label dan menu yang gagal**
+- [x] **Step 13: Tulis uji tombol Cetak Label dan menu yang gagal**
 
 Tambahkan di akhir `describe('BookDetailPage')` di `src/app/(app)/master/buku/[id]/page.test.tsx`:
 
@@ -2352,7 +2352,7 @@ Tambahkan di akhir `describe('BookDetailPage')` di `src/app/(app)/master/buku/[i
 
 Di `src/components/layout/sidebar.test.tsx`, tambahkan `'/cetak/label-barcode',` ke larik `COMMON` tepat setelah `'/master/rak',`.
 
-- [ ] **Step 14: Jalankan uji dan pastikan gagal**
+- [x] **Step 14: Jalankan uji dan pastikan gagal**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- "src/app/(app)/master/buku/\[id\]" src/components/layout/sidebar.test.tsx
@@ -2360,7 +2360,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- "src/app/(app)/master/buku/\[id\]
 
 Harapan: FAIL pada kedua uji baru.
 
-- [ ] **Step 15: Tambahkan tombol dan menu**
+- [x] **Step 15: Tambahkan tombol dan menu**
 
 Di `src/app/(app)/master/buku/[id]/page.tsx`, ganti prop `actions` pada `<PageHeader>` dengan:
 
@@ -2379,7 +2379,7 @@ Di `src/components/layout/sidebar.tsx`, tambahkan item terakhir di grup `'Master
       { href: '/cetak/label-barcode', label: 'Label Barcode' },
 ```
 
-- [ ] **Step 16: Jalankan uji dan pastikan lulus, lalu commit**
+- [x] **Step 16: Jalankan uji dan pastikan lulus, lalu commit**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test && npm run test:integration -- tests/integration/labels.test.ts && npm run lint && npx tsc --noEmit && npm run build
@@ -2426,7 +2426,7 @@ Setiap perubahan data sudah menulis `audit_logs` sejak Rencana 02 (spec §3.1 at
 
 Aksi yang saat ini ditulis ke `audit_logs` (dari `src/server/services/*.ts`): `academic_year.{create,update,activate}`, `book.{create,update,activate,deactivate}`, `copy.{create,restore,deactivate,reactivate}`, `category.{create,update,activate,deactivate}`, `rack.{create,update,activate,deactivate}`, `student.{create,update,activate,deactivate}`, `loan.create`, `return.process`, `fine.pay`, `settings.update`, `user.{create,update,reset_password,activate,deactivate}`.
 
-- [ ] **Step 1: Tulis uji label dan ringkasan audit yang gagal**
+- [x] **Step 1: Tulis uji label dan ringkasan audit yang gagal**
 
 Buat `src/lib/audit-labels.test.ts`:
 
@@ -2557,7 +2557,7 @@ describe('redactSecrets', () => {
 });
 ```
 
-- [ ] **Step 2: Jalankan uji dan pastikan gagal**
+- [x] **Step 2: Jalankan uji dan pastikan gagal**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/lib/audit-labels.test.ts
@@ -2565,7 +2565,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/lib/audit-labels.test.ts
 
 Harapan: FAIL dengan "Failed to resolve import './audit-labels'".
 
-- [ ] **Step 3: Tulis label dan ringkasan audit**
+- [x] **Step 3: Tulis label dan ringkasan audit**
 
 Buat `src/lib/audit-labels.ts`:
 
@@ -2799,7 +2799,7 @@ export function redactSecrets(value: unknown): unknown {
 
 Catatan untuk pelaksana: `subjectOf` membedakan `barcodes` milik `loan.create` (yang juga berisi `dueDate`) dari `copy.create`. Untuk peminjaman, subjeknya nomor transaksi dan barcode masuk ke rincian.
 
-- [ ] **Step 4: Jalankan uji dan pastikan lulus**
+- [x] **Step 4: Jalankan uji dan pastikan lulus**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/lib/audit-labels.test.ts
@@ -2807,7 +2807,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/lib/audit-labels.test.ts
 
 Harapan: PASS. Bila urutan `details` berbeda dari uji, sesuaikan **urutan penambahan di kode**, bukan ujinya. Urutannya disengaja: apa yang terjadi, lalu siapa atau kapan, lalu uangnya.
 
-- [ ] **Step 5: Tulis uji integrasi query audit yang gagal**
+- [x] **Step 5: Tulis uji integrasi query audit yang gagal**
 
 Buat `tests/integration/audit-logs.test.ts`:
 
@@ -2893,7 +2893,7 @@ describe('listAuditLogs', () => {
 });
 ```
 
-- [ ] **Step 6: Jalankan uji dan pastikan gagal**
+- [x] **Step 6: Jalankan uji dan pastikan gagal**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm run test:integration -- tests/integration/audit-logs.test.ts
@@ -2901,7 +2901,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm run test:integration -- tests/integration
 
 Harapan: FAIL dengan "Failed to resolve import '@/server/queries/audit-logs'".
 
-- [ ] **Step 7: Tulis query audit log**
+- [x] **Step 7: Tulis query audit log**
 
 Buat `src/server/queries/audit-logs.ts`:
 
@@ -2986,7 +2986,7 @@ export async function listAuditLogs(
 }
 ```
 
-- [ ] **Step 8: Jalankan uji dan pastikan lulus**
+- [x] **Step 8: Jalankan uji dan pastikan lulus**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm run test:integration -- tests/integration/audit-logs.test.ts
@@ -2994,7 +2994,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm run test:integration -- tests/integration
 
 Harapan: PASS, 4 uji.
 
-- [ ] **Step 9: Tulis uji halaman audit log yang gagal**
+- [x] **Step 9: Tulis uji halaman audit log yang gagal**
 
 Buat `src/app/(app)/pengaturan/audit-log/page.test.tsx`:
 
@@ -3086,7 +3086,7 @@ describe('AuditLogPage', () => {
 });
 ```
 
-- [ ] **Step 10: Jalankan uji dan pastikan gagal**
+- [x] **Step 10: Jalankan uji dan pastikan gagal**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- "src/app/(app)/pengaturan/audit-log"
@@ -3094,7 +3094,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- "src/app/(app)/pengaturan/audit-l
 
 Harapan: FAIL dengan "Failed to resolve import './page'".
 
-- [ ] **Step 11: Tulis halaman audit log**
+- [x] **Step 11: Tulis halaman audit log**
 
 Buat `src/app/(app)/pengaturan/audit-log/page.tsx`:
 
@@ -3213,7 +3213,7 @@ export default async function AuditLogPage({ searchParams }: { searchParams: Sea
 }
 ```
 
-- [ ] **Step 12: Jalankan uji dan pastikan lulus**
+- [x] **Step 12: Jalankan uji dan pastikan lulus**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- "src/app/(app)/pengaturan/audit-log" src/lib/audit-labels.test.ts
@@ -3221,7 +3221,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- "src/app/(app)/pengaturan/audit-l
 
 Harapan: PASS.
 
-- [ ] **Step 13: Tambahkan menu Audit Log**
+- [x] **Step 13: Tambahkan menu Audit Log**
 
 Di `src/components/layout/sidebar.test.tsx`, tambahkan `'/pengaturan/audit-log'` di akhir larik `ADMIN_ONLY`. Jalankan `npm test -- src/components/layout/sidebar.test.tsx`; harapan FAIL. Lalu di `src/components/layout/sidebar.tsx`, tambahkan item terakhir di grup `'Pengaturan'`:
 
@@ -3231,7 +3231,7 @@ Di `src/components/layout/sidebar.test.tsx`, tambahkan `'/pengaturan/audit-log'`
 
 Jalankan ulang; harapan PASS.
 
-- [ ] **Step 14: Jalankan seluruh pemeriksaan lalu commit**
+- [x] **Step 14: Jalankan seluruh pemeriksaan lalu commit**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test && npm run test:integration -- tests/integration/audit-logs.test.ts && npm run lint && npx tsc --noEmit && npm run build
@@ -3262,7 +3262,7 @@ Tidak ada kode baru. Task ini membuktikan dashboard, cetak, dan audit log bekerj
 - Consumes: seluruh keluaran Task 1–7
 - Produces: bukti bahwa Rencana 05 selesai
 
-- [ ] **Step 1: Jalankan seluruh pemeriksaan otomatis**
+- [x] **Step 1: Jalankan seluruh pemeriksaan otomatis**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"
@@ -3275,7 +3275,7 @@ npm run build
 
 Harapan: seluruhnya lulus. `npm run build` mencantumkan `/dashboard`, `/cetak/struk/[id]`, `/cetak/label-barcode`, dan `/pengaturan/audit-log`.
 
-- [ ] **Step 2: Pastikan uji integrasi tidak meninggalkan jejak**
+- [x] **Step 2: Pastikan uji integrasi tidak meninggalkan jejak**
 
 `npx tsx -e "import(...)"` tidak dapat dipakai di repo ini. Pakai berkas sementara dengan impor statis, lalu hapus:
 
@@ -3304,7 +3304,7 @@ rm tmp-sisa.ts
 
 Harapan: `Sisa data uji: 0`. Angka lain berarti ada uji yang ditulis di luar `withRollback()`. Temukan ujinya dan perbaiki; jangan menghapus datanya tanpa memahami asalnya.
 
-- [ ] **Step 3: Uji di peramban**
+- [x] **Step 3: Uji di peramban**
 
 Jalankan `npm run dev`. Bila memakai agen, gunakan skill `/browse` dari gstack. **Jangan** memakai `mcp__claude-in-chrome__*`.
 
@@ -3344,18 +3344,18 @@ Jalankan `npm run dev`. Bila memakai agen, gunakan skill `/browse` dari gstack. 
 
 Keseluruhan alur (A–E) dapat diselesaikan dengan papan ketik: Tab, Enter, dan `Ctrl+Enter`.
 
-- [ ] **Step 4: Bereskan data pemeriksaan**
+- [x] **Step 4: Bereskan data pemeriksaan**
 
 Transaksi dari langkah 14–15 tetap tersimpan sebagai riwayat (BR-08). Rapikan keadaannya:
 1. Pastikan `BK-000003` berstatus "Tersedia".
 2. Nonaktifkan kembali siswa `QA-001`.
 3. Periksa dengan kueri baca-saja: `BK-000001` s.d. `BK-000006` seluruhnya `TERSEDIA`, dan `QA-001`/`QA-002` berstatus `inactive`.
 
-- [ ] **Step 5: Catat hasilnya**
+- [x] **Step 5: Catat hasilnya**
 
 Laporkan setiap langkah Step 3 dengan LULUS/GAGAL beserta buktinya, jalur tangkapan layar struk dan label, serta angka dashboard yang dicocokkan. Pengujian dengan printer thermal dan pemindai USB sungguhan dilakukan pemilik produk. Catat di laporan bahwa langkah itu belum dilakukan.
 
-- [ ] **Step 6: Tandai rencana selesai**
+- [x] **Step 6: Tandai rencana selesai**
 
 Ubah seluruh `- [ ]` di berkas rencana ini menjadi `- [x]`, lalu commit:
 
