@@ -86,7 +86,7 @@ Supabase Postgres — RLS tolak-semua untuk peran anon
 ### 3.1 Aturan Arsitektural yang Mengikat
 
 1. **`domain/` tidak boleh mengimpor apa pun dari `server/` atau `app/`.** Lapisan ini bebas I/O dan bebas waktu sistem; tanggal selalu disuntikkan sebagai parameter. Ini yang membuatnya dapat diuji dalam milidetik tanpa database.
-2. **Status `book_copies` hanya boleh berubah di dalam `server/actions/`**, selalu di dalam transaksi database dengan baris eksemplar terkunci.
+2. **Status `book_copies` hanya boleh berubah di lapisan server (`server/services/`, dipanggil dari `server/actions/`)**, selalu di dalam transaksi database dengan baris eksemplar terkunci.
 3. **`supabase-js` tidak pernah dipanggil dari komponen klien.** Seluruh akses data melalui server dengan service role.
 4. **Setiap perubahan yang mengubah status transaksi atau status eksemplar menulis satu baris `audit_logs`** di dalam transaksi yang sama.
 
@@ -349,6 +349,7 @@ Empat fungsi murni. Tanpa database, tanpa `Date.now()`, tanpa efek samping.
 | `DUPLICATE_COPY` | Eksemplar sama dimasukkan dua kali dalam satu transaksi | Tolak |
 | `NO_ACTIVE_YEAR` | Tidak ada tahun ajaran aktif | Tolak |
 | `UNPAID_FINE` | Ada denda belum lunas, dan `block_when_unpaid_fine` | Tolak — **mati secara bawaan** |
+| `BOOK_INACTIVE` | Eksemplar milik buku berstatus nonaktif | Tolak — **wajib diterapkan di Rencana 04**: `createLoan` mengunci/membaca baris buku dan menolak eksemplar buku nonaktif |
 
 ### 5.3 Perhitungan Denda
 
@@ -546,6 +547,5 @@ Migrasi skema dikelola berkas melalui Drizzle Kit dan masuk kendali versi.
 
 - Ekspor laporan ke PDF/Excel. Laporan sendiri kini masuk lingkup (lihat revisi di Section 2.2); `loans.student_class` sudah menyimpan snapshot kelas sehingga laporan per kelas akurat secara historis.
 - Import Excel — `nis` dan `barcode` sudah menjadi kunci alami yang stabil.
-- Ekspor PDF/Excel.
 - Portal siswa — **memerlukan pengaktifan RLS sebagai kontrol utama**, bukan sekadar jaring pengaman.
 - Blokir tunggakan denda — kolom `block_when_unpaid_fine` sudah tersedia dalam keadaan mati; mengaktifkannya cukup satu aturan di lapisan domain.
