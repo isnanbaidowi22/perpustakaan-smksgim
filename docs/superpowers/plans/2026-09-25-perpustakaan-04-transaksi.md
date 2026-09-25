@@ -103,7 +103,7 @@ Blok murni yang dipakai seluruh task berikutnya: aturan `BOOK_INACTIVE` dan perb
   - `SCHOOL_TIME_ZONE = 'Asia/Jakarta'`, `schoolToday(now?: Date): IsoDate`, `formatSchoolDateTime(value: Date): string`
   - `interface ViolationMessage { title: string; detail: string }`, `describeViolation(violation: Violation): ViolationMessage`
 
-- [ ] **Step 1: Tulis uji domain yang gagal**
+- [x] **Step 1: Tulis uji domain yang gagal**
 
 Di `src/domain/loan/rules.test.ts`, ubah fixture `copy()` menjadi:
 
@@ -158,12 +158,12 @@ describe('validateLoanRequest — pinjaman selesai yang dendanya belum lunas', (
 });
 ```
 
-- [ ] **Step 2: Jalankan uji dan pastikan gagal**
+- [x] **Step 2: Jalankan uji dan pastikan gagal**
 
 Run: `npx vitest run src/domain/loan/rules.test.ts`
 Expected: FAIL — uji `BOOK_INACTIVE` menerima `COPY_UNAVAILABLE`, dan uji pinjaman selesai menerima `HAS_OVERDUE`.
 
-- [ ] **Step 3: Implementasikan perubahan domain**
+- [x] **Step 3: Implementasikan perubahan domain**
 
 Di `src/domain/shared/types.ts`, ganti komentar di atas `OpenLoanSnapshot` dengan:
 
@@ -237,12 +237,12 @@ dan ganti perulangan terakhir (`for (const copy of uniqueCopies) { … }`) denga
 
 Ubah juga komentar properti `openLoans` di `LoanRequestInput` menjadi `/** Peminjaman yang belum selesai atau dendanya belum lunas (lihat OpenLoanSnapshot). */`.
 
-- [ ] **Step 4: Jalankan uji domain dan pastikan lulus**
+- [x] **Step 4: Jalankan uji domain dan pastikan lulus**
 
 Run: `npx vitest run src/domain`
 Expected: PASS, termasuk seluruh uji lama.
 
-- [ ] **Step 5: Tulis uji nomor transaksi yang gagal**
+- [x] **Step 5: Tulis uji nomor transaksi yang gagal**
 
 Buat `src/domain/loan/transaction-number.test.ts`:
 
@@ -279,7 +279,7 @@ describe('loanCounterScope', () => {
 Run: `npx vitest run src/domain/loan/transaction-number.test.ts`
 Expected: FAIL — modul `./transaction-number` tidak ditemukan.
 
-- [ ] **Step 6: Implementasikan nomor transaksi**
+- [x] **Step 6: Implementasikan nomor transaksi**
 
 Buat `src/domain/loan/transaction-number.ts`:
 
@@ -312,7 +312,7 @@ export function formatTransactionNumber(date: IsoDate, sequence: number): string
 Run: `npx vitest run src/domain/loan/transaction-number.test.ts`
 Expected: PASS.
 
-- [ ] **Step 7: Tulis uji tanggal sekolah yang gagal**
+- [x] **Step 7: Tulis uji tanggal sekolah yang gagal**
 
 Buat `src/lib/school-date.test.ts`:
 
@@ -344,7 +344,7 @@ describe('formatSchoolDateTime', () => {
 Run: `npx vitest run src/lib/school-date.test.ts`
 Expected: FAIL — modul `./school-date` tidak ditemukan.
 
-- [ ] **Step 8: Implementasikan tanggal sekolah**
+- [x] **Step 8: Implementasikan tanggal sekolah**
 
 Buat `src/lib/school-date.ts`:
 
@@ -388,7 +388,7 @@ export function formatSchoolDateTime(value: Date): string {
 Run: `npx vitest run src/lib/school-date.test.ts`
 Expected: PASS.
 
-- [ ] **Step 9: Tulis uji kalimat pelanggaran yang gagal**
+- [x] **Step 9: Tulis uji kalimat pelanggaran yang gagal**
 
 Buat `src/lib/violation-message.test.ts`:
 
@@ -456,7 +456,7 @@ describe('describeViolation', () => {
 Run: `npx vitest run src/lib/violation-message.test.ts`
 Expected: FAIL — modul `./violation-message` tidak ditemukan.
 
-- [ ] **Step 10: Implementasikan kalimat pelanggaran**
+- [x] **Step 10: Implementasikan kalimat pelanggaran**
 
 Buat `src/lib/violation-message.ts`:
 
@@ -546,12 +546,12 @@ export function describeViolation(violation: Violation): ViolationMessage {
 Run: `npx vitest run src/lib/violation-message.test.ts`
 Expected: PASS.
 
-- [ ] **Step 11: Jalankan seluruh uji unit, lint, dan tsc**
+- [x] **Step 11: Jalankan seluruh uji unit, lint, dan tsc**
 
 Run: `npm test && npm run lint && npx tsc --noEmit`
 Expected: seluruhnya PASS/bersih. Bila tsc menandai tempat lain yang membangun `CopySnapshot` tanpa `bookStatus`, tambahkan `bookStatus` di sana (saat rencana ini ditulis, tidak ada pemakai di luar `src/domain`).
 
-- [ ] **Step 12: Commit**
+- [x] **Step 12: Commit**
 
 ```bash
 git add src/domain/shared/types.ts src/domain/shared/violations.ts src/domain/loan/rules.ts src/domain/loan/rules.test.ts \
@@ -592,7 +592,7 @@ Pembacaan yang dibutuhkan meja peminjaman dan `createLoan`: mencari siswa (scan 
   - `findCopyByBarcode(barcode: string, executor?): Promise<CopyLookup | null>` — tidak peka huruf besar-kecil
   - Fixture: `TODAY = '2090-03-02'`, `circulationFixture(tx, options?)`, `seedLoan(tx, fx, options)`
 
-- [ ] **Step 1: Buat fixture uji transaksi**
+- [x] **Step 1: Buat fixture uji transaksi**
 
 Buat `tests/integration/circulation-fixture.ts` (berkas pendukung uji, bukan implementasi):
 
@@ -753,7 +753,7 @@ export async function seedLoan(
 }
 ```
 
-- [ ] **Step 2: Tulis uji integrasi query yang gagal**
+- [x] **Step 2: Tulis uji integrasi query yang gagal**
 
 Buat `tests/integration/circulation.test.ts`:
 
@@ -890,7 +890,7 @@ describe('findCopyByBarcode', () => {
 Run: `npx vitest run --config vitest.integration.config.ts tests/integration/circulation.test.ts`
 Expected: FAIL — modul `@/server/queries/circulation` tidak ditemukan.
 
-- [ ] **Step 3: Implementasikan subquery agregat**
+- [x] **Step 3: Implementasikan subquery agregat**
 
 Buat `src/server/queries/loan-aggregates.ts`:
 
@@ -930,7 +930,7 @@ export function paidTotals(executor: Executor) {
 }
 ```
 
-- [ ] **Step 4: Implementasikan query sirkulasi**
+- [x] **Step 4: Implementasikan query sirkulasi**
 
 Buat `src/server/queries/circulation.ts`:
 
@@ -1111,19 +1111,19 @@ export async function findCopyByBarcode(barcode: string, executor: Executor = db
 }
 ```
 
-- [ ] **Step 5: Jalankan uji dan pastikan lulus**
+- [x] **Step 5: Jalankan uji dan pastikan lulus**
 
 Run: `npx vitest run --config vitest.integration.config.ts tests/integration/circulation.test.ts`
 Expected: seluruh uji PASS.
 
 Bila `coalesce(${openItems.openCount}, 0)` mengembalikan untai (bukan bilangan), biarkan: kode memetakan dengan `Number(...)`. Bila uji `loadBorrowerLoans` gagal karena kolom di template `sql` tidak menyebut tabelnya, periksa SQL-nya dengan `.toSQL()`; pada query ber-JOIN Drizzle 0.45 menyebut nama tabel.
 
-- [ ] **Step 6: Jalankan uji unit, lint, dan tsc**
+- [x] **Step 6: Jalankan uji unit, lint, dan tsc**
 
 Run: `npm test && npm run lint && npx tsc --noEmit`
 Expected: PASS/bersih.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/server/queries/loan-aggregates.ts src/server/queries/circulation.ts \
@@ -1159,7 +1159,7 @@ Uji konkurensi mengikuti keputusan pemilik produk (lihat kepala rencana): dua ko
   - `createLoan(input: CreateLoanInput, actor: Actor, today: IsoDate, executor?): Promise<LoanResult>`
   - Audit `loan.create` (entity `loans`, metadata `{ transactionNumber, studentNis, barcodes, dueDate }`)
 
-- [ ] **Step 1: Tulis uji `sqlState` yang gagal**
+- [x] **Step 1: Tulis uji `sqlState` yang gagal**
 
 Ubah impor di `src/server/db/errors.test.ts` menjadi `import { sqlState, uniqueViolation } from './errors';`, lalu tambahkan di akhir berkas:
 
@@ -1180,7 +1180,7 @@ describe('sqlState', () => {
 Run: `npx vitest run src/server/db/errors.test.ts`
 Expected: FAIL — `sqlState` tidak diekspor.
 
-- [ ] **Step 2: Implementasikan `sqlState`**
+- [x] **Step 2: Implementasikan `sqlState`**
 
 Tambahkan di akhir `src/server/db/errors.ts`:
 
@@ -1195,7 +1195,7 @@ export function sqlState(error: unknown): string | null {
 Run: `npx vitest run src/server/db/errors.test.ts`
 Expected: PASS.
 
-- [ ] **Step 3: Tulis uji validasi yang gagal**
+- [x] **Step 3: Tulis uji validasi yang gagal**
 
 Buat `src/server/validation/loan.test.ts`:
 
@@ -1239,7 +1239,7 @@ describe('createLoanSchema', () => {
 Run: `npx vitest run src/server/validation/loan.test.ts`
 Expected: FAIL — modul `./loan` tidak ditemukan.
 
-- [ ] **Step 4: Implementasikan validasi**
+- [x] **Step 4: Implementasikan validasi**
 
 Buat `src/server/validation/loan.ts`:
 
@@ -1263,7 +1263,7 @@ export type CreateLoanInput = z.output<typeof createLoanSchema>;
 Run: `npx vitest run src/server/validation/loan.test.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Tulis uji integrasi `createLoan` yang gagal**
+- [x] **Step 5: Tulis uji integrasi `createLoan` yang gagal**
 
 Buat `tests/integration/loans.test.ts`:
 
@@ -1449,7 +1449,7 @@ describe('createLoan — penolakan', () => {
 Run: `npx vitest run --config vitest.integration.config.ts tests/integration/loans.test.ts`
 Expected: FAIL — modul `@/server/services/loans` tidak ditemukan.
 
-- [ ] **Step 6: Implementasikan `createLoan`**
+- [x] **Step 6: Implementasikan `createLoan`**
 
 Buat `src/server/services/loans.ts`:
 
@@ -1631,12 +1631,12 @@ export async function createLoan(
 }
 ```
 
-- [ ] **Step 7: Jalankan uji dan pastikan lulus**
+- [x] **Step 7: Jalankan uji dan pastikan lulus**
 
 Run: `npx vitest run --config vitest.integration.config.ts tests/integration/loans.test.ts`
 Expected: seluruh uji PASS.
 
-- [ ] **Step 8: Tulis uji konkurensi**
+- [x] **Step 8: Tulis uji konkurensi**
 
 Buat `tests/integration/loan-concurrency.test.ts`:
 
@@ -1766,19 +1766,19 @@ describe('createLoan bersamaan atas eksemplar yang sama', () => {
 });
 ```
 
-- [ ] **Step 9: Jalankan uji konkurensi**
+- [x] **Step 9: Jalankan uji konkurensi**
 
 Run: `npx vitest run --config vitest.integration.config.ts tests/integration/loan-concurrency.test.ts`
 Expected: 2 uji PASS dalam beberapa detik.
 
 Bila uji pertama gagal dengan `sqlState` bernilai `null`, cetak `failure` di laporan: kemungkinan besar peminjaman kedua **tidak** tertahan (kunci `FOR UPDATE` tidak terpasang) — itu cacat `createLoan`, bukan cacat uji. Jangan menaikkan `lock_timeout` untuk "membuat lulus".
 
-- [ ] **Step 10: Jalankan seluruh uji, lint, dan tsc**
+- [x] **Step 10: Jalankan seluruh uji, lint, dan tsc**
 
 Run: `npm test && npm run test:integration && npm run lint && npx tsc --noEmit`
 Expected: seluruhnya PASS/bersih.
 
-- [ ] **Step 11: Commit**
+- [x] **Step 11: Commit**
 
 ```bash
 git add src/server/db/errors.ts src/server/db/errors.test.ts \
@@ -1819,7 +1819,7 @@ Task ini juga membuat dua query yang dipakai layar pengembalian dan riwayat: det
   - `processReturn(input: ReturnInput, actor: Actor, today: IsoDate, executor?): Promise<ServiceResult>` — `ok(loanId, notice)`; notice `'Total denda transaksi ini Rp54.000.'` atau `'Tidak ada denda.'`
   - Audit `return.process` (entity `loans`, metadata `{ transactionNumber, items: [{ barcode, condition, daysLate, lateFine, replacementFee }], totalFine, status }`)
 
-- [ ] **Step 1: Tulis uji validasi yang gagal**
+- [x] **Step 1: Tulis uji validasi yang gagal**
 
 Buat `src/server/validation/return.test.ts`:
 
@@ -1870,7 +1870,7 @@ describe('returnSchema', () => {
 Run: `npx vitest run src/server/validation/return.test.ts`
 Expected: FAIL — modul `./return` tidak ditemukan.
 
-- [ ] **Step 2: Implementasikan validasi**
+- [x] **Step 2: Implementasikan validasi**
 
 Buat `src/server/validation/return.ts`:
 
@@ -1905,7 +1905,7 @@ export type ReturnInput = z.output<typeof returnSchema>;
 Run: `npx vitest run src/server/validation/return.test.ts`
 Expected: PASS.
 
-- [ ] **Step 3: Tulis uji integrasi pengembalian yang gagal**
+- [x] **Step 3: Tulis uji integrasi pengembalian yang gagal**
 
 Buat `tests/integration/returns.test.ts`:
 
@@ -2171,7 +2171,7 @@ describe('findLoansForReturn', () => {
 Run: `npx vitest run --config vitest.integration.config.ts tests/integration/returns.test.ts tests/integration/loan-queries.test.ts`
 Expected: FAIL — modul `@/server/queries/loans` tidak ditemukan.
 
-- [ ] **Step 4: Implementasikan query pinjaman**
+- [x] **Step 4: Implementasikan query pinjaman**
 
 Buat `src/server/queries/loans.ts`:
 
@@ -2387,7 +2387,7 @@ export async function findLoansForReturn(
 }
 ```
 
-- [ ] **Step 5: Implementasikan `processReturn`**
+- [x] **Step 5: Implementasikan `processReturn`**
 
 Buat `src/server/services/returns.ts`:
 
@@ -2518,17 +2518,17 @@ export async function processReturn(
 }
 ```
 
-- [ ] **Step 6: Jalankan uji dan pastikan lulus**
+- [x] **Step 6: Jalankan uji dan pastikan lulus**
 
 Run: `npx vitest run --config vitest.integration.config.ts tests/integration/returns.test.ts tests/integration/loan-queries.test.ts`
 Expected: seluruh uji PASS.
 
-- [ ] **Step 7: Jalankan seluruh uji, lint, dan tsc**
+- [x] **Step 7: Jalankan seluruh uji, lint, dan tsc**
 
 Run: `npm test && npm run test:integration && npm run lint && npx tsc --noEmit`
 Expected: seluruhnya PASS/bersih. (Uji integrasi memakai `detail!` pada hasil yang baru dibuat; bila lint melarang non-null assertion di `tests/`, ganti dengan pemeriksaan `if (!detail) throw …`.)
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add src/server/queries/loans.ts src/server/validation/return.ts src/server/validation/return.test.ts \
@@ -2561,7 +2561,7 @@ Spec 5.4: setiap penekanan "Tandai Lunas" menulis satu baris `fine_payments`; st
   - `payFineAction(loanId: string, state: FormState, formData: FormData): Promise<FormState>` — kembali ke `/transaksi/riwayat/<loanId>` dengan `?pesan=`
   - Audit `fine.pay` (entity `loans`, metadata `{ transactionNumber, amount, remaining }`)
 
-- [ ] **Step 1: Tulis uji validasi yang gagal**
+- [x] **Step 1: Tulis uji validasi yang gagal**
 
 Buat `src/server/validation/fine.test.ts`:
 
@@ -2594,7 +2594,7 @@ describe('finePaymentSchema', () => {
 Run: `npx vitest run src/server/validation/fine.test.ts`
 Expected: FAIL — modul `./fine` tidak ditemukan.
 
-- [ ] **Step 2: Implementasikan validasi**
+- [x] **Step 2: Implementasikan validasi**
 
 Buat `src/server/validation/fine.ts`:
 
@@ -2620,7 +2620,7 @@ export type FinePaymentInput = z.output<typeof finePaymentSchema>;
 Run: `npx vitest run src/server/validation/fine.test.ts`
 Expected: PASS.
 
-- [ ] **Step 3: Tulis uji integrasi yang gagal**
+- [x] **Step 3: Tulis uji integrasi yang gagal**
 
 Buat `tests/integration/fines.test.ts`:
 
@@ -2713,7 +2713,7 @@ describe('payFine', () => {
 Run: `npx vitest run --config vitest.integration.config.ts tests/integration/fines.test.ts`
 Expected: FAIL — modul `@/server/services/fines` tidak ditemukan.
 
-- [ ] **Step 4: Implementasikan `payFine`**
+- [x] **Step 4: Implementasikan `payFine`**
 
 Buat `src/server/services/fines.ts`:
 
@@ -2785,7 +2785,7 @@ export async function payFine(
 Run: `npx vitest run --config vitest.integration.config.ts tests/integration/fines.test.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Tulis uji Server Action yang gagal**
+- [x] **Step 5: Tulis uji Server Action yang gagal**
 
 Buat `src/server/actions/fines.test.ts`:
 
@@ -2827,7 +2827,7 @@ describe('payFineAction', () => {
 Run: `npx vitest run src/server/actions/fines.test.ts`
 Expected: FAIL — modul `./fines` tidak ditemukan.
 
-- [ ] **Step 6: Implementasikan Server Action**
+- [x] **Step 6: Implementasikan Server Action**
 
 Buat `src/server/actions/fines.ts`:
 
@@ -2857,12 +2857,12 @@ export async function payFineAction(loanId: string, _state: FormState, formData:
 Run: `npx vitest run src/server/actions/fines.test.ts`
 Expected: PASS.
 
-- [ ] **Step 7: Jalankan seluruh uji unit, lint, dan tsc**
+- [x] **Step 7: Jalankan seluruh uji unit, lint, dan tsc**
 
 Run: `npm test && npm run lint && npx tsc --noEmit`
 Expected: PASS/bersih.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add src/server/validation/fine.ts src/server/validation/fine.test.ts src/server/services/fines.ts \
@@ -2898,7 +2898,7 @@ Daftar seluruh peminjaman dengan pencarian dan filter status (termasuk "Terlamba
   - `<LoanStatusBadge status daysOverdue />`
   - Rute `/transaksi/riwayat` dan `/transaksi/riwayat/[id]`
 
-- [ ] **Step 1: Tulis uji label yang gagal**
+- [x] **Step 1: Tulis uji label yang gagal**
 
 Buat `src/lib/circulation-labels.test.ts`:
 
@@ -2932,7 +2932,7 @@ describe('kondisi pengembalian', () => {
 Run: `npx vitest run src/lib/circulation-labels.test.ts`
 Expected: FAIL — modul `./circulation-labels` tidak ditemukan.
 
-- [ ] **Step 2: Implementasikan label**
+- [x] **Step 2: Implementasikan label**
 
 Buat `src/lib/circulation-labels.ts`:
 
@@ -2972,7 +2972,7 @@ export const RETURN_CONDITION_OPTIONS: Option[] = (['BAIK', 'RUSAK', 'HILANG'] a
 Run: `npx vitest run src/lib/circulation-labels.test.ts`
 Expected: PASS.
 
-- [ ] **Step 3: Tulis uji `listLoans` yang gagal**
+- [x] **Step 3: Tulis uji `listLoans` yang gagal**
 
 Ubah impor di `tests/integration/loan-queries.test.ts` menjadi:
 
@@ -3039,7 +3039,7 @@ describe('listLoans', () => {
 Run: `npx vitest run --config vitest.integration.config.ts tests/integration/loan-queries.test.ts`
 Expected: FAIL — `listLoans` tidak diekspor.
 
-- [ ] **Step 4: Implementasikan `listLoans`**
+- [x] **Step 4: Implementasikan `listLoans`**
 
 Di `src/server/queries/loans.ts`, ubah impor `drizzle-orm` menjadi `import { and, asc, desc, eq, ilike, inArray, isNull, lt, ne, or, sql } from 'drizzle-orm';`, tambahkan `import type { HistoryStatus } from '@/lib/circulation-labels';`, `import { offsetOf, PAGE_SIZE } from '@/lib/pagination';`, dan ubah impor agregat menjadi `import { openItemCounts, paidTotals } from './loan-aggregates';`. Lalu tambahkan di akhir berkas:
 
@@ -3165,7 +3165,7 @@ Hapus `isNull` dan `inArray` dari impor bila lint menandainya tidak terpakai (ke
 Run: `npx vitest run --config vitest.integration.config.ts tests/integration/loan-queries.test.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Tulis uji badge yang gagal**
+- [x] **Step 5: Tulis uji badge yang gagal**
 
 Buat `src/components/ui/loan-status-badge.test.tsx`:
 
@@ -3195,7 +3195,7 @@ describe('LoanStatusBadge', () => {
 Run: `npx vitest run src/components/ui/loan-status-badge.test.tsx`
 Expected: FAIL — modul tidak ditemukan.
 
-- [ ] **Step 6: Implementasikan badge**
+- [x] **Step 6: Implementasikan badge**
 
 Buat `src/components/ui/loan-status-badge.tsx`:
 
@@ -3245,7 +3245,7 @@ export function LoanStatusBadge({ status, daysOverdue }: { status: LoanStatus; d
 Run: `npx vitest run src/components/ui/loan-status-badge.test.tsx`
 Expected: PASS.
 
-- [ ] **Step 7: Tulis uji halaman yang gagal**
+- [x] **Step 7: Tulis uji halaman yang gagal**
 
 Buat `src/app/(app)/transaksi/riwayat/page.test.tsx`:
 
@@ -3414,7 +3414,7 @@ describe('LoanDetailPage', () => {
 Run: `npx vitest run "src/app/(app)/transaksi/riwayat"`
 Expected: FAIL — modul halaman tidak ditemukan.
 
-- [ ] **Step 8: Implementasikan halaman daftar**
+- [x] **Step 8: Implementasikan halaman daftar**
 
 Buat `src/app/(app)/transaksi/riwayat/page.tsx`:
 
@@ -3511,7 +3511,7 @@ export default async function HistoryPage({ searchParams }: { searchParams: Sear
 }
 ```
 
-- [ ] **Step 9: Implementasikan halaman detail**
+- [x] **Step 9: Implementasikan halaman detail**
 
 Buat `src/app/(app)/transaksi/riwayat/[id]/page.tsx`:
 
@@ -3672,17 +3672,17 @@ export default async function LoanDetailPage({
 }
 ```
 
-- [ ] **Step 10: Jalankan uji halaman dan pastikan lulus**
+- [x] **Step 10: Jalankan uji halaman dan pastikan lulus**
 
 Run: `npx vitest run "src/app/(app)/transaksi/riwayat" src/components/ui/loan-status-badge.test.tsx`
 Expected: PASS. Uji waktu memakai `formatSchoolDateTime` asli: `2090-03-09T03:00:00Z` tampil `09/03/2090 10.00`.
 
-- [ ] **Step 11: Jalankan seluruh uji unit, lint, dan tsc**
+- [x] **Step 11: Jalankan seluruh uji unit, lint, dan tsc**
 
 Run: `npm test && npm run lint && npx tsc --noEmit`
 Expected: PASS/bersih.
 
-- [ ] **Step 12: Commit**
+- [x] **Step 12: Commit**
 
 ```bash
 git add src/lib/circulation-labels.ts src/lib/circulation-labels.test.ts src/server/queries/loans.ts \
@@ -3720,7 +3720,7 @@ Eksemplar yang tidak boleh dipinjam ditolak **saat dipindai**, dengan alasannya,
   - `deskReducer`, `INITIAL_DESK`, `remainingSlots(state)`, `cardWarnings(card)`, tipe `DeskState`, `DeskAction`, `DeskCopy`, `CardWarning`
   - `<LoanDesk loanDate dueDate durationDays />`; rute `/transaksi/peminjaman`
 
-- [ ] **Step 1: Tulis uji Server Action yang gagal**
+- [x] **Step 1: Tulis uji Server Action yang gagal**
 
 Buat `src/server/actions/loans.test.ts`:
 
@@ -3827,7 +3827,7 @@ describe('createLoanAction', () => {
 Run: `npx vitest run src/server/actions/loans.test.ts`
 Expected: FAIL — modul `./loans` tidak ditemukan.
 
-- [ ] **Step 2: Implementasikan tipe hasil dan Server Action**
+- [x] **Step 2: Implementasikan tipe hasil dan Server Action**
 
 Buat `src/lib/circulation-results.ts`:
 
@@ -3919,7 +3919,7 @@ export async function createLoanAction(input: unknown): Promise<CreateLoanState>
 Run: `npx vitest run src/server/actions/loans.test.ts`
 Expected: PASS.
 
-- [ ] **Step 3: Tulis uji reducer yang gagal**
+- [x] **Step 3: Tulis uji reducer yang gagal**
 
 Buat `src/app/(app)/transaksi/peminjaman/desk-state.test.ts`:
 
@@ -4055,7 +4055,7 @@ describe('cardWarnings', () => {
 Run: `npx vitest run "src/app/(app)/transaksi/peminjaman/desk-state.test.ts"`
 Expected: FAIL — modul `./desk-state` tidak ditemukan.
 
-- [ ] **Step 4: Implementasikan reducer**
+- [x] **Step 4: Implementasikan reducer**
 
 Buat `src/app/(app)/transaksi/peminjaman/desk-state.ts`:
 
@@ -4178,7 +4178,7 @@ export function cardWarnings(card: BorrowerCard): CardWarning[] {
 Run: `npx vitest run "src/app/(app)/transaksi/peminjaman/desk-state.test.ts"`
 Expected: PASS.
 
-- [ ] **Step 5: Tulis uji halaman yang gagal**
+- [x] **Step 5: Tulis uji halaman yang gagal**
 
 Buat `src/app/(app)/transaksi/peminjaman/page.test.tsx`:
 
@@ -4232,7 +4232,7 @@ describe('LoanPage', () => {
 Run: `npx vitest run "src/app/(app)/transaksi/peminjaman/page.test.tsx"`
 Expected: FAIL — modul `./page` tidak ditemukan.
 
-- [ ] **Step 6: Implementasikan komponen meja peminjaman**
+- [x] **Step 6: Implementasikan komponen meja peminjaman**
 
 Buat `src/app/(app)/transaksi/peminjaman/loan-desk.tsx`:
 
@@ -4496,7 +4496,7 @@ export function LoanDesk({ loanDate, dueDate, durationDays }: { loanDate: string
 }
 ```
 
-- [ ] **Step 7: Implementasikan halaman**
+- [x] **Step 7: Implementasikan halaman**
 
 Buat `src/app/(app)/transaksi/peminjaman/page.tsx`:
 
@@ -4535,17 +4535,17 @@ export default async function LoanPage() {
 }
 ```
 
-- [ ] **Step 8: Jalankan uji halaman dan pastikan lulus**
+- [x] **Step 8: Jalankan uji halaman dan pastikan lulus**
 
 Run: `npx vitest run "src/app/(app)/transaksi/peminjaman"`
 Expected: PASS. Bila React merender atribut `autoFocus` dengan ejaan lain di markup statis, sesuaikan regex uji agar tetap memeriksa bahwa kolom siswa difokuskan otomatis (catat di laporan).
 
-- [ ] **Step 9: Jalankan seluruh uji unit, lint, dan tsc**
+- [x] **Step 9: Jalankan seluruh uji unit, lint, dan tsc**
 
 Run: `npm test && npm run lint && npx tsc --noEmit`
 Expected: PASS/bersih.
 
-- [ ] **Step 10: Commit**
+- [x] **Step 10: Commit**
 
 ```bash
 git add src/lib/circulation-results.ts src/server/actions/loans.ts src/server/actions/loans.test.ts \
@@ -4580,7 +4580,7 @@ Satu kolom pencarian universal (nomor transaksi, NIS, nama, atau barcode buku; s
   - `initialRows(items)`, `parseRupiahInput(raw: string): number | null`, `previewReturn(items, rows, context): ReturnPreview`, `toReturnInput(loanId, items, rows)`
   - `<ReturnForm loan today finePerDay />`; rute `/transaksi/pengembalian`
 
-- [ ] **Step 1: Tulis uji `autoFocus` FilterBar yang gagal**
+- [x] **Step 1: Tulis uji `autoFocus` FilterBar yang gagal**
 
 Tambahkan di `src/components/ui/list-parts.test.tsx` (impor `FilterBar` dari `./filter-bar` bila belum ada):
 
@@ -4596,7 +4596,7 @@ describe('FilterBar autoFocus', () => {
 Run: `npx vitest run src/components/ui/list-parts.test.tsx`
 Expected: FAIL — `autoFocus` belum diteruskan ke `<input>`.
 
-- [ ] **Step 2: Tambahkan `autoFocus` ke FilterBar**
+- [x] **Step 2: Tambahkan `autoFocus` ke FilterBar**
 
 Di `src/components/ui/filter-bar.tsx`, ubah tanda tangan dan `<input>` `FilterBar`:
 
@@ -4625,7 +4625,7 @@ export function FilterBar({
 Run: `npx vitest run src/components/ui/list-parts.test.tsx`
 Expected: PASS.
 
-- [ ] **Step 3: Tulis uji pratinjau yang gagal**
+- [x] **Step 3: Tulis uji pratinjau yang gagal**
 
 Buat `src/app/(app)/transaksi/pengembalian/return-preview.test.ts`:
 
@@ -4722,7 +4722,7 @@ describe('toReturnInput', () => {
 Run: `npx vitest run "src/app/(app)/transaksi/pengembalian/return-preview.test.ts"`
 Expected: FAIL — modul `./return-preview` tidak ditemukan.
 
-- [ ] **Step 4: Implementasikan pratinjau**
+- [x] **Step 4: Implementasikan pratinjau**
 
 Buat `src/app/(app)/transaksi/pengembalian/return-preview.ts`:
 
@@ -4843,7 +4843,7 @@ export function toReturnInput(loanId: string, items: ReturnableItem[], rows: Rec
 Run: `npx vitest run "src/app/(app)/transaksi/pengembalian/return-preview.test.ts"`
 Expected: PASS.
 
-- [ ] **Step 5: Tulis uji Server Action yang gagal**
+- [x] **Step 5: Tulis uji Server Action yang gagal**
 
 Buat `src/server/actions/returns.test.ts`:
 
@@ -4913,7 +4913,7 @@ describe('processReturnAction', () => {
 Run: `npx vitest run src/server/actions/returns.test.ts`
 Expected: FAIL — modul `./returns` tidak ditemukan.
 
-- [ ] **Step 6: Implementasikan Server Action**
+- [x] **Step 6: Implementasikan Server Action**
 
 Buat `src/server/actions/returns.ts`:
 
@@ -4954,7 +4954,7 @@ export async function processReturnAction(input: unknown): Promise<FormState> {
 Run: `npx vitest run src/server/actions/returns.test.ts`
 Expected: PASS.
 
-- [ ] **Step 7: Tulis uji halaman yang gagal**
+- [x] **Step 7: Tulis uji halaman yang gagal**
 
 Buat `src/app/(app)/transaksi/pengembalian/page.test.tsx`:
 
@@ -5060,7 +5060,7 @@ describe('ReturnPage', () => {
 Run: `npx vitest run "src/app/(app)/transaksi/pengembalian/page.test.tsx"`
 Expected: FAIL — modul `./page` tidak ditemukan.
 
-- [ ] **Step 8: Implementasikan form pengembalian**
+- [x] **Step 8: Implementasikan form pengembalian**
 
 Buat `src/app/(app)/transaksi/pengembalian/return-form.tsx`:
 
@@ -5203,7 +5203,7 @@ export function ReturnForm({
 }
 ```
 
-- [ ] **Step 9: Implementasikan halaman**
+- [x] **Step 9: Implementasikan halaman**
 
 Buat `src/app/(app)/transaksi/pengembalian/page.tsx`:
 
@@ -5329,17 +5329,17 @@ export default async function ReturnPage({ searchParams }: { searchParams: Searc
 }
 ```
 
-- [ ] **Step 10: Jalankan uji halaman dan pastikan lulus**
+- [x] **Step 10: Jalankan uji halaman dan pastikan lulus**
 
 Run: `npx vitest run "src/app/(app)/transaksi/pengembalian"`
 Expected: PASS. (Pratinjau di markup statis: satu buku BK-000002 tercentang, jatuh tempo 05/03, hari ini 09/03, denda Rp1.000/hari → `Rp4.000`.)
 
-- [ ] **Step 11: Jalankan seluruh uji unit, lint, dan tsc**
+- [x] **Step 11: Jalankan seluruh uji unit, lint, dan tsc**
 
 Run: `npm test && npm run lint && npx tsc --noEmit`
 Expected: PASS/bersih.
 
-- [ ] **Step 12: Commit**
+- [x] **Step 12: Commit**
 
 ```bash
 git add src/components/ui/filter-bar.tsx src/components/ui/list-parts.test.tsx \
@@ -5365,7 +5365,7 @@ Tidak ada kode baru. Task ini membuktikan seluruh alur transaksi bekerja bersama
 - Consumes: seluruh keluaran Task 1–8
 - Produces: bukti bahwa Rencana 04 selesai
 
-- [ ] **Step 1: Jalankan seluruh pemeriksaan otomatis**
+- [x] **Step 1: Jalankan seluruh pemeriksaan otomatis**
 
 ```bash
 npm test
@@ -5377,7 +5377,7 @@ npm run build
 
 Harapan: seluruhnya lulus, termasuk `tests/integration/loan-concurrency.test.ts`. `npm run build` mencantumkan rute `/transaksi/peminjaman`, `/transaksi/pengembalian`, `/transaksi/riwayat`, dan `/transaksi/riwayat/[id]`.
 
-- [ ] **Step 2: Pastikan uji integrasi tidak meninggalkan jejak**
+- [x] **Step 2: Pastikan uji integrasi tidak meninggalkan jejak**
 
 `npx tsx -e "import(...)"` tidak dapat dipakai di repo ini. Pakai berkas sementara dengan impor statis, lalu hapus:
 
@@ -5406,7 +5406,7 @@ rm tmp-sisa.ts
 
 Harapan: `Sisa data uji: 0`. Angka lain berarti ada uji yang ditulis di luar `withRollback()`; temukan dan perbaiki ujinya, jangan hapus datanya tanpa memahami asalnya.
 
-- [ ] **Step 3: Uji alur lengkap di peramban**
+- [x] **Step 3: Uji alur lengkap di peramban**
 
 Jalankan `npm run dev`. Bila memakai agen, gunakan skill `/browse` (bukan `mcp__claude-in-chrome__*`).
 
@@ -5440,7 +5440,7 @@ Di lebar tablet (`$B viewport 768x1024`):
 
 Seluruh langkah peminjaman dan pengembalian harus dapat diselesaikan dengan papan ketik saja (Tab, Enter, Spasi, Ctrl+Enter).
 
-- [ ] **Step 4: Periksa jejak audit**
+- [x] **Step 4: Periksa jejak audit**
 
 ```bash
 cat > tmp-audit.ts <<'EOF'
@@ -5465,14 +5465,14 @@ rm tmp-audit.ts
 
 Harapan: dua `loan.create`, tiga `return.process` (satu dengan `items[0].condition = 'RUSAK'` dan `totalFine: 60000`), dua `fine.pay` (`remaining` 40000 lalu 0), seluruhnya oleh `petugas`.
 
-- [ ] **Step 5: Bereskan data pemeriksaan**
+- [x] **Step 5: Bereskan data pemeriksaan**
 
 Transaksi QA tetap tersimpan sebagai riwayat (BR-08; `loans` tidak dapat dihapus). Kembalikan keadaan koleksi:
 1. Sebagai **admin**, Master Data → Buku → "Pemrograman Web": pulihkan BK-000001 (Rusak → Tersedia).
 2. Pastikan BK-000001 s.d. BK-000006 seluruhnya "Tersedia" — uji konkurensi (Step 1) membutuhkan setidaknya satu eksemplar TERSEDIA dari buku aktif.
 3. Nonaktifkan siswa `QA-001` dan `QA-002` di Master Data → Siswa.
 
-- [ ] **Step 6: Tandai rencana selesai**
+- [x] **Step 6: Tandai rencana selesai**
 
 Ubah seluruh `- [ ]` di berkas rencana ini menjadi `- [x]`, lalu commit:
 
