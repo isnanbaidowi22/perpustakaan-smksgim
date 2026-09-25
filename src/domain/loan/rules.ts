@@ -17,7 +17,7 @@ export const DEFAULT_SETTINGS: LibrarySettings = {
 
 export interface LoanRequestInput {
   student: StudentSnapshot;
-  /** Peminjaman siswa yang masih memiliki eksemplar belum kembali. */
+  /** Peminjaman yang belum selesai atau dendanya belum lunas (lihat OpenLoanSnapshot). */
   openLoans: OpenLoanSnapshot[];
   requestedCopies: CopySnapshot[];
   settings: LibrarySettings;
@@ -76,6 +76,9 @@ export function validateLoanRequest(input: LoanRequestInput): ValidationResult {
 
   if (settings.blockWhenOverdue) {
     for (const loan of openLoans) {
+      // Pinjaman yang semua bukunya sudah kembali hanya menyisakan denda;
+      // tidak ada buku yang terlambat dikembalikan.
+      if (loan.openItemCount === 0) continue;
       const daysLate = diffDays(loan.dueDate, today);
       if (daysLate > 0) {
         violations.push({
@@ -96,7 +99,9 @@ export function validateLoanRequest(input: LoanRequestInput): ValidationResult {
   }
 
   for (const copy of uniqueCopies) {
-    if (copy.status !== 'TERSEDIA') {
+    if (copy.bookStatus !== 'active') {
+      violations.push({ code: 'BOOK_INACTIVE', barcode: copy.barcode, bookTitle: copy.bookTitle });
+    } else if (copy.status !== 'TERSEDIA') {
       violations.push({
         code: 'COPY_UNAVAILABLE',
         barcode: copy.barcode,

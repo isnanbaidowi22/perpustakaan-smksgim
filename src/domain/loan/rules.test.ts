@@ -25,6 +25,7 @@ function copy(overrides: Partial<CopySnapshot> = {}): CopySnapshot {
     barcode: 'BK-000123',
     status: 'TERSEDIA',
     bookTitle: 'Pemrograman Web',
+    bookStatus: 'active',
     ...overrides,
   };
 }
@@ -235,5 +236,39 @@ describe('validateLoanRequest — pelanggaran majemuk', () => {
     expect(codes).toContain('QUOTA_EXCEEDED');
     expect(codes).toContain('HAS_OVERDUE');
     expect(codes).toContain('COPY_UNAVAILABLE');
+  });
+});
+
+describe('validateLoanRequest — buku nonaktif', () => {
+  it('menolak eksemplar milik buku nonaktif dengan BOOK_INACTIVE, bukan COPY_UNAVAILABLE', () => {
+    const result = validateLoanRequest(request({
+      requestedCopies: [copy({ bookStatus: 'inactive', status: 'DIPINJAM' })],
+    }));
+    expect(result).toEqual({
+      ok: false,
+      violations: [{ code: 'BOOK_INACTIVE', barcode: 'BK-000123', bookTitle: 'Pemrograman Web' }],
+    });
+  });
+});
+
+describe('validateLoanRequest — pinjaman selesai yang dendanya belum lunas', () => {
+  const settled = {
+    id: 'l9', transactionNumber: 'PJM-20260901-0001',
+    dueDate: '2026-09-04', openItemCount: 0, unpaidFine: 5000,
+  };
+
+  it('tidak menganggap pinjaman tanpa eksemplar terbuka sebagai terlambat', () => {
+    expect(validateLoanRequest(request({ openLoans: [settled] }))).toEqual({ ok: true });
+  });
+
+  it('tetap menghitung dendanya bila blockWhenUnpaidFine dinyalakan', () => {
+    const result = validateLoanRequest(request({
+      openLoans: [settled],
+      settings: { ...settings, blockWhenUnpaidFine: true },
+    }));
+    expect(result).toEqual({
+      ok: false,
+      violations: [{ code: 'UNPAID_FINE', studentName: 'Ahmad Fauzi', amount: 5000 }],
+    });
   });
 });

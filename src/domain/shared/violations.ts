@@ -30,6 +30,7 @@ export type Violation =
       status: CopyStatus;
       borrowedBy?: BorrowerSnapshot;
     }
+  | { code: 'BOOK_INACTIVE'; barcode: string; bookTitle: string }
   | { code: 'UNPAID_FINE'; studentName: string; amount: number };
 
 export type ViolationCode = Violation['code'];

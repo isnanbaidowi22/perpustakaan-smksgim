@@ -22,7 +22,11 @@ export interface StudentSnapshot {
   status: RecordStatus;
 }
 
-/** Peminjaman yang masih memiliki eksemplar belum kembali. */
+/**
+ * Peminjaman yang masih berpengaruh pada peminjaman baru: masih memiliki
+ * eksemplar belum kembali, atau semua bukunya sudah kembali tetapi dendanya
+ * belum lunas (openItemCount = 0).
+ */
 export interface OpenLoanSnapshot {
   id: string;
   transactionNumber: string;
@@ -44,6 +48,8 @@ export interface CopySnapshot {
   barcode: string;
   status: CopyStatus;
   bookTitle: string;
+  /** Eksemplar milik buku nonaktif tidak boleh dipinjam (spec 5.2, BOOK_INACTIVE). */
+  bookStatus: RecordStatus;
   /** Terisi hanya bila status DIPINJAM, untuk menyusun pesan galat. */
   borrowedBy?: BorrowerSnapshot;
 }
