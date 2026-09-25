@@ -1,4 +1,4 @@
-import { and, asc, eq, isNull } from 'drizzle-orm';
+import { and, asc, eq, isNull, sql } from 'drizzle-orm';
 import { nextCopyStatus, resolveLoanStatus } from '@/domain/return/copy-status';
 import { calculateItemFine } from '@/domain/return/fine';
 import type { IsoDate } from '@/domain/shared/date';
@@ -7,7 +7,7 @@ import { formatRupiah } from '@/lib/format';
 import { writeAudit } from '@/server/audit';
 import { db } from '@/server/db/client';
 import type { Executor } from '@/server/db/executor';
-import { bookCopies, books, loanItems, loans } from '@/server/db/schema';
+import { bookCopies, books, finePayments, loanItems, loans } from '@/server/db/schema';
 import { getLibrarySettings } from '@/server/queries/settings';
 import { isUuid } from '@/server/validation/common';
 import type { ReturnInput } from '@/server/validation/return';
@@ -119,6 +119,20 @@ export async function processReturn(
       entityId: loan.id,
       metadata: { transactionNumber: loan.transactionNumber, items: summary, totalFine, status },
     });
-    return ok(loan.id, totalFine > 0 ? `Total denda transaksi ini ${formatRupiah(totalFine)}.` : 'Tidak ada denda.');
+
+    // 7. Notice: denda pengembalian KALI INI (bukan kumulatif transaksi, I2)
+    // dan sisa tagihan yang belum dibayar, dibaca dalam transaksi yang sama.
+    const thisReturnFine = summary.reduce((sum, row) => sum + row.lateFine + row.replacementFee, 0);
+    const [{ paid }] = await tx
+      .select({ paid: sql<string>`coalesce(sum(${finePayments.amount}), 0)` })
+      .from(finePayments)
+      .where(eq(finePayments.loanId, loan.id));
+    const remainder = totalFine - Number(paid);
+    const notice = thisReturnFine > 0
+      ? `Denda pengembalian ini ${formatRupiah(thisReturnFine)}. Sisa tagihan transaksi ${formatRupiah(remainder)}.`
+      : remainder > 0
+        ? `Tidak ada denda baru. Sisa tagihan transaksi ${formatRupiah(remainder)}.`
+        : 'Tidak ada denda baru.';
+    return ok(loan.id, notice);
   });
 }

@@ -1816,7 +1816,7 @@ Task ini juga membuat dua query yang dipakai layar pengembalian dan riwayat: det
   - `interface ReturnCandidate { id: string; transactionNumber: string; studentName: string; studentNis: string; studentClass: string; loanDate: string; dueDate: string; openCount: number; daysOverdue: number }`
   - `findLoansForReturn(query: string, today: IsoDate, executor?): Promise<ReturnCandidate[]>` — maks. 20, hanya pinjaman yang masih punya item terbuka
   - `returnSchema`; `type ReturnInput = { loanId: string; items: { loanItemId: string; condition: ReturnCondition; replacementFee: number | null; note: string | null }[] }`
-  - `processReturn(input: ReturnInput, actor: Actor, today: IsoDate, executor?): Promise<ServiceResult>` — `ok(loanId, notice)`; notice `'Total denda transaksi ini Rp54.000.'` atau `'Tidak ada denda.'`
+  - `processReturn(input: ReturnInput, actor: Actor, today: IsoDate, executor?): Promise<ServiceResult>` — `ok(loanId, notice)`; notice menyebut denda pengembalian KALI INI dan sisa tagihan transaksi (bukan denda kumulatif, I2 pada tinjauan akhir): `'Denda pengembalian ini Rp3.000. Sisa tagihan transaksi Rp43.000.'`, `'Tidak ada denda baru. Sisa tagihan transaksi Rp43.000.'`, atau `'Tidak ada denda baru.'` (sisa tagihan lunas)
   - Audit `return.process` (entity `loans`, metadata `{ transactionNumber, items: [{ barcode, condition, daysLate, lateFine, replacementFee }], totalFine, status }`)
 
 - [x] **Step 1: Tulis uji validasi yang gagal**
@@ -5422,7 +5422,7 @@ Persiapan sebagai **petugas** (`petugas` / `perpus123`) di Master Data → Siswa
 
 **Pengembalian** (`/transaksi/pengembalian`):
 7. Kolom pencarian terfokus. Ketik `QA-001` + Enter → dua pinjaman terbuka tampil sebagai daftar. Pilih pinjaman pertama (BK-000001, BK-000004).
-8. Lepas centang BK-000004. Ubah BK-000001 menjadi "Rusak" → kolom biaya ganti terisi Rp85.000 (harga katalog); ubah menjadi `60.000` → panel kanan langsung menampilkan Rp60.000 sebelum disimpan. Simpan → diarahkan ke detail transaksi dengan pesan "Pengembalian tersimpan. Total denda transaksi ini Rp60.000."; status "Sebagian kembali".
+8. Lepas centang BK-000004. Ubah BK-000001 menjadi "Rusak" → kolom biaya ganti terisi Rp85.000 (harga katalog); ubah menjadi `60.000` → panel kanan langsung menampilkan Rp60.000 sebelum disimpan. Simpan → diarahkan ke detail transaksi dengan pesan "Pengembalian tersimpan. Denda pengembalian ini Rp60.000. Sisa tagihan transaksi Rp60.000."; status "Sebagian kembali".
 9. Di Master Data → Buku → "Pemrograman Web": BK-000001 berstatus Rusak.
 
 **Riwayat dan denda** (`/transaksi/riwayat/<id>` dari langkah 8):

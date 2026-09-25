@@ -4,6 +4,7 @@ import type { ReturnCondition } from '@/domain/shared/types';
 import type { Transaction } from '@/server/db/executor';
 import { auditLogs, bookCopies, loanItems, loans } from '@/server/db/schema';
 import { getLoanDetail } from '@/server/queries/loans';
+import { payFine } from '@/server/services/fines';
 import { createLoan } from '@/server/services/loans';
 import { processReturn } from '@/server/services/returns';
 import { circulationFixture, TODAY, type CirculationFixture } from './circulation-fixture';
@@ -37,7 +38,7 @@ describe('processReturn', () => {
 
       const result = await processReturn({ loanId: loan.id, items: [item(loan.items[0].id)] }, fx.actor, '2090-03-05', tx);
 
-      expect(result).toEqual({ ok: true, id: loan.id, notice: 'Tidak ada denda.' });
+      expect(result).toEqual({ ok: true, id: loan.id, notice: 'Tidak ada denda baru.' });
       const [row] = await tx.select({ status: loans.status, totalFine: loans.totalFine }).from(loans).where(eq(loans.id, loan.id));
       expect(row).toEqual({ status: 'SELESAI', totalFine: '0.00' });
       expect(await copyStatus(tx, fx.copies[0].id)).toBe('TERSEDIA');
@@ -74,7 +75,7 @@ describe('processReturn', () => {
         items: [{ loanItemId: loan.items[0].id, condition: 'RUSAK', replacementFee: null, note: 'UJI sampul sobek' }],
       }, fx.actor, '2090-03-09', tx);
 
-      expect(result).toEqual({ ok: true, id: loan.id, notice: 'Total denda transaksi ini Rp54.000.' });
+      expect(result).toEqual({ ok: true, id: loan.id, notice: 'Denda pengembalian ini Rp54.000. Sisa tagihan transaksi Rp54.000.' });
       const [returned] = await tx.select().from(loanItems).where(eq(loanItems.id, loan.items[0].id));
       expect(returned).toMatchObject({
         returnCondition: 'RUSAK', daysLate: 4, lateFine: '4000.00', replacementFee: '50000.00', conditionNote: 'UJI sampul sobek',
@@ -94,6 +95,46 @@ describe('processReturn', () => {
         totalFine: 54000,
         status: 'SELESAI',
       });
+    });
+  });
+
+  it('menyebut denda kali ini dan sisa tagihan transaksi, bukan denda kumulatif (I2)', async () => {
+    await withRollback(async (tx) => {
+      const fx = await circulationFixture(tx);
+      const loan = await borrow(tx, fx, [0, 1]);
+
+      const first = await processReturn({
+        loanId: loan.id, items: [{ loanItemId: loan.items[0].id, condition: 'RUSAK', replacementFee: null, note: null }],
+      }, fx.actor, '2090-03-09', tx);
+      expect(first).toEqual({ ok: true, id: loan.id, notice: 'Denda pengembalian ini Rp54.000. Sisa tagihan transaksi Rp54.000.' });
+
+      const payment = await payFine(loan.id, { amount: 30000, note: null }, fx.actor, tx);
+      expect(payment).toEqual({ ok: true, id: loan.id, notice: 'Sisa tagihan Rp24.000.' });
+
+      const second = await processReturn({
+        loanId: loan.id, items: [item(loan.items[1].id)],
+      }, fx.actor, '2090-03-09', tx);
+      // Denda kali ini (Rp4.000, telat) + sisa dari pengembalian pertama yang belum lunas (Rp24.000).
+      expect(second).toEqual({ ok: true, id: loan.id, notice: 'Denda pengembalian ini Rp4.000. Sisa tagihan transaksi Rp28.000.' });
+
+      const [row] = await tx.select({ totalFine: loans.totalFine }).from(loans).where(eq(loans.id, loan.id));
+      expect(row?.totalFine).toBe('58000.00');
+    });
+  });
+
+  it('menyebut "Tidak ada denda baru." bila pengembalian kali ini tanpa denda dan tagihan sebelumnya sudah lunas', async () => {
+    await withRollback(async (tx) => {
+      const fx = await circulationFixture(tx);
+      const loan = await borrow(tx, fx, [0, 1]);
+
+      await processReturn({
+        loanId: loan.id, items: [{ loanItemId: loan.items[0].id, condition: 'RUSAK', replacementFee: null, note: null }],
+      }, fx.actor, '2090-03-09', tx);
+      await payFine(loan.id, { amount: 54000, note: null }, fx.actor, tx);
+
+      const result = await processReturn({ loanId: loan.id, items: [item(loan.items[1].id)] }, fx.actor, '2090-03-05', tx);
+
+      expect(result).toEqual({ ok: true, id: loan.id, notice: 'Tidak ada denda baru.' });
     });
   });
 

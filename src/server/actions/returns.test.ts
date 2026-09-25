@@ -47,14 +47,18 @@ describe('processReturnAction', () => {
   });
 
   it('menyimpan dengan tanggal sekolah lalu pindah ke detail transaksi dengan total denda', async () => {
-    mockProcessReturn.mockResolvedValueOnce({ ok: true, id: loanId, notice: 'Total denda transaksi ini Rp4.000.' });
+    mockProcessReturn.mockResolvedValueOnce({
+      ok: true, id: loanId, notice: 'Denda pengembalian ini Rp4.000. Sisa tagihan transaksi Rp4.000.',
+    });
 
     await expect(processReturnAction(input)).rejects.toThrow('NEXT_REDIRECT');
 
     expect(mockProcessReturn).toHaveBeenCalledWith(input, actor, '2090-03-09');
     expect(mockRevalidatePath).toHaveBeenCalledWith('/transaksi/riwayat');
     expect(mockRedirect).toHaveBeenCalledWith(
-      `/transaksi/riwayat/${loanId}?pesan=${encodeURIComponent('Pengembalian tersimpan. Total denda transaksi ini Rp4.000.')}`,
+      `/transaksi/riwayat/${loanId}?pesan=${encodeURIComponent(
+        'Pengembalian tersimpan. Denda pengembalian ini Rp4.000. Sisa tagihan transaksi Rp4.000.',
+      )}`,
     );
   });
 });
