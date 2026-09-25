@@ -27,4 +27,13 @@ describe('AppShell', () => {
     expect(html).toMatch(/<button[^>]*aria-expanded="false"[^>]*aria-controls="navigasi-utama"/);
     expect(html).toContain('Menu');
   });
+
+  it('menempatkan tombol Menu sebelum panel navigasi agar urutan Tab maju masuk ke menu', () => {
+    const html = render();
+    const buttonIndex = html.indexOf('aria-controls="navigasi-utama"');
+    const panelIndex = html.indexOf('id="navigasi-utama"');
+    expect(buttonIndex).toBeGreaterThan(-1);
+    expect(panelIndex).toBeGreaterThan(-1);
+    expect(buttonIndex).toBeLessThan(panelIndex);
+  });
 });
