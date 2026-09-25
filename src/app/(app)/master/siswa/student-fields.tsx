@@ -17,6 +17,10 @@ export function StudentFields({
   yearOptions: Option[];
   defaultYearId: string | null;
 }) {
+  // Tanpa opsi kosong, peramban memilih opsi pertama — tahun ajaran lama —
+  // dan siswa baru tercatat di tahun yang salah tanpa ada yang menyadarinya.
+  const noActiveYear = !student && !defaultYearId;
+
   return (
     <>
       <TextField name="nis" label="NIS" defaultValue={student?.nis} required autoFocus={!student} maxLength={30} />
@@ -52,7 +56,8 @@ export function StudentFields({
       <SelectField
         name="academicYearId"
         label="Tahun ajaran"
-        placeholder={student ? '— Tanpa tahun ajaran —' : undefined}
+        placeholder={student || noActiveYear ? '— Tanpa tahun ajaran —' : undefined}
+        hint={noActiveYear ? 'Belum ada tahun ajaran aktif. Admin dapat mengaktifkannya di Pengaturan → Tahun Ajaran.' : undefined}
         defaultValue={student?.academicYearId ?? defaultYearId ?? ''}
         options={yearOptions}
       />
