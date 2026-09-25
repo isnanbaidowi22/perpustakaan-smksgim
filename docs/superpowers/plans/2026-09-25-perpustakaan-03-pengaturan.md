@@ -114,7 +114,7 @@ Tiga layar di rencana ini butuh hal yang belum dimiliki Rencana 02: kotak centan
   - `AuditEntry.entityId?: string` (kosong → `null`)
   - `<AccessDenied />`
 
-- [ ] **Step 1: Tulis uji pembangun skema yang gagal**
+- [x] **Step 1: Tulis uji pembangun skema yang gagal**
 
 Di `src/server/validation/common.test.ts`, ubah baris impor menjadi:
 
@@ -167,12 +167,12 @@ describe('checkbox', () => {
 });
 ```
 
-- [ ] **Step 2: Jalankan uji dan pastikan gagal**
+- [x] **Step 2: Jalankan uji dan pastikan gagal**
 
 Run: `npx vitest run src/server/validation/common.test.ts`
 Expected: FAIL — `requiredInteger is not a function` (dan dua lainnya).
 
-- [ ] **Step 3: Implementasikan pembangun skema**
+- [x] **Step 3: Implementasikan pembangun skema**
 
 Tambahkan di `src/server/validation/common.ts`, tepat setelah `optionalInteger`:
 
@@ -202,12 +202,12 @@ export function checkbox() {
 }
 ```
 
-- [ ] **Step 4: Jalankan uji dan pastikan lulus**
+- [x] **Step 4: Jalankan uji dan pastikan lulus**
 
 Run: `npx vitest run src/server/validation/common.test.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Kunci perilaku `formToObject` yang diandalkan kotak centang**
+- [x] **Step 5: Kunci perilaku `formToObject` yang diandalkan kotak centang**
 
 Tambahkan di dalam `describe('formToObject', …)` pada `src/lib/form-state.test.ts`:
 
@@ -224,7 +224,7 @@ Tambahkan di dalam `describe('formToObject', …)` pada `src/lib/form-state.test
 Run: `npx vitest run src/lib/form-state.test.ts`
 Expected: PASS tanpa perubahan kode — uji ini mengunci kontrak yang sudah ada agar tidak berubah diam-diam.
 
-- [ ] **Step 6: Tulis uji `CheckboxField` dan kolom kata sandi yang gagal**
+- [x] **Step 6: Tulis uji `CheckboxField` dan kolom kata sandi yang gagal**
 
 Di `src/components/ui/action-form.test.tsx`, ubah impor fields menjadi:
 
@@ -270,12 +270,12 @@ Lalu tambahkan di dalam `describe('ActionForm', …)`:
   });
 ```
 
-- [ ] **Step 7: Jalankan uji dan pastikan gagal**
+- [x] **Step 7: Jalankan uji dan pastikan gagal**
 
 Run: `npx vitest run src/components/ui/action-form.test.tsx`
 Expected: FAIL — `CheckboxField` tidak diekspor, dan `autocomplete` tidak dirender.
 
-- [ ] **Step 8: Implementasikan `CheckboxField` dan kolom kata sandi**
+- [x] **Step 8: Implementasikan `CheckboxField` dan kolom kata sandi**
 
 Di `src/components/ui/fields.tsx`, ganti deklarasi `TextField` seluruhnya dengan:
 
@@ -354,12 +354,12 @@ export function CheckboxField({
 }
 ```
 
-- [ ] **Step 9: Jalankan uji dan pastikan lulus**
+- [x] **Step 9: Jalankan uji dan pastikan lulus**
 
 Run: `npx vitest run src/components/ui/action-form.test.tsx`
 Expected: PASS.
 
-- [ ] **Step 10: Tulis uji kolom rahasia yang gagal**
+- [x] **Step 10: Tulis uji kolom rahasia yang gagal**
 
 Tambahkan di dalam `describe('runFormAction', …)` pada `src/server/forms/run-action.test.ts`:
 
@@ -396,12 +396,12 @@ Tambahkan di dalam `describe('runFormAction', …)` pada `src/server/forms/run-a
   });
 ```
 
-- [ ] **Step 11: Jalankan uji dan pastikan gagal**
+- [x] **Step 11: Jalankan uji dan pastikan gagal**
 
 Run: `npx vitest run src/server/forms/run-action.test.ts`
 Expected: FAIL — `values` masih berisi `password: 'rahasia123'`.
 
-- [ ] **Step 12: Implementasikan `secretFields`**
+- [x] **Step 12: Implementasikan `secretFields`**
 
 Di `src/server/forms/run-action.ts`, tambahkan properti ini ke `interface FormActionOptions`, tepat setelah `invalidMessage`:
 
@@ -440,12 +440,12 @@ function withoutFields(values: Record<string, string>, fields: string[]): Record
 }
 ```
 
-- [ ] **Step 13: Jalankan uji dan pastikan lulus**
+- [x] **Step 13: Jalankan uji dan pastikan lulus**
 
 Run: `npx vitest run src/server/forms/run-action.test.ts`
 Expected: PASS.
 
-- [ ] **Step 14: Tulis uji audit tanpa id entitas**
+- [x] **Step 14: Tulis uji audit tanpa id entitas**
 
 Ubah impor `drizzle-orm` di `tests/integration/audit.test.ts` menjadi `import { and, eq, sql } from 'drizzle-orm';`, lalu tambahkan di dalam `describe('writeAudit', …)`:
 
@@ -470,12 +470,12 @@ Ubah impor `drizzle-orm` di `tests/integration/audit.test.ts` menjadi `import { 
   });
 ```
 
-- [ ] **Step 15: Pastikan uji gagal di pemeriksa tipe**
+- [x] **Step 15: Pastikan uji gagal di pemeriksa tipe**
 
 Run: `npx tsc --noEmit`
 Expected: FAIL — `Property 'entityId' is missing in type … but required in type 'AuditEntry'`. (Saat runtime Drizzle sudah mengisi `null` untuk `undefined`; yang salah adalah kontrak tipenya.)
 
-- [ ] **Step 16: Jadikan `entityId` opsional**
+- [x] **Step 16: Jadikan `entityId` opsional**
 
 Di `src/server/audit.ts`, ganti baris `entityId: string;` pada `AuditEntry` dengan:
 
@@ -486,12 +486,12 @@ Di `src/server/audit.ts`, ganti baris `entityId: string;` pada `AuditEntry` deng
 
 Dan di `writeAudit`, ganti `entityId: entry.entityId,` dengan `entityId: entry.entityId ?? null,`.
 
-- [ ] **Step 17: Jalankan pemeriksa tipe dan uji audit**
+- [x] **Step 17: Jalankan pemeriksa tipe dan uji audit**
 
 Run: `npx tsc --noEmit && npx vitest run --config vitest.integration.config.ts tests/integration/audit.test.ts`
 Expected: tsc bersih; 2 uji PASS.
 
-- [ ] **Step 18: Tulis uji panel "Akses ditolak" yang gagal**
+- [x] **Step 18: Tulis uji panel "Akses ditolak" yang gagal**
 
 Buat `src/components/ui/access-denied.test.tsx`:
 
@@ -513,7 +513,7 @@ describe('AccessDenied', () => {
 Run: `npx vitest run src/components/ui/access-denied.test.tsx`
 Expected: FAIL — modul `./access-denied` tidak ditemukan.
 
-- [ ] **Step 19: Implementasikan panel**
+- [x] **Step 19: Implementasikan panel**
 
 Buat `src/components/ui/access-denied.tsx`:
 
@@ -539,12 +539,12 @@ export function AccessDenied() {
 }
 ```
 
-- [ ] **Step 20: Jalankan seluruh uji unit dan lint**
+- [x] **Step 20: Jalankan seluruh uji unit dan lint**
 
 Run: `npm test && npm run lint`
 Expected: seluruhnya PASS, lint bersih.
 
-- [ ] **Step 21: Commit**
+- [x] **Step 21: Commit**
 
 ```bash
 git add src/server/validation/common.ts src/server/validation/common.test.ts src/lib/form-state.test.ts \
@@ -592,7 +592,7 @@ Task ini juga menutup kewajiban dari Rencana 02: form tambah siswa saat tidak ad
   - Server Action: `createAcademicYearAction`, `updateAcademicYearAction(id, …)`, `activateAcademicYearAction(id, …)`
   - Audit: `academic_year.create`, `academic_year.update`, `academic_year.activate` (entity `academic_years`)
 
-- [ ] **Step 1: Tulis uji validasi yang gagal**
+- [x] **Step 1: Tulis uji validasi yang gagal**
 
 Buat `src/server/validation/academic-year.test.ts`:
 
@@ -647,12 +647,12 @@ describe('newAcademicYearSchema', () => {
 });
 ```
 
-- [ ] **Step 2: Jalankan uji dan pastikan gagal**
+- [x] **Step 2: Jalankan uji dan pastikan gagal**
 
 Run: `npx vitest run src/server/validation/academic-year.test.ts`
 Expected: FAIL — modul `./academic-year` tidak ditemukan.
 
-- [ ] **Step 3: Implementasikan validasi**
+- [x] **Step 3: Implementasikan validasi**
 
 Buat `src/server/validation/academic-year.ts`:
 
@@ -720,12 +720,12 @@ export type AcademicYearInput = z.output<typeof academicYearSchema>;
 export type NewAcademicYearInput = z.output<typeof newAcademicYearSchema>;
 ```
 
-- [ ] **Step 4: Jalankan uji dan pastikan lulus**
+- [x] **Step 4: Jalankan uji dan pastikan lulus**
 
 Run: `npx vitest run src/server/validation/academic-year.test.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Tulis uji integrasi service dan query yang gagal**
+- [x] **Step 5: Tulis uji integrasi service dan query yang gagal**
 
 Di `tests/integration/academic-years.test.ts`, ganti blok impor dengan:
 
@@ -886,12 +886,12 @@ describe('listAcademicYears dan getAcademicYear', () => {
 });
 ```
 
-- [ ] **Step 6: Jalankan uji dan pastikan gagal**
+- [x] **Step 6: Jalankan uji dan pastikan gagal**
 
 Run: `npx vitest run --config vitest.integration.config.ts tests/integration/academic-years.test.ts`
 Expected: FAIL — modul `@/server/services/academic-years` tidak ditemukan.
 
-- [ ] **Step 7: Tambahkan query**
+- [x] **Step 7: Tambahkan query**
 
 Di `src/server/queries/academic-years.ts`, tambahkan `import { isUuid } from '@/server/validation/common';` ke blok impor, lalu tambahkan di akhir berkas:
 
@@ -924,7 +924,7 @@ export async function getAcademicYear(id: string, executor: Executor = db): Prom
 }
 ```
 
-- [ ] **Step 8: Implementasikan service**
+- [x] **Step 8: Implementasikan service**
 
 Buat `src/server/services/academic-years.ts`:
 
@@ -1075,12 +1075,12 @@ export async function activateAcademicYear(id: string, actor: Actor, executor: E
 }
 ```
 
-- [ ] **Step 9: Jalankan uji dan pastikan lulus**
+- [x] **Step 9: Jalankan uji dan pastikan lulus**
 
 Run: `npx vitest run --config vitest.integration.config.ts tests/integration/academic-years.test.ts`
 Expected: seluruh uji PASS, termasuk dua uji lama.
 
-- [ ] **Step 10: Tulis uji Server Action yang gagal**
+- [x] **Step 10: Tulis uji Server Action yang gagal**
 
 Buat `src/server/actions/academic-years.test.ts`:
 
@@ -1149,7 +1149,7 @@ describe('Server Action tahun ajaran', () => {
 Run: `npx vitest run src/server/actions/academic-years.test.ts`
 Expected: FAIL — modul `./academic-years` tidak ditemukan.
 
-- [ ] **Step 11: Implementasikan Server Action**
+- [x] **Step 11: Implementasikan Server Action**
 
 Buat `src/server/actions/academic-years.ts`:
 
@@ -1216,7 +1216,7 @@ export async function activateAcademicYearAction(
 Run: `npx vitest run src/server/actions/academic-years.test.ts`
 Expected: PASS.
 
-- [ ] **Step 12: Tulis uji halaman yang gagal**
+- [x] **Step 12: Tulis uji halaman yang gagal**
 
 Buat `src/app/(app)/pengaturan/tahun-ajaran/page.test.tsx`:
 
@@ -1384,7 +1384,7 @@ describe('EditAcademicYearPage', () => {
 Run: `npx vitest run "src/app/(app)/pengaturan/tahun-ajaran"`
 Expected: FAIL — modul halaman tidak ditemukan.
 
-- [ ] **Step 13: Implementasikan halaman**
+- [x] **Step 13: Implementasikan halaman**
 
 Buat `src/app/(app)/pengaturan/tahun-ajaran/academic-year-fields.tsx`:
 
@@ -1567,12 +1567,12 @@ export default async function EditAcademicYearPage({ params }: { params: Promise
 }
 ```
 
-- [ ] **Step 14: Jalankan uji halaman dan pastikan lulus**
+- [x] **Step 14: Jalankan uji halaman dan pastikan lulus**
 
 Run: `npx vitest run "src/app/(app)/pengaturan/tahun-ajaran"`
 Expected: PASS.
 
-- [ ] **Step 15: Tulis uji form siswa tanpa tahun ajaran aktif yang gagal**
+- [x] **Step 15: Tulis uji form siswa tanpa tahun ajaran aktif yang gagal**
 
 Ganti seluruh isi `src/app/(app)/master/siswa/baru/page.test.tsx` dengan:
 
@@ -1628,7 +1628,7 @@ describe('NewStudentPage', () => {
 Run: `npx vitest run "src/app/(app)/master/siswa/baru"`
 Expected: FAIL pada uji ketiga — tanpa opsi kosong, peramban memilih opsi pertama (tahun lama) secara diam-diam.
 
-- [ ] **Step 16: Perbaiki kolom tahun ajaran di form siswa**
+- [x] **Step 16: Perbaiki kolom tahun ajaran di form siswa**
 
 Di `src/app/(app)/master/siswa/student-fields.tsx`, ganti `SelectField` tahun ajaran (elemen terakhir) dengan:
 
@@ -1651,12 +1651,12 @@ Dan tambahkan baris ini tepat sebelum `return (` di fungsi `StudentFields`:
   const noActiveYear = !student && !defaultYearId;
 ```
 
-- [ ] **Step 17: Jalankan seluruh uji unit, uji integrasi tahun ajaran, dan lint**
+- [x] **Step 17: Jalankan seluruh uji unit, uji integrasi tahun ajaran, dan lint**
 
 Run: `npm test && npx vitest run --config vitest.integration.config.ts tests/integration/academic-years.test.ts tests/integration/students.test.ts && npm run lint`
 Expected: seluruhnya PASS, lint bersih.
 
-- [ ] **Step 18: Commit**
+- [x] **Step 18: Commit**
 
 ```bash
 git add src/server/validation/academic-year.ts src/server/validation/academic-year.test.ts \
@@ -1697,7 +1697,7 @@ Admin mengubah aturan peminjaman (BR-09: tanpa menyentuh kode) dan isi struk. Ko
   - Server Action `updateSettingsAction(state, formData)`
   - Audit: `settings.update` (entity `library_settings`, `entity_id` kosong, metadata `{ before, after }`)
 
-- [ ] **Step 1: Tulis uji validasi yang gagal**
+- [x] **Step 1: Tulis uji validasi yang gagal**
 
 Buat `src/server/validation/settings.test.ts`:
 
@@ -1761,7 +1761,7 @@ describe('settingsSchema', () => {
 Run: `npx vitest run src/server/validation/settings.test.ts`
 Expected: FAIL — modul `./settings` tidak ditemukan.
 
-- [ ] **Step 2: Implementasikan validasi**
+- [x] **Step 2: Implementasikan validasi**
 
 Buat `src/server/validation/settings.ts`:
 
@@ -1791,7 +1791,7 @@ export type SettingsInput = z.output<typeof settingsSchema>;
 Run: `npx vitest run src/server/validation/settings.test.ts`
 Expected: PASS.
 
-- [ ] **Step 3: Tulis uji integrasi yang gagal**
+- [x] **Step 3: Tulis uji integrasi yang gagal**
 
 Buat `tests/integration/settings.test.ts`:
 
@@ -1870,7 +1870,7 @@ describe('updateLibrarySettings', () => {
 Run: `npx vitest run --config vitest.integration.config.ts tests/integration/settings.test.ts`
 Expected: FAIL — modul `@/server/queries/settings` tidak ditemukan.
 
-- [ ] **Step 4: Implementasikan query dan service**
+- [x] **Step 4: Implementasikan query dan service**
 
 Buat `src/server/queries/settings.ts`:
 
@@ -1971,12 +1971,12 @@ export async function updateLibrarySettings(
 }
 ```
 
-- [ ] **Step 5: Jalankan uji integrasi dan pastikan lulus**
+- [x] **Step 5: Jalankan uji integrasi dan pastikan lulus**
 
 Run: `npx vitest run --config vitest.integration.config.ts tests/integration/settings.test.ts`
 Expected: PASS.
 
-- [ ] **Step 6: Tulis uji Server Action dan halaman yang gagal**
+- [x] **Step 6: Tulis uji Server Action dan halaman yang gagal**
 
 Buat `src/server/actions/settings.test.ts`:
 
@@ -2075,7 +2075,7 @@ describe('SettingsPage', () => {
 Run: `npx vitest run src/server/actions/settings.test.ts "src/app/(app)/pengaturan/konfigurasi"`
 Expected: FAIL — modul tidak ditemukan.
 
-- [ ] **Step 7: Implementasikan Server Action dan halaman**
+- [x] **Step 7: Implementasikan Server Action dan halaman**
 
 Buat `src/server/actions/settings.ts`:
 
@@ -2190,12 +2190,12 @@ export default async function SettingsPage() {
 }
 ```
 
-- [ ] **Step 8: Jalankan seluruh uji unit, uji integrasi konfigurasi, dan lint**
+- [x] **Step 8: Jalankan seluruh uji unit, uji integrasi konfigurasi, dan lint**
 
 Run: `npm test && npx vitest run --config vitest.integration.config.ts tests/integration/settings.test.ts && npm run lint && npx tsc --noEmit`
 Expected: seluruhnya PASS, lint dan tsc bersih.
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add src/server/validation/settings.ts src/server/validation/settings.test.ts \
@@ -2244,7 +2244,7 @@ Service menerima port `AuthAdmin`, bukan memanggil Supabase langsung. Server Act
   - `fakeAuthAdmin(tx, options?): FakeAuthAdmin` di `tests/integration/helpers.ts`
   - Audit: `user.create`, `user.update`, `user.activate`, `user.deactivate`, `user.reset_password` (entity `profiles`; tanpa kata sandi)
 
-- [ ] **Step 1: Tulis uji port Supabase yang gagal**
+- [x] **Step 1: Tulis uji port Supabase yang gagal**
 
 Buat `src/server/auth/auth-admin.test.ts`:
 
@@ -2320,7 +2320,7 @@ describe('supabaseAuthAdmin', () => {
 Run: `npx vitest run src/server/auth/auth-admin.test.ts`
 Expected: FAIL — modul `./auth-admin` tidak ditemukan.
 
-- [ ] **Step 2: Implementasikan port**
+- [x] **Step 2: Implementasikan port**
 
 Buat `src/server/auth/auth-admin.ts`:
 
@@ -2382,7 +2382,7 @@ export function supabaseAuthAdmin(): AuthAdmin {
 Run: `npx vitest run src/server/auth/auth-admin.test.ts`
 Expected: PASS.
 
-- [ ] **Step 3: Tulis uji validasi yang gagal**
+- [x] **Step 3: Tulis uji validasi yang gagal**
 
 Buat `src/server/validation/user.test.ts`:
 
@@ -2459,7 +2459,7 @@ describe('passwordSchema', () => {
 Run: `npx vitest run src/server/validation/user.test.ts`
 Expected: FAIL — modul `./user` tidak ditemukan.
 
-- [ ] **Step 4: Implementasikan validasi**
+- [x] **Step 4: Implementasikan validasi**
 
 Di `src/server/auth/username.ts`, ubah `const VALID_USERNAME` menjadi `export const VALID_USERNAME` (satu kata ditambahkan; isi tetap).
 
@@ -2516,7 +2516,7 @@ export type PasswordInput = z.output<typeof passwordSchema>;
 Run: `npx vitest run src/server/validation/user.test.ts src/server/auth/username.test.ts`
 Expected: PASS. Bila uji "kata sandi pendek" juga memunculkan pesan pengulangan, periksa bahwa kedua isian di uji itu sama (`'pendek'`) — refinement hanya menambah pesan bila isiannya berbeda.
 
-- [ ] **Step 5: Tambahkan `fakeAuthAdmin` ke helper uji integrasi**
+- [x] **Step 5: Tambahkan `fakeAuthAdmin` ke helper uji integrasi**
 
 Di `tests/integration/helpers.ts`, ubah impor `drizzle-orm` menjadi `import { and, eq, sql, TransactionRollbackError } from 'drizzle-orm';`, tambahkan `import type { AuthAdmin, AuthAdminResult } from '@/server/auth/auth-admin';`, lalu tambahkan di akhir berkas:
 
@@ -2570,7 +2570,7 @@ export function fakeAuthAdmin(tx: Transaction, options: FakeOptions = {}): FakeA
 }
 ```
 
-- [ ] **Step 6: Tulis uji integrasi service pengguna yang gagal**
+- [x] **Step 6: Tulis uji integrasi service pengguna yang gagal**
 
 Buat `tests/integration/users.test.ts`:
 
@@ -2794,7 +2794,7 @@ describe('listUsers', () => {
 Run: `npx vitest run --config vitest.integration.config.ts tests/integration/users.test.ts`
 Expected: FAIL — modul `@/server/queries/users` tidak ditemukan.
 
-- [ ] **Step 7: Implementasikan query**
+- [x] **Step 7: Implementasikan query**
 
 Buat `src/server/queries/users.ts`:
 
@@ -2834,7 +2834,7 @@ export async function getUser(id: string, executor: Executor = db): Promise<User
 }
 ```
 
-- [ ] **Step 8: Implementasikan service**
+- [x] **Step 8: Implementasikan service**
 
 Buat `src/server/services/users.ts`:
 
@@ -3012,14 +3012,14 @@ export async function resetUserPassword(
 }
 ```
 
-- [ ] **Step 9: Jalankan uji integrasi dan pastikan lulus**
+- [x] **Step 9: Jalankan uji integrasi dan pastikan lulus**
 
 Run: `npx vitest run --config vitest.integration.config.ts tests/integration/users.test.ts`
 Expected: seluruh uji PASS.
 
 Bila `insert into auth.users` di `fakeAuthAdmin` ditolak karena kolom wajib lain, baca daftar kolom `not null` tanpa nilai bawaan dengan kueri read-only `select column_name from information_schema.columns where table_schema = 'auth' and table_name = 'users' and is_nullable = 'NO' and column_default is null`, lalu tambahkan kolom itu ke insert tiruan. Jangan pernah membuat akun Supabase sungguhan dari uji.
 
-- [ ] **Step 10: Catat aturan uji pengguna di README**
+- [x] **Step 10: Catat aturan uji pengguna di README**
 
 Di `README.md`, tambahkan paragraf ini tepat setelah paragraf yang diakhiri "…agar tidak bertabrakan dengan data seed." di bagian **Uji**:
 
@@ -3031,12 +3031,12 @@ di-rollback. Username uji berawalan `uji_`, dan tahun ajaran uji memakai
 tahun 2090 ke atas, karena format keduanya tidak mengizinkan awalan `UJI-`.
 ```
 
-- [ ] **Step 11: Jalankan seluruh uji unit, seluruh uji integrasi, lint, dan tsc**
+- [x] **Step 11: Jalankan seluruh uji unit, seluruh uji integrasi, lint, dan tsc**
 
 Run: `npm test && npm run test:integration && npm run lint && npx tsc --noEmit`
 Expected: seluruhnya PASS, lint dan tsc bersih.
 
-- [ ] **Step 12: Commit**
+- [x] **Step 12: Commit**
 
 ```bash
 git add src/server/auth/auth-admin.ts src/server/auth/auth-admin.test.ts src/server/auth/username.ts \
@@ -3076,7 +3076,7 @@ Admin membuat akun petugas, mengubah nama dan peran, mengatur ulang kata sandi, 
   - `signIn` mengembalikan `{ error: 'Akun ini dinonaktifkan. …' }` untuk profil nonaktif
   - `ROLE_LABELS: Record<UserRole, string>`, `<ProfileFields user? isSelf? />`, `<PasswordFields />`
 
-- [ ] **Step 1: Tulis uji Server Action pengguna yang gagal**
+- [x] **Step 1: Tulis uji Server Action pengguna yang gagal**
 
 Buat `src/server/actions/users.test.ts`:
 
@@ -3170,7 +3170,7 @@ describe('Server Action pengguna', () => {
 Run: `npx vitest run src/server/actions/users.test.ts`
 Expected: FAIL — modul `./users` tidak ditemukan.
 
-- [ ] **Step 2: Implementasikan Server Action pengguna**
+- [x] **Step 2: Implementasikan Server Action pengguna**
 
 Buat `src/server/actions/users.ts`:
 
@@ -3250,7 +3250,7 @@ export async function setUserStatusAction(
 Run: `npx vitest run src/server/actions/users.test.ts`
 Expected: PASS.
 
-- [ ] **Step 3: Tulis uji penolakan akun nonaktif di layar masuk yang gagal**
+- [x] **Step 3: Tulis uji penolakan akun nonaktif di layar masuk yang gagal**
 
 Di `src/server/actions/auth.test.ts`, ganti blok `vi.hoisted` dan `vi.mock` di bagian atas dengan:
 
@@ -3312,7 +3312,7 @@ Dan ganti mock di uji `'mengembalikan pesan generik ketika kredensial ditolak…
 Run: `npx vitest run src/server/actions/auth.test.ts`
 Expected: FAIL — uji akun nonaktif dan tanpa profil gagal karena `signIn` langsung mengarahkan ke `/dashboard`.
 
-- [ ] **Step 4: Tolak akun nonaktif di `signIn`**
+- [x] **Step 4: Tolak akun nonaktif di `signIn`**
 
 Di `src/server/actions/auth.ts`, tambahkan `import { getUser } from '@/server/queries/users';` ke blok impor, lalu ganti bagian dari `const supabase = …` sampai `redirect('/dashboard');` di `signIn` dengan:
 
@@ -3345,7 +3345,7 @@ Di `src/server/actions/auth.ts`, tambahkan `import { getUser } from '@/server/qu
 Run: `npx vitest run src/server/actions/auth.test.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Tulis uji halaman pengguna yang gagal**
+- [x] **Step 5: Tulis uji halaman pengguna yang gagal**
 
 Buat `src/app/(app)/pengaturan/pengguna/page.test.tsx`:
 
@@ -3508,7 +3508,7 @@ describe('EditUserPage', () => {
 Run: `npx vitest run "src/app/(app)/pengaturan/pengguna"`
 Expected: FAIL — modul halaman tidak ditemukan.
 
-- [ ] **Step 6: Implementasikan halaman pengguna**
+- [x] **Step 6: Implementasikan halaman pengguna**
 
 Buat `src/app/(app)/pengaturan/pengguna/user-fields.tsx`:
 
@@ -3721,12 +3721,12 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
 }
 ```
 
-- [ ] **Step 7: Jalankan uji halaman dan pastikan lulus**
+- [x] **Step 7: Jalankan uji halaman dan pastikan lulus**
 
 Run: `npx vitest run "src/app/(app)/pengaturan/pengguna"`
 Expected: PASS.
 
-- [ ] **Step 8: Perbarui catatan akun pengembangan di README**
+- [x] **Step 8: Perbarui catatan akun pengembangan di README**
 
 Di `README.md`, ganti paragraf di bawah tabel **Akun pengembangan** (yang diawali "Kata sandi `perpus123` sama untuk keduanya…") dengan:
 
@@ -3738,12 +3738,12 @@ Kata Sandi**, atau nonaktifkan akun `petugas` bila tidak dipakai. Akun baru
 untuk staf dibuat dari layar yang sama; tidak perlu membuka dasbor Supabase.
 ```
 
-- [ ] **Step 9: Jalankan seluruh uji unit, lint, dan tsc**
+- [x] **Step 9: Jalankan seluruh uji unit, lint, dan tsc**
 
 Run: `npm test && npm run lint && npx tsc --noEmit`
 Expected: seluruhnya PASS, lint dan tsc bersih.
 
-- [ ] **Step 10: Commit**
+- [x] **Step 10: Commit**
 
 ```bash
 git add src/server/actions/users.ts src/server/actions/users.test.ts \
@@ -3770,7 +3770,7 @@ Tidak ada kode baru. Task ini membuktikan bahwa seluruh rencana bekerja bersama,
 - Consumes: seluruh keluaran Task 1–5
 - Produces: bukti bahwa Rencana 03 selesai
 
-- [ ] **Step 1: Jalankan seluruh pemeriksaan otomatis**
+- [x] **Step 1: Jalankan seluruh pemeriksaan otomatis**
 
 ```bash
 npm test
@@ -3782,7 +3782,7 @@ npm run build
 
 Harapan: seluruhnya lulus. `npm run build` mencantumkan rute `/pengaturan/tahun-ajaran`, `/pengaturan/konfigurasi`, `/pengaturan/pengguna`, beserta `/baru` dan `/[id]` untuk tahun ajaran dan pengguna.
 
-- [ ] **Step 2: Pastikan uji integrasi tidak meninggalkan jejak**
+- [x] **Step 2: Pastikan uji integrasi tidak meninggalkan jejak**
 
 `npx tsx -e "import(...)"` tidak dapat dipakai di repo ini (namespace modulnya berada di bawah `.default`). Pakai berkas sementara dengan impor statis, lalu hapus:
 
@@ -3811,7 +3811,7 @@ rm tmp-sisa.ts
 
 Harapan: `Sisa data uji: 0`. Angka lain berarti ada uji yang ditulis di luar `withRollback()`. Temukan dan perbaiki ujinya; jangan hapus datanya tanpa memahami asalnya.
 
-- [ ] **Step 3: Uji alur lengkap di peramban**
+- [x] **Step 3: Uji alur lengkap di peramban**
 
 Jalankan `npm run dev`. Bila memakai agen, gunakan skill `/browse` (bukan `mcp__claude-in-chrome__*`).
 
@@ -3843,7 +3843,7 @@ Di lebar tablet (`$B viewport 768x1024`):
 
 Seluruh langkah harus dapat diselesaikan dengan papan ketik saja (Tab, Enter, Spasi).
 
-- [ ] **Step 4: Periksa jejak audit dari alur di atas**
+- [x] **Step 4: Periksa jejak audit dari alur di atas**
 
 ```bash
 cat > tmp-audit.ts <<'EOF'
@@ -3867,7 +3867,7 @@ rm tmp-audit.ts
 
 Harapan, dari atas: `user.deactivate`, `user.reset_password`, `user.create`, `academic_year.activate` (metadata `previous: "2026/2027"`), `academic_year.create`, `settings.update` — seluruhnya oleh `admin`. **Tidak ada satu pun metadata yang memuat `qa-sandi`.**
 
-- [ ] **Step 5: Kembalikan data pengembangan**
+- [x] **Step 5: Kembalikan data pengembangan**
 
 Sebagai admin, lewat layar:
 1. **Tahun Ajaran:** Jadikan Aktif `2026/2027`. Biarkan `2027/2028` tersimpan tidak aktif; itu tahun ajaran sungguhan berikutnya dan tidak dapat dihapus (BR-08).
@@ -3876,7 +3876,7 @@ Sebagai admin, lewat layar:
 
 Pastikan top bar kembali menampilkan "2026/2027".
 
-- [ ] **Step 6: Tandai rencana selesai**
+- [x] **Step 6: Tandai rencana selesai**
 
 Ubah seluruh `- [ ]` di berkas rencana ini menjadi `- [x]`, lalu commit:
 
