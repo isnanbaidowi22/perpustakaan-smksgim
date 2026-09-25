@@ -6,10 +6,13 @@ import { Flash } from '@/components/ui/flash';
 import { PageHeader } from '@/components/ui/page-header';
 import { firstValue, type SearchParams } from '@/lib/search-params';
 import { updateBookAction } from '@/server/actions/books';
+import { requireProfile } from '@/server/auth/guard';
 import { getBook } from '@/server/queries/books';
 import { listCategoryOptions } from '@/server/queries/categories';
+import { listCopiesOfBook } from '@/server/queries/copies';
 import { listRackOptions } from '@/server/queries/racks';
 import { BookFields } from '../book-fields';
+import { CopiesSection } from './copies-section';
 
 export default async function BookDetailPage({
   params,
@@ -19,12 +22,13 @@ export default async function BookDetailPage({
   searchParams: SearchParams;
 }) {
   const [{ id }, query] = await Promise.all([params, searchParams]);
-  const book = await getBook(id);
+  const [book, profile] = await Promise.all([getBook(id), requireProfile()]);
   if (!book) notFound();
 
-  const [categoryOptions, rackOptions] = await Promise.all([
+  const [categoryOptions, rackOptions, copies] = await Promise.all([
     listCategoryOptions(book.categoryId),
     listRackOptions(book.rackId),
+    listCopiesOfBook(book.id),
   ]);
 
   return (
@@ -42,6 +46,13 @@ export default async function BookDetailPage({
           <BookFields book={book} categoryOptions={categoryOptions} rackOptions={rackOptions} />
         </ActionForm>
       </section>
+
+      <CopiesSection
+        bookId={book.id}
+        bookActive={book.status === 'active'}
+        copies={copies}
+        canManageStatus={profile.role === 'admin'}
+      />
     </>
   );
 }
