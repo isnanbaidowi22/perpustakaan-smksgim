@@ -114,7 +114,7 @@ Uji integrasi Rencana 01 memakai `truncate`. Sekarang DATABASE_URL menunjuk ke d
   - `expectConstraint(promise: Promise<unknown>, constraint: string): Promise<void>`
   - Kolom `status`/`role`/`gender`/`returnCondition` di `schema.ts` kini bertipe union (`RecordStatus`, `CopyStatus`, dst.), bukan `string`
 
-- [ ] **Step 1: Tulis uji pengenal pelanggaran unik yang gagal**
+- [x] **Step 1: Tulis uji pengenal pelanggaran unik yang gagal**
 
 Buat `src/server/db/errors.test.ts`:
 
@@ -148,12 +148,12 @@ describe('uniqueViolation', () => {
 
 Bentuk galat di atas diambil dari percobaan langsung terhadap database: Drizzle 0.45 membungkus galat `postgres` di dalam `DrizzleQueryError.cause`, dan galat aslinya membawa `code` serta `constraint_name`.
 
-- [ ] **Step 2: Jalankan uji untuk memastikan gagal**
+- [x] **Step 2: Jalankan uji untuk memastikan gagal**
 
 Jalankan: `npx vitest run src/server/db/errors.test.ts`
 Harapan: GAGAL dengan "Failed to resolve import './errors'".
 
-- [ ] **Step 3: Implementasikan pengenal pelanggaran unik**
+- [x] **Step 3: Implementasikan pengenal pelanggaran unik**
 
 Buat `src/server/db/errors.ts`:
 
@@ -184,12 +184,12 @@ export function uniqueViolation(error: unknown): string | null {
 }
 ```
 
-- [ ] **Step 4: Jalankan uji untuk memastikan lulus**
+- [x] **Step 4: Jalankan uji untuk memastikan lulus**
 
 Jalankan: `npx vitest run src/server/db/errors.test.ts`
 Harapan: LULUS, 4 uji.
 
-- [ ] **Step 5: Tambahkan tipe `Actor` dan tipe executor**
+- [x] **Step 5: Tambahkan tipe `Actor` dan tipe executor**
 
 Tambahkan di akhir `src/domain/shared/types.ts`:
 
@@ -222,7 +222,7 @@ export type Executor = Database | Transaction;
 
 `import type` membuat berkas ini tidak pernah memuat `client.ts` saat runtime, sehingga tidak memicu pemeriksaan `DATABASE_URL`. Tipe gabungan ini sudah diverifikasi dengan `tsc`: `select`, `insert`, `update`, dan `transaction` dapat dipanggil pada `Executor` tanpa galat tipe.
 
-- [ ] **Step 6: Beri kolom status tipe union di skema**
+- [x] **Step 6: Beri kolom status tipe union di skema**
 
 Ubah `src/server/db/schema.ts`. Tambahkan impor di bagian atas:
 
@@ -262,7 +262,7 @@ status: text('status').$type<LoanStatus>().notNull().default('AKTIF'),
 returnCondition: text('return_condition').$type<ReturnCondition>(),
 ```
 
-- [ ] **Step 7: Pastikan skema database tidak berubah**
+- [x] **Step 7: Pastikan skema database tidak berubah**
 
 ```bash
 npm run db:generate
@@ -273,7 +273,7 @@ Harapan: Drizzle Kit melaporkan tidak ada perubahan skema dan tidak membuat berk
 Lalu jalankan `npm test` dan `npx tsc --noEmit`.
 Harapan: seluruh uji unit lulus, tanpa galat tipe.
 
-- [ ] **Step 8: Buat konfigurasi dan pemuat env uji integrasi**
+- [x] **Step 8: Buat konfigurasi dan pemuat env uji integrasi**
 
 Buat `vitest.integration.config.ts`:
 
@@ -322,7 +322,7 @@ Ubah skrip di `package.json`:
 "test:integration": "vitest run --config vitest.integration.config.ts"
 ```
 
-- [ ] **Step 9: Tulis uji harness rollback yang gagal**
+- [x] **Step 9: Tulis uji harness rollback yang gagal**
 
 Buat `tests/integration/rollback.test.ts`:
 
@@ -367,12 +367,12 @@ describe('testActor', () => {
 });
 ```
 
-- [ ] **Step 10: Jalankan uji untuk memastikan gagal**
+- [x] **Step 10: Jalankan uji untuk memastikan gagal**
 
 Jalankan: `npm run test:integration -- tests/integration/rollback.test.ts`
 Harapan: GAGAL dengan "Failed to resolve import './helpers'".
 
-- [ ] **Step 11: Implementasikan harness**
+- [x] **Step 11: Implementasikan harness**
 
 Buat `tests/integration/helpers.ts`:
 
@@ -439,12 +439,12 @@ export async function expectConstraint(promise: Promise<unknown>, constraint: st
 }
 ```
 
-- [ ] **Step 12: Jalankan uji untuk memastikan lulus**
+- [x] **Step 12: Jalankan uji untuk memastikan lulus**
 
 Jalankan: `npm run test:integration -- tests/integration/rollback.test.ts`
 Harapan: LULUS, 3 uji. Bila `testActor` gagal dengan "Tidak ada profil admin aktif", jalankan `npm run db:seed` terlebih dahulu.
 
-- [ ] **Step 13: Tulis ulang uji batasan skema tanpa `truncate`**
+- [x] **Step 13: Tulis ulang uji batasan skema tanpa `truncate`**
 
 Ganti seluruh isi `tests/integration/schema.test.ts`:
 
@@ -522,7 +522,7 @@ describe('batasan book_copies', () => {
 });
 ```
 
-- [ ] **Step 14: Jalankan uji batasan skema**
+- [x] **Step 14: Jalankan uji batasan skema**
 
 Jalankan: `npm run test:integration -- tests/integration/schema.test.ts`
 Harapan: LULUS, 5 uji.
@@ -535,7 +535,7 @@ npx tsx --env-file=.env.local -e "import('./src/server/db/client').then(async ({
 
 Harapan: jumlah judul sama dengan sebelum uji dijalankan (2 dari seed).
 
-- [ ] **Step 15: Tulis uji audit log yang gagal**
+- [x] **Step 15: Tulis uji audit log yang gagal**
 
 Buat `tests/integration/audit.test.ts`:
 
@@ -574,12 +574,12 @@ describe('writeAudit', () => {
 });
 ```
 
-- [ ] **Step 16: Jalankan uji untuk memastikan gagal**
+- [x] **Step 16: Jalankan uji untuk memastikan gagal**
 
 Jalankan: `npm run test:integration -- tests/integration/audit.test.ts`
 Harapan: GAGAL dengan "Failed to resolve import '@/server/audit'".
 
-- [ ] **Step 17: Implementasikan penulis audit log**
+- [x] **Step 17: Implementasikan penulis audit log**
 
 Buat `src/server/audit.ts`:
 
@@ -614,12 +614,12 @@ export async function writeAudit(executor: Executor, entry: AuditEntry): Promise
 
 Tabel diimpor dari `schema.ts`, bukan dari `client.ts`, supaya berkas ini tidak memuat koneksi database hanya untuk mendapatkan definisi tabel.
 
-- [ ] **Step 18: Jalankan uji untuk memastikan lulus**
+- [x] **Step 18: Jalankan uji untuk memastikan lulus**
 
 Jalankan: `npm run test:integration`
 Harapan: LULUS, 9 uji (3 rollback, 5 skema, 1 audit).
 
-- [ ] **Step 19: Dokumentasikan cara kerja uji integrasi**
+- [x] **Step 19: Dokumentasikan cara kerja uji integrasi**
 
 Tambahkan di akhir `README.md`:
 
@@ -641,7 +641,7 @@ pada nilai unik buatan uji agar tidak bertabrakan dengan data seed.
 Uji integrasi membutuhkan akun `admin` dari `npm run db:seed`.
 ```
 
-- [ ] **Step 20: Jalankan seluruh uji dan commit**
+- [x] **Step 20: Jalankan seluruh uji dan commit**
 
 ```bash
 npm test
@@ -680,7 +680,7 @@ EOF
   - `authorize(roles: UserRole[]): Promise<{ ok: true; actor: Actor } | { ok: false; message: string }>`
   - `runFormAction(options): Promise<FormState>`, `runCommand(options): Promise<FormState>`
 
-- [ ] **Step 1: Pasang zod**
+- [x] **Step 1: Pasang zod**
 
 ```bash
 npm install zod@^4.6.5
@@ -688,7 +688,7 @@ npm install zod@^4.6.5
 
 zod sudah ada di `node_modules` sebagai dependensi transitif `eslint-config-next`. Memasangnya eksplisit mencegah versinya berubah diam-diam ketika dependensi lain diperbarui.
 
-- [ ] **Step 2: Tulis uji state form yang gagal**
+- [x] **Step 2: Tulis uji state form yang gagal**
 
 Buat `src/lib/form-state.test.ts`:
 
@@ -735,12 +735,12 @@ describe('pembentuk state', () => {
 });
 ```
 
-- [ ] **Step 3: Jalankan uji untuk memastikan gagal**
+- [x] **Step 3: Jalankan uji untuk memastikan gagal**
 
 Jalankan: `npx vitest run src/lib/form-state.test.ts`
 Harapan: GAGAL dengan "Failed to resolve import './form-state'".
 
-- [ ] **Step 4: Implementasikan state form**
+- [x] **Step 4: Implementasikan state form**
 
 Buat `src/lib/form-state.ts`:
 
@@ -794,12 +794,12 @@ export function formToObject(formData: FormData): Record<string, string> {
 }
 ```
 
-- [ ] **Step 5: Jalankan uji untuk memastikan lulus**
+- [x] **Step 5: Jalankan uji untuk memastikan lulus**
 
 Jalankan: `npx vitest run src/lib/form-state.test.ts`
 Harapan: LULUS, 5 uji.
 
-- [ ] **Step 6: Tulis uji pembangun skema yang gagal**
+- [x] **Step 6: Tulis uji pembangun skema yang gagal**
 
 Buat `src/server/validation/common.test.ts`:
 
@@ -909,12 +909,12 @@ describe('penjaga tipe', () => {
 });
 ```
 
-- [ ] **Step 7: Jalankan uji untuk memastikan gagal**
+- [x] **Step 7: Jalankan uji untuk memastikan gagal**
 
 Jalankan: `npx vitest run src/server/validation/common.test.ts`
 Harapan: GAGAL dengan "Failed to resolve import './common'".
 
-- [ ] **Step 8: Implementasikan pembangun skema**
+- [x] **Step 8: Implementasikan pembangun skema**
 
 Buat `src/server/validation/common.ts`:
 
@@ -992,12 +992,12 @@ export function isRecordStatus(value: unknown): value is RecordStatus {
 }
 ```
 
-- [ ] **Step 9: Jalankan uji untuk memastikan lulus**
+- [x] **Step 9: Jalankan uji untuk memastikan lulus**
 
 Jalankan: `npx vitest run src/server/validation/common.test.ts`
 Harapan: LULUS, 22 uji.
 
-- [ ] **Step 10: Tulis uji `authorize` yang gagal**
+- [x] **Step 10: Tulis uji `authorize` yang gagal**
 
 Tambahkan ke `src/server/auth/guard.test.ts`. Ubah baris impor menjadi `import { authorize, requireProfile, requireRole } from './guard';`, lalu tambahkan di akhir berkas:
 
@@ -1021,12 +1021,12 @@ describe('authorize', () => {
 });
 ```
 
-- [ ] **Step 11: Jalankan uji untuk memastikan gagal**
+- [x] **Step 11: Jalankan uji untuk memastikan gagal**
 
 Jalankan: `npx vitest run src/server/auth/guard.test.ts`
 Harapan: GAGAL; `authorize` belum diekspor.
 
-- [ ] **Step 12: Implementasikan `authorize`**
+- [x] **Step 12: Implementasikan `authorize`**
 
 Ganti seluruh isi `src/server/auth/guard.ts`:
 
@@ -1077,12 +1077,12 @@ export async function authorize(roles: UserRole[]): Promise<Authorization> {
 
 `profile.role` kini bertipe `UserRole` berkat Task 1 Step 6, jadi cast `as UserRole` dari Rencana 01 tidak diperlukan lagi.
 
-- [ ] **Step 13: Jalankan uji untuk memastikan lulus**
+- [x] **Step 13: Jalankan uji untuk memastikan lulus**
 
 Jalankan: `npx vitest run src/server/auth/guard.test.ts`
 Harapan: LULUS, 4 uji.
 
-- [ ] **Step 14: Buat bentuk hasil service**
+- [x] **Step 14: Buat bentuk hasil service**
 
 Buat `src/server/services/result.ts`:
 
@@ -1109,7 +1109,7 @@ export function fail(message: string, field?: string): ServiceResult {
 
 Berkas ini hanya berisi tipe dan dua pembentuk nilai; perilakunya teruji lewat `run-action.test.ts` dan uji integrasi setiap service.
 
-- [ ] **Step 15: Tulis uji urutan baku Server Action yang gagal**
+- [x] **Step 15: Tulis uji urutan baku Server Action yang gagal**
 
 Buat `src/server/forms/run-action.test.ts`:
 
@@ -1258,12 +1258,12 @@ describe('runCommand', () => {
 });
 ```
 
-- [ ] **Step 16: Jalankan uji untuk memastikan gagal**
+- [x] **Step 16: Jalankan uji untuk memastikan gagal**
 
 Jalankan: `npx vitest run src/server/forms/run-action.test.ts`
 Harapan: GAGAL dengan "Failed to resolve import './run-action'".
 
-- [ ] **Step 17: Implementasikan urutan baku Server Action**
+- [x] **Step 17: Implementasikan urutan baku Server Action**
 
 Buat `src/server/forms/run-action.ts`:
 
@@ -1359,12 +1359,12 @@ function complete(result: ServiceResult, completion: Completion, values: Record<
 }
 ```
 
-- [ ] **Step 18: Jalankan uji untuk memastikan lulus**
+- [x] **Step 18: Jalankan uji untuk memastikan lulus**
 
 Jalankan: `npx vitest run src/server/forms/run-action.test.ts`
 Harapan: LULUS, 9 uji.
 
-- [ ] **Step 19: Jalankan seluruh uji unit dan lint, lalu commit**
+- [x] **Step 19: Jalankan seluruh uji unit dan lint, lalu commit**
 
 ```bash
 npm test
@@ -1413,7 +1413,7 @@ PRD bab 9 mewajibkan aplikasi dapat dipakai di **desktop dan tablet**. Di tablet
   - `<Topbar>` kini memiliki tombol **Keluar**
   - `<AppShell sidebar topbar>`: kerangka responsif; di bawah `lg` (1024px) sidebar tersembunyi dan dibuka lewat tombol Menu
 
-- [ ] **Step 1: Tulis uji utilitas tampilan yang gagal**
+- [x] **Step 1: Tulis uji utilitas tampilan yang gagal**
 
 Buat `src/lib/format.test.ts`:
 
@@ -1517,12 +1517,12 @@ describe('withQuery', () => {
 });
 ```
 
-- [ ] **Step 2: Jalankan uji untuk memastikan gagal**
+- [x] **Step 2: Jalankan uji untuk memastikan gagal**
 
 Jalankan: `npx vitest run src/lib`
 Harapan: GAGAL; `./format`, `./pagination`, dan `./search-params` belum ada.
 
-- [ ] **Step 3: Implementasikan utilitas tampilan**
+- [x] **Step 3: Implementasikan utilitas tampilan**
 
 Buat `src/lib/options.ts`:
 
@@ -1597,12 +1597,12 @@ export function withQuery(path: string, params: Record<string, string | number |
 }
 ```
 
-- [ ] **Step 4: Jalankan uji untuk memastikan lulus**
+- [x] **Step 4: Jalankan uji untuk memastikan lulus**
 
 Jalankan: `npx vitest run src/lib`
 Harapan: LULUS, seluruh uji di `src/lib` (termasuk `form-state.test.ts` dari Task 2).
 
-- [ ] **Step 5: Tulis uji form dan kolom yang gagal**
+- [x] **Step 5: Tulis uji form dan kolom yang gagal**
 
 Buat `src/components/ui/action-form.test.tsx`:
 
@@ -1664,12 +1664,12 @@ describe('ActionForm', () => {
 });
 ```
 
-- [ ] **Step 6: Jalankan uji untuk memastikan gagal**
+- [x] **Step 6: Jalankan uji untuk memastikan gagal**
 
 Jalankan: `npx vitest run src/components/ui/action-form.test.tsx`
 Harapan: GAGAL dengan "Failed to resolve import './action-form'".
 
-- [ ] **Step 7: Implementasikan gaya tombol, form, dan kolom**
+- [x] **Step 7: Implementasikan gaya tombol, form, dan kolom**
 
 Buat `src/components/ui/button-styles.ts`:
 
@@ -1909,12 +1909,12 @@ export function TextAreaField({
 }
 ```
 
-- [ ] **Step 8: Jalankan uji untuk memastikan lulus**
+- [x] **Step 8: Jalankan uji untuk memastikan lulus**
 
 Jalankan: `npx vitest run src/components/ui/action-form.test.tsx`
 Harapan: LULUS, 3 uji.
 
-- [ ] **Step 9: Tulis uji tombol aksi yang gagal**
+- [x] **Step 9: Tulis uji tombol aksi yang gagal**
 
 Buat `src/components/ui/action-button.test.tsx`:
 
@@ -1933,12 +1933,12 @@ describe('ActionButton', () => {
 });
 ```
 
-- [ ] **Step 10: Jalankan uji untuk memastikan gagal**
+- [x] **Step 10: Jalankan uji untuk memastikan gagal**
 
 Jalankan: `npx vitest run src/components/ui/action-button.test.tsx`
 Harapan: GAGAL dengan "Failed to resolve import './action-button'".
 
-- [ ] **Step 11: Implementasikan tombol aksi**
+- [x] **Step 11: Implementasikan tombol aksi**
 
 Buat `src/components/ui/action-button.tsx`:
 
@@ -1995,12 +1995,12 @@ export function ActionButton({
 }
 ```
 
-- [ ] **Step 12: Jalankan uji untuk memastikan lulus**
+- [x] **Step 12: Jalankan uji untuk memastikan lulus**
 
 Jalankan: `npx vitest run src/components/ui/action-button.test.tsx`
 Harapan: LULUS, 1 uji.
 
-- [ ] **Step 13: Tulis uji komponen daftar yang gagal**
+- [x] **Step 13: Tulis uji komponen daftar yang gagal**
 
 Buat `src/components/ui/list-parts.test.tsx`:
 
@@ -2084,12 +2084,12 @@ describe('ScrollTable', () => {
 });
 ```
 
-- [ ] **Step 14: Jalankan uji untuk memastikan gagal**
+- [x] **Step 14: Jalankan uji untuk memastikan gagal**
 
 Jalankan: `npx vitest run src/components/ui/list-parts.test.tsx`
 Harapan: GAGAL; komponen-komponen belum ada.
 
-- [ ] **Step 15: Implementasikan komponen daftar**
+- [x] **Step 15: Implementasikan komponen daftar**
 
 Buat `src/components/ui/page-header.tsx`:
 
@@ -2253,12 +2253,12 @@ export function ScrollTable({ children }: { children: ReactNode }) {
 }
 ```
 
-- [ ] **Step 16: Jalankan uji untuk memastikan lulus**
+- [x] **Step 16: Jalankan uji untuk memastikan lulus**
 
 Jalankan: `npx vitest run src/components/ui`
 Harapan: LULUS, seluruh uji di `src/components/ui`.
 
-- [ ] **Step 17: Tulis uji kerangka yang sadar peran (gagal)**
+- [x] **Step 17: Tulis uji kerangka yang sadar peran (gagal)**
 
 Ganti seluruh isi `src/components/layout/sidebar.test.tsx`:
 
@@ -2404,12 +2404,12 @@ Dan tambahkan uji ketiga di dalam `describe('AppLayout')`:
   });
 ```
 
-- [ ] **Step 18: Jalankan uji untuk memastikan gagal**
+- [x] **Step 18: Jalankan uji untuk memastikan gagal**
 
 Jalankan: `npx vitest run src/components/layout "src/app/(app)/layout.test.tsx"`
 Harapan: GAGAL; petugas masih melihat Pengaturan, menu Laporan dan tombol Keluar belum ada, dan `./app-shell` belum ada.
 
-- [ ] **Step 19: Implementasikan kerangka yang sadar peran**
+- [x] **Step 19: Implementasikan kerangka yang sadar peran**
 
 Ganti seluruh isi `src/components/layout/sidebar.tsx`:
 
@@ -2632,12 +2632,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
 `Sidebar` dan `Topbar` tetap Server Component; keduanya dikirim ke `AppShell` (Client Component) sebagai prop, sehingga Server Action `signOut` di Topbar tidak ikut menjadi kode klien.
 
-- [ ] **Step 20: Jalankan uji untuk memastikan lulus**
+- [x] **Step 20: Jalankan uji untuk memastikan lulus**
 
 Jalankan: `npx vitest run src/components/layout "src/app/(app)/layout.test.tsx"`
 Harapan: LULUS, 10 uji (2 sidebar, 3 topbar, 2 app-shell, 3 layout).
 
-- [ ] **Step 21: Jalankan seluruh uji, lint, dan commit**
+- [x] **Step 21: Jalankan seluruh uji, lint, dan commit**
 
 ```bash
 npm test
@@ -2683,7 +2683,7 @@ Task ini menetapkan pola lima lapis yang diikuti seluruh entitas berikutnya: ske
   - `listCategoryOptions(includeId?: string | null, executor?): Promise<Option[]>` (dipakai Task 7)
   - `createCategoryAction(state, formData)`, `updateCategoryAction(id, state, formData)`, `setCategoryStatusAction(id, status, state, formData)`
 
-- [ ] **Step 1: Tulis uji pola pencarian yang gagal**
+- [x] **Step 1: Tulis uji pola pencarian yang gagal**
 
 Buat `src/server/queries/like.test.ts`:
 
@@ -2707,12 +2707,12 @@ describe('containsPattern', () => {
 });
 ```
 
-- [ ] **Step 2: Jalankan uji untuk memastikan gagal**
+- [x] **Step 2: Jalankan uji untuk memastikan gagal**
 
 Jalankan: `npx vitest run src/server/queries/like.test.ts`
 Harapan: GAGAL dengan "Failed to resolve import './like'".
 
-- [ ] **Step 3: Implementasikan pola pencarian**
+- [x] **Step 3: Implementasikan pola pencarian**
 
 Buat `src/server/queries/like.ts`:
 
@@ -2727,12 +2727,12 @@ export function containsPattern(keyword: string): string {
 }
 ```
 
-- [ ] **Step 4: Jalankan uji untuk memastikan lulus**
+- [x] **Step 4: Jalankan uji untuk memastikan lulus**
 
 Jalankan: `npx vitest run src/server/queries/like.test.ts`
 Harapan: LULUS, 3 uji.
 
-- [ ] **Step 5: Tulis uji skema kategori yang gagal**
+- [x] **Step 5: Tulis uji skema kategori yang gagal**
 
 Buat `src/server/validation/category.test.ts`:
 
@@ -2753,12 +2753,12 @@ describe('categorySchema', () => {
 });
 ```
 
-- [ ] **Step 6: Jalankan uji untuk memastikan gagal**
+- [x] **Step 6: Jalankan uji untuk memastikan gagal**
 
 Jalankan: `npx vitest run src/server/validation/category.test.ts`
 Harapan: GAGAL dengan "Failed to resolve import './category'".
 
-- [ ] **Step 7: Implementasikan skema kategori**
+- [x] **Step 7: Implementasikan skema kategori**
 
 Buat `src/server/validation/category.ts`:
 
@@ -2773,12 +2773,12 @@ export const categorySchema = z.object({
 export type CategoryInput = z.output<typeof categorySchema>;
 ```
 
-- [ ] **Step 8: Jalankan uji untuk memastikan lulus**
+- [x] **Step 8: Jalankan uji untuk memastikan lulus**
 
 Jalankan: `npx vitest run src/server/validation/category.test.ts`
 Harapan: LULUS, 2 uji.
 
-- [ ] **Step 9: Tulis uji integrasi kategori yang gagal**
+- [x] **Step 9: Tulis uji integrasi kategori yang gagal**
 
 Buat `tests/integration/categories.test.ts`:
 
@@ -2938,12 +2938,12 @@ describe('listCategoryOptions', () => {
 });
 ```
 
-- [ ] **Step 10: Jalankan uji untuk memastikan gagal**
+- [x] **Step 10: Jalankan uji untuk memastikan gagal**
 
 Jalankan: `npm run test:integration -- tests/integration/categories.test.ts`
 Harapan: GAGAL dengan "Failed to resolve import '@/server/queries/categories'".
 
-- [ ] **Step 11: Implementasikan service kategori**
+- [x] **Step 11: Implementasikan service kategori**
 
 Buat `src/server/services/categories.ts`:
 
@@ -3053,7 +3053,7 @@ export async function setCategoryStatus(
 
 Kategori yang dinonaktifkan tetap melekat pada buku lamanya. Ia hanya tidak ditawarkan lagi saat buku baru dibuat (lihat `listCategoryOptions`).
 
-- [ ] **Step 12: Implementasikan query kategori**
+- [x] **Step 12: Implementasikan query kategori**
 
 Buat `src/server/queries/categories.ts`:
 
@@ -3148,12 +3148,12 @@ export async function listCategoryOptions(
 }
 ```
 
-- [ ] **Step 13: Jalankan uji integrasi untuk memastikan lulus**
+- [x] **Step 13: Jalankan uji integrasi untuk memastikan lulus**
 
 Jalankan: `npm run test:integration -- tests/integration/categories.test.ts`
 Harapan: LULUS, 9 uji.
 
-- [ ] **Step 14: Tulis uji Server Action kategori yang gagal**
+- [x] **Step 14: Tulis uji Server Action kategori yang gagal**
 
 Buat `src/server/actions/categories.test.ts`:
 
@@ -3227,12 +3227,12 @@ describe('setCategoryStatusAction', () => {
 });
 ```
 
-- [ ] **Step 15: Jalankan uji untuk memastikan gagal**
+- [x] **Step 15: Jalankan uji untuk memastikan gagal**
 
 Jalankan: `npx vitest run src/server/actions/categories.test.ts`
 Harapan: GAGAL dengan "Failed to resolve import './categories'".
 
-- [ ] **Step 16: Implementasikan Server Action kategori**
+- [x] **Step 16: Implementasikan Server Action kategori**
 
 Buat `src/server/actions/categories.ts`:
 
@@ -3295,12 +3295,12 @@ export async function setCategoryStatusAction(
 }
 ```
 
-- [ ] **Step 17: Jalankan uji untuk memastikan lulus**
+- [x] **Step 17: Jalankan uji untuk memastikan lulus**
 
 Jalankan: `npx vitest run src/server/actions/categories.test.ts`
 Harapan: LULUS, 4 uji.
 
-- [ ] **Step 18: Tulis uji halaman kategori yang gagal**
+- [x] **Step 18: Tulis uji halaman kategori yang gagal**
 
 Buat `src/app/(app)/master/kategori/page.test.tsx`:
 
@@ -3403,12 +3403,12 @@ describe('EditCategoryPage', () => {
 });
 ```
 
-- [ ] **Step 19: Jalankan uji untuk memastikan gagal**
+- [x] **Step 19: Jalankan uji untuk memastikan gagal**
 
 Jalankan: `npx vitest run "src/app/(app)/master/kategori"`
 Harapan: GAGAL; halaman belum ada.
 
-- [ ] **Step 20: Implementasikan halaman kategori**
+- [x] **Step 20: Implementasikan halaman kategori**
 
 Buat `src/app/(app)/master/kategori/page.tsx`:
 
@@ -3539,12 +3539,12 @@ export default async function EditCategoryPage({ params }: { params: Promise<{ i
 }
 ```
 
-- [ ] **Step 21: Jalankan uji untuk memastikan lulus**
+- [x] **Step 21: Jalankan uji untuk memastikan lulus**
 
 Jalankan: `npx vitest run "src/app/(app)/master/kategori"`
 Harapan: LULUS, 5 uji.
 
-- [ ] **Step 22: Periksa di peramban**
+- [x] **Step 22: Periksa di peramban**
 
 ```bash
 npm run dev
@@ -3559,7 +3559,7 @@ Masuk sebagai `petugas` / `perpus123`, buka `http://localhost:3000/master/katego
 
 Data yang dibuat di langkah ini tersimpan sungguhan; nonaktifkan kategori contoh setelah selesai.
 
-- [ ] **Step 23: Jalankan seluruh uji, lint, dan commit**
+- [x] **Step 23: Jalankan seluruh uji, lint, dan commit**
 
 ```bash
 npm test
@@ -3600,7 +3600,7 @@ Mengikuti pola Task 4. Perbedaannya: rak punya kode unik (`A-3`) yang dinormalka
   - `listRacks(filter, executor?)`, `getRack(id, executor?)`, `listRackOptions(includeId?, executor?): Promise<Option[]>` (dipakai Task 7)
   - `createRackAction`, `updateRackAction(id, …)`, `setRackStatusAction(id, status, …)`
 
-- [ ] **Step 1: Tulis uji skema rak yang gagal**
+- [x] **Step 1: Tulis uji skema rak yang gagal**
 
 Buat `src/server/validation/rack.test.ts`:
 
@@ -3634,12 +3634,12 @@ describe('rackSchema', () => {
 });
 ```
 
-- [ ] **Step 2: Jalankan uji untuk memastikan gagal**
+- [x] **Step 2: Jalankan uji untuk memastikan gagal**
 
 Jalankan: `npx vitest run src/server/validation/rack.test.ts`
 Harapan: GAGAL dengan "Failed to resolve import './rack'".
 
-- [ ] **Step 3: Implementasikan skema rak**
+- [x] **Step 3: Implementasikan skema rak**
 
 Buat `src/server/validation/rack.ts`:
 
@@ -3658,12 +3658,12 @@ export const rackSchema = z.object({
 export type RackInput = z.output<typeof rackSchema>;
 ```
 
-- [ ] **Step 4: Jalankan uji untuk memastikan lulus**
+- [x] **Step 4: Jalankan uji untuk memastikan lulus**
 
 Jalankan: `npx vitest run src/server/validation/rack.test.ts`
 Harapan: LULUS, 3 uji.
 
-- [ ] **Step 5: Tulis uji integrasi rak yang gagal**
+- [x] **Step 5: Tulis uji integrasi rak yang gagal**
 
 Buat `tests/integration/racks.test.ts`:
 
@@ -3771,12 +3771,12 @@ describe('listRackOptions', () => {
 });
 ```
 
-- [ ] **Step 6: Jalankan uji untuk memastikan gagal**
+- [x] **Step 6: Jalankan uji untuk memastikan gagal**
 
 Jalankan: `npm run test:integration -- tests/integration/racks.test.ts`
 Harapan: GAGAL dengan "Failed to resolve import '@/server/queries/racks'".
 
-- [ ] **Step 7: Implementasikan service rak**
+- [x] **Step 7: Implementasikan service rak**
 
 Buat `src/server/services/racks.ts`:
 
@@ -3871,7 +3871,7 @@ export async function setRackStatus(
 }
 ```
 
-- [ ] **Step 8: Implementasikan query rak**
+- [x] **Step 8: Implementasikan query rak**
 
 Buat `src/server/queries/racks.ts`:
 
@@ -3957,12 +3957,12 @@ export async function listRackOptions(includeId: string | null = null, executor:
 }
 ```
 
-- [ ] **Step 9: Jalankan uji integrasi untuk memastikan lulus**
+- [x] **Step 9: Jalankan uji integrasi untuk memastikan lulus**
 
 Jalankan: `npm run test:integration -- tests/integration/racks.test.ts`
 Harapan: LULUS, 6 uji.
 
-- [ ] **Step 10: Tulis uji Server Action rak yang gagal**
+- [x] **Step 10: Tulis uji Server Action rak yang gagal**
 
 Buat `src/server/actions/racks.test.ts`:
 
@@ -4028,12 +4028,12 @@ describe('Server Action rak', () => {
 });
 ```
 
-- [ ] **Step 11: Jalankan uji untuk memastikan gagal**
+- [x] **Step 11: Jalankan uji untuk memastikan gagal**
 
 Jalankan: `npx vitest run src/server/actions/racks.test.ts`
 Harapan: GAGAL dengan "Failed to resolve import './racks'".
 
-- [ ] **Step 12: Implementasikan Server Action rak**
+- [x] **Step 12: Implementasikan Server Action rak**
 
 Buat `src/server/actions/racks.ts`:
 
@@ -4095,12 +4095,12 @@ export async function setRackStatusAction(
 }
 ```
 
-- [ ] **Step 13: Jalankan uji untuk memastikan lulus**
+- [x] **Step 13: Jalankan uji untuk memastikan lulus**
 
 Jalankan: `npx vitest run src/server/actions/racks.test.ts`
 Harapan: LULUS, 4 uji.
 
-- [ ] **Step 14: Tulis uji halaman rak yang gagal**
+- [x] **Step 14: Tulis uji halaman rak yang gagal**
 
 Buat `src/app/(app)/master/rak/page.test.tsx`:
 
@@ -4201,12 +4201,12 @@ describe('EditRackPage', () => {
 });
 ```
 
-- [ ] **Step 15: Jalankan uji untuk memastikan gagal**
+- [x] **Step 15: Jalankan uji untuk memastikan gagal**
 
 Jalankan: `npx vitest run "src/app/(app)/master/rak"`
 Harapan: GAGAL; halaman belum ada.
 
-- [ ] **Step 16: Implementasikan halaman rak**
+- [x] **Step 16: Implementasikan halaman rak**
 
 Buat `src/app/(app)/master/rak/rack-fields.tsx`:
 
@@ -4361,12 +4361,12 @@ export default async function EditRackPage({ params }: { params: Promise<{ id: s
 }
 ```
 
-- [ ] **Step 17: Jalankan uji untuk memastikan lulus**
+- [x] **Step 17: Jalankan uji untuk memastikan lulus**
 
 Jalankan: `npx vitest run "src/app/(app)/master/rak"`
 Harapan: LULUS, 5 uji.
 
-- [ ] **Step 18: Periksa di peramban, lalu commit**
+- [x] **Step 18: Periksa di peramban, lalu commit**
 
 Dengan `npm run dev`, buka `/master/rak`: tambah rak `c-9` (tersimpan sebagai `C-9`), coba tambah `C-9` lagi (galat di kolom kode, isian tetap), ubah lokasinya, lalu nonaktifkan.
 
@@ -4410,7 +4410,7 @@ Mengikuti pola Task 4. Tambahannya: NIS unik yang pesan galatnya menyebut pemili
   - `interface Student`, `interface StudentRow`, `listStudents(filter: { q; className; status; page }, executor?)`, `listClassNames(executor?): Promise<string[]>`, `getStudent(id, executor?)`
   - `createStudentAction`, `updateStudentAction(id, …)`, `setStudentStatusAction(id, status, …)`
 
-- [ ] **Step 1: Tulis uji skema siswa yang gagal**
+- [x] **Step 1: Tulis uji skema siswa yang gagal**
 
 Buat `src/server/validation/student.test.ts`:
 
@@ -4464,12 +4464,12 @@ describe('studentSchema', () => {
 });
 ```
 
-- [ ] **Step 2: Jalankan uji untuk memastikan gagal**
+- [x] **Step 2: Jalankan uji untuk memastikan gagal**
 
 Jalankan: `npx vitest run src/server/validation/student.test.ts`
 Harapan: GAGAL dengan "Failed to resolve import './student'".
 
-- [ ] **Step 3: Implementasikan skema siswa**
+- [x] **Step 3: Implementasikan skema siswa**
 
 Buat `src/server/validation/student.ts`:
 
@@ -4500,12 +4500,12 @@ export const studentSchema = z.object({
 export type StudentInput = z.output<typeof studentSchema>;
 ```
 
-- [ ] **Step 4: Jalankan uji untuk memastikan lulus**
+- [x] **Step 4: Jalankan uji untuk memastikan lulus**
 
 Jalankan: `npx vitest run src/server/validation/student.test.ts`
 Harapan: LULUS, 5 uji.
 
-- [ ] **Step 5: Tulis uji query tahun ajaran yang gagal**
+- [x] **Step 5: Tulis uji query tahun ajaran yang gagal**
 
 Buat `tests/integration/academic-years.test.ts`:
 
@@ -4543,12 +4543,12 @@ describe('query tahun ajaran', () => {
 
 Opsi diurutkan dari tanggal mulai terbaru, sehingga tahun ajaran 2090/2091 buatan uji selalu berada di urutan pertama.
 
-- [ ] **Step 6: Jalankan uji untuk memastikan gagal**
+- [x] **Step 6: Jalankan uji untuk memastikan gagal**
 
 Jalankan: `npm run test:integration -- tests/integration/academic-years.test.ts`
 Harapan: GAGAL dengan "Failed to resolve import '@/server/queries/academic-years'".
 
-- [ ] **Step 7: Implementasikan query tahun ajaran**
+- [x] **Step 7: Implementasikan query tahun ajaran**
 
 Buat `src/server/queries/academic-years.ts`:
 
@@ -4584,12 +4584,12 @@ export async function listAcademicYearOptions(executor: Executor = db): Promise<
 }
 ```
 
-- [ ] **Step 8: Jalankan uji untuk memastikan lulus**
+- [x] **Step 8: Jalankan uji untuk memastikan lulus**
 
 Jalankan: `npm run test:integration -- tests/integration/academic-years.test.ts`
 Harapan: LULUS, 2 uji.
 
-- [ ] **Step 9: Tulis uji integrasi siswa yang gagal**
+- [x] **Step 9: Tulis uji integrasi siswa yang gagal**
 
 Buat `tests/integration/students.test.ts`:
 
@@ -4711,12 +4711,12 @@ describe('listStudents dan listClassNames', () => {
 });
 ```
 
-- [ ] **Step 10: Jalankan uji untuk memastikan gagal**
+- [x] **Step 10: Jalankan uji untuk memastikan gagal**
 
 Jalankan: `npm run test:integration -- tests/integration/students.test.ts`
 Harapan: GAGAL dengan "Failed to resolve import '@/server/queries/students'".
 
-- [ ] **Step 11: Implementasikan service siswa**
+- [x] **Step 11: Implementasikan service siswa**
 
 Buat `src/server/services/students.ts`:
 
@@ -4838,7 +4838,7 @@ export async function setStudentStatus(
 
 Menonaktifkan siswa yang masih punya pinjaman terbuka sengaja diizinkan: siswa nonaktif tetap wajib mengembalikan buku, dan aturan `STUDENT_INACTIVE` di lapisan domain sudah mencegahnya meminjam lagi.
 
-- [ ] **Step 12: Implementasikan query siswa**
+- [x] **Step 12: Implementasikan query siswa**
 
 Buat `src/server/queries/students.ts`:
 
@@ -4945,12 +4945,12 @@ export async function getStudent(id: string, executor: Executor = db): Promise<S
 }
 ```
 
-- [ ] **Step 13: Jalankan uji integrasi untuk memastikan lulus**
+- [x] **Step 13: Jalankan uji integrasi untuk memastikan lulus**
 
 Jalankan: `npm run test:integration -- tests/integration/students.test.ts`
 Harapan: LULUS, 5 uji.
 
-- [ ] **Step 14: Tulis uji Server Action siswa yang gagal**
+- [x] **Step 14: Tulis uji Server Action siswa yang gagal**
 
 Buat `src/server/actions/students.test.ts`:
 
@@ -5019,12 +5019,12 @@ describe('Server Action siswa', () => {
 });
 ```
 
-- [ ] **Step 15: Jalankan uji untuk memastikan gagal**
+- [x] **Step 15: Jalankan uji untuk memastikan gagal**
 
 Jalankan: `npx vitest run src/server/actions/students.test.ts`
 Harapan: GAGAL dengan "Failed to resolve import './students'".
 
-- [ ] **Step 16: Implementasikan Server Action siswa**
+- [x] **Step 16: Implementasikan Server Action siswa**
 
 Buat `src/server/actions/students.ts`:
 
@@ -5086,12 +5086,12 @@ export async function setStudentStatusAction(
 }
 ```
 
-- [ ] **Step 17: Jalankan uji untuk memastikan lulus**
+- [x] **Step 17: Jalankan uji untuk memastikan lulus**
 
 Jalankan: `npx vitest run src/server/actions/students.test.ts`
 Harapan: LULUS, 4 uji.
 
-- [ ] **Step 18: Tulis uji halaman siswa yang gagal**
+- [x] **Step 18: Tulis uji halaman siswa yang gagal**
 
 Buat `src/app/(app)/master/siswa/page.test.tsx`:
 
@@ -5212,12 +5212,12 @@ describe('EditStudentPage', () => {
 });
 ```
 
-- [ ] **Step 19: Jalankan uji untuk memastikan gagal**
+- [x] **Step 19: Jalankan uji untuk memastikan gagal**
 
 Jalankan: `npx vitest run "src/app/(app)/master/siswa"`
 Harapan: GAGAL; halaman belum ada.
 
-- [ ] **Step 20: Implementasikan halaman siswa**
+- [x] **Step 20: Implementasikan halaman siswa**
 
 Buat `src/app/(app)/master/siswa/student-fields.tsx`:
 
@@ -5432,12 +5432,12 @@ export default async function EditStudentPage({ params }: { params: Promise<{ id
 }
 ```
 
-- [ ] **Step 21: Jalankan uji untuk memastikan lulus**
+- [x] **Step 21: Jalankan uji untuk memastikan lulus**
 
 Jalankan: `npx vitest run "src/app/(app)/master/siswa"`
 Harapan: LULUS, 5 uji.
 
-- [ ] **Step 22: Periksa di peramban, lalu commit**
+- [x] **Step 22: Periksa di peramban, lalu commit**
 
 Dengan `npm run dev`, buka `/master/siswa`:
 1. Tambah siswa dengan NIS `202600123` → galat di kolom NIS yang menyebut "atas nama Ahmad Fauzi" (siswa seed); isian lain tetap.
@@ -5486,7 +5486,7 @@ Buku di sini adalah **judul**; eksemplar fisiknya dikelola di Task 8. Tambahanny
   - `createBookAction`, `updateBookAction(id, …)`, `setBookStatusAction(id, status, …)`
   - Halaman `/master/buku/[id]` (diperluas Task 8 dengan bagian eksemplar)
 
-- [ ] **Step 1: Tulis uji skema buku yang gagal**
+- [x] **Step 1: Tulis uji skema buku yang gagal**
 
 Buat `src/server/validation/book.test.ts`:
 
@@ -5551,12 +5551,12 @@ describe('bookSchema', () => {
 });
 ```
 
-- [ ] **Step 2: Jalankan uji untuk memastikan gagal**
+- [x] **Step 2: Jalankan uji untuk memastikan gagal**
 
 Jalankan: `npx vitest run src/server/validation/book.test.ts`
 Harapan: GAGAL dengan "Failed to resolve import './book'".
 
-- [ ] **Step 3: Implementasikan skema buku**
+- [x] **Step 3: Implementasikan skema buku**
 
 Buat `src/server/validation/book.ts`:
 
@@ -5585,12 +5585,12 @@ export const bookSchema = z.object({
 export type BookInput = z.output<typeof bookSchema>;
 ```
 
-- [ ] **Step 4: Jalankan uji untuk memastikan lulus**
+- [x] **Step 4: Jalankan uji untuk memastikan lulus**
 
 Jalankan: `npx vitest run src/server/validation/book.test.ts`
 Harapan: LULUS, 5 uji.
 
-- [ ] **Step 5: Tulis uji integrasi buku yang gagal**
+- [x] **Step 5: Tulis uji integrasi buku yang gagal**
 
 Buat `tests/integration/books.test.ts`:
 
@@ -5744,12 +5744,12 @@ describe('listBooks', () => {
 });
 ```
 
-- [ ] **Step 6: Jalankan uji untuk memastikan gagal**
+- [x] **Step 6: Jalankan uji untuk memastikan gagal**
 
 Jalankan: `npm run test:integration -- tests/integration/books.test.ts`
 Harapan: GAGAL dengan "Failed to resolve import '@/server/queries/books'".
 
-- [ ] **Step 7: Implementasikan service buku**
+- [x] **Step 7: Implementasikan service buku**
 
 Buat `src/server/services/books.ts`:
 
@@ -5864,7 +5864,7 @@ export async function setBookStatus(
 
 `books` tidak punya constraint unik: dua edisi berbeda boleh berbagi judul, penulis, bahkan ISBN yang salah cetak. Karena itu tidak ada penanganan nama ganda di sini.
 
-- [ ] **Step 8: Implementasikan query buku**
+- [x] **Step 8: Implementasikan query buku**
 
 Buat `src/server/queries/books.ts`:
 
@@ -5988,12 +5988,12 @@ export async function getBook(id: string, executor: Executor = db): Promise<Book
 
 Kueri daftar ini sudah diverifikasi terhadap database pengembangan sebelum rencana ditulis: subquery agregat dengan `.as()` lolos `tsc` dan mengembalikan `totalCopies`/`availableCopies` bertipe number.
 
-- [ ] **Step 9: Jalankan uji integrasi untuk memastikan lulus**
+- [x] **Step 9: Jalankan uji integrasi untuk memastikan lulus**
 
 Jalankan: `npm run test:integration -- tests/integration/books.test.ts`
 Harapan: LULUS, 8 uji.
 
-- [ ] **Step 10: Tulis uji Server Action buku yang gagal**
+- [x] **Step 10: Tulis uji Server Action buku yang gagal**
 
 Buat `src/server/actions/books.test.ts`:
 
@@ -6065,12 +6065,12 @@ describe('Server Action buku', () => {
 });
 ```
 
-- [ ] **Step 11: Jalankan uji untuk memastikan gagal**
+- [x] **Step 11: Jalankan uji untuk memastikan gagal**
 
 Jalankan: `npx vitest run src/server/actions/books.test.ts`
 Harapan: GAGAL dengan "Failed to resolve import './books'".
 
-- [ ] **Step 12: Implementasikan Server Action buku**
+- [x] **Step 12: Implementasikan Server Action buku**
 
 Buat `src/server/actions/books.ts`:
 
@@ -6137,12 +6137,12 @@ export async function setBookStatusAction(
 }
 ```
 
-- [ ] **Step 13: Jalankan uji untuk memastikan lulus**
+- [x] **Step 13: Jalankan uji untuk memastikan lulus**
 
 Jalankan: `npx vitest run src/server/actions/books.test.ts`
 Harapan: LULUS, 4 uji.
 
-- [ ] **Step 14: Tulis uji halaman buku yang gagal**
+- [x] **Step 14: Tulis uji halaman buku yang gagal**
 
 Buat `src/app/(app)/master/buku/page.test.tsx`:
 
@@ -6282,12 +6282,12 @@ describe('BookDetailPage', () => {
 });
 ```
 
-- [ ] **Step 15: Jalankan uji untuk memastikan gagal**
+- [x] **Step 15: Jalankan uji untuk memastikan gagal**
 
 Jalankan: `npx vitest run "src/app/(app)/master/buku"`
 Harapan: GAGAL; halaman belum ada.
 
-- [ ] **Step 16: Implementasikan halaman buku**
+- [x] **Step 16: Implementasikan halaman buku**
 
 Buat `src/app/(app)/master/buku/book-fields.tsx`:
 
@@ -6540,12 +6540,12 @@ export default async function BookDetailPage({
 }
 ```
 
-- [ ] **Step 17: Jalankan uji untuk memastikan lulus**
+- [x] **Step 17: Jalankan uji untuk memastikan lulus**
 
 Jalankan: `npx vitest run "src/app/(app)/master/buku"`
 Harapan: LULUS, 5 uji.
 
-- [ ] **Step 18: Periksa di peramban, lalu commit**
+- [x] **Step 18: Periksa di peramban, lalu commit**
 
 Dengan `npm run dev`, buka `/master/buku`:
 1. Dua buku seed tampil dengan "3/3 tersedia".
@@ -6602,7 +6602,7 @@ Dua keputusan desain yang perlu diketahui:
   - `interface CopyRow { id; barcode; status: CopyStatus; acquisitionDate: string | null; notes: string | null }`, `listCopiesOfBook(bookId, executor?)`
   - `addCopiesAction(bookId, state, formData)`, `changeCopyStatusAction(bookId, copyId, action, state, formData)`
 
-- [ ] **Step 1: Tulis uji aturan barcode yang gagal**
+- [x] **Step 1: Tulis uji aturan barcode yang gagal**
 
 Buat `src/domain/copy/barcode.test.ts`:
 
@@ -6645,7 +6645,7 @@ describe('isReservedBarcode', () => {
 });
 ```
 
-- [ ] **Step 2: Tulis uji perubahan status manual yang gagal**
+- [x] **Step 2: Tulis uji perubahan status manual yang gagal**
 
 Buat `src/domain/copy/manual-status.test.ts`:
 
@@ -6702,12 +6702,12 @@ describe('isManualCopyAction', () => {
 });
 ```
 
-- [ ] **Step 3: Jalankan uji untuk memastikan gagal**
+- [x] **Step 3: Jalankan uji untuk memastikan gagal**
 
 Jalankan: `npx vitest run src/domain/copy`
 Harapan: GAGAL; `./barcode` dan `./manual-status` belum ada.
 
-- [ ] **Step 4: Implementasikan aturan barcode dan status manual**
+- [x] **Step 4: Implementasikan aturan barcode dan status manual**
 
 Buat `src/domain/copy/barcode.ts`:
 
@@ -6786,12 +6786,12 @@ export function isManualCopyAction(value: unknown): value is ManualCopyAction {
 }
 ```
 
-- [ ] **Step 5: Jalankan uji untuk memastikan lulus**
+- [x] **Step 5: Jalankan uji untuk memastikan lulus**
 
 Jalankan: `npx vitest run src/domain/copy`
 Harapan: LULUS, 25 uji (9 barcode, 16 status manual). Jalankan juga `npm run lint` untuk memastikan berkas domain baru tetap murni.
 
-- [ ] **Step 6: Tulis uji skema tambah eksemplar yang gagal**
+- [x] **Step 6: Tulis uji skema tambah eksemplar yang gagal**
 
 Buat `src/server/validation/copy.test.ts`:
 
@@ -6840,12 +6840,12 @@ describe('addCopiesSchema', () => {
 });
 ```
 
-- [ ] **Step 7: Jalankan uji untuk memastikan gagal**
+- [x] **Step 7: Jalankan uji untuk memastikan gagal**
 
 Jalankan: `npx vitest run src/server/validation/copy.test.ts`
 Harapan: GAGAL dengan "Failed to resolve import './copy'".
 
-- [ ] **Step 8: Implementasikan skema tambah eksemplar**
+- [x] **Step 8: Implementasikan skema tambah eksemplar**
 
 Buat `src/server/validation/copy.ts`:
 
@@ -6884,12 +6884,12 @@ export const addCopiesSchema = z
 export type AddCopiesInput = z.output<typeof addCopiesSchema>;
 ```
 
-- [ ] **Step 9: Jalankan uji untuk memastikan lulus**
+- [x] **Step 9: Jalankan uji untuk memastikan lulus**
 
 Jalankan: `npx vitest run src/server/validation/copy.test.ts`
 Harapan: LULUS, 6 uji.
 
-- [ ] **Step 10: Tulis uji integrasi eksemplar yang gagal**
+- [x] **Step 10: Tulis uji integrasi eksemplar yang gagal**
 
 Buat `tests/integration/copies.test.ts`:
 
@@ -7053,12 +7053,12 @@ describe('changeCopyStatus', () => {
 });
 ```
 
-- [ ] **Step 11: Jalankan uji untuk memastikan gagal**
+- [x] **Step 11: Jalankan uji untuk memastikan gagal**
 
 Jalankan: `npm run test:integration -- tests/integration/copies.test.ts`
 Harapan: GAGAL dengan "Failed to resolve import '@/server/queries/copies'".
 
-- [ ] **Step 12: Implementasikan query eksemplar**
+- [x] **Step 12: Implementasikan query eksemplar**
 
 Buat `src/server/queries/copies.ts`:
 
@@ -7094,7 +7094,7 @@ export async function listCopiesOfBook(bookId: string, executor: Executor = db):
 }
 ```
 
-- [ ] **Step 13: Implementasikan service eksemplar**
+- [x] **Step 13: Implementasikan service eksemplar**
 
 Buat `src/server/services/copies.ts`:
 
@@ -7246,12 +7246,12 @@ export async function changeCopyStatus(
 
 Alokasi counter di atas sudah diverifikasi terhadap database pengembangan sebelum rencana ditulis: pada pemanggilan pertama (baris counter belum ada, barcode seed terbesar `BK-000006`) alokasi 3 nomor mengembalikan 9, dan pemanggilan kedua mengembalikan 12.
 
-- [ ] **Step 14: Jalankan uji integrasi untuk memastikan lulus**
+- [x] **Step 14: Jalankan uji integrasi untuk memastikan lulus**
 
 Jalankan: `npm run test:integration -- tests/integration/copies.test.ts`
 Harapan: LULUS, 8 uji.
 
-- [ ] **Step 15: Tulis uji Server Action eksemplar yang gagal**
+- [x] **Step 15: Tulis uji Server Action eksemplar yang gagal**
 
 Buat `src/server/actions/copies.test.ts`:
 
@@ -7311,12 +7311,12 @@ describe('changeCopyStatusAction', () => {
 });
 ```
 
-- [ ] **Step 16: Jalankan uji untuk memastikan gagal**
+- [x] **Step 16: Jalankan uji untuk memastikan gagal**
 
 Jalankan: `npx vitest run src/server/actions/copies.test.ts`
 Harapan: GAGAL dengan "Failed to resolve import './copies'".
 
-- [ ] **Step 17: Implementasikan Server Action eksemplar**
+- [x] **Step 17: Implementasikan Server Action eksemplar**
 
 Buat `src/server/actions/copies.ts`:
 
@@ -7365,12 +7365,12 @@ export async function changeCopyStatusAction(
 }
 ```
 
-- [ ] **Step 18: Jalankan uji untuk memastikan lulus**
+- [x] **Step 18: Jalankan uji untuk memastikan lulus**
 
 Jalankan: `npx vitest run src/server/actions/copies.test.ts`
 Harapan: LULUS, 3 uji.
 
-- [ ] **Step 19: Tulis uji bagian eksemplar dan halaman detail buku yang gagal**
+- [x] **Step 19: Tulis uji bagian eksemplar dan halaman detail buku yang gagal**
 
 Buat `src/app/(app)/master/buku/[id]/copies-section.test.tsx`:
 
@@ -7497,12 +7497,12 @@ describe('BookDetailPage', () => {
 });
 ```
 
-- [ ] **Step 20: Jalankan uji untuk memastikan gagal**
+- [x] **Step 20: Jalankan uji untuk memastikan gagal**
 
 Jalankan: `npx vitest run "src/app/(app)/master/buku/[id]"`
 Harapan: GAGAL; `./copies-section` belum ada, dan halaman belum menampilkan eksemplar.
 
-- [ ] **Step 21: Implementasikan bagian eksemplar dan rangkai ke halaman detail**
+- [x] **Step 21: Implementasikan bagian eksemplar dan rangkai ke halaman detail**
 
 Buat `src/app/(app)/master/buku/[id]/copies-section.tsx`:
 
@@ -7679,12 +7679,12 @@ export default async function BookDetailPage({
 }
 ```
 
-- [ ] **Step 22: Jalankan uji untuk memastikan lulus**
+- [x] **Step 22: Jalankan uji untuk memastikan lulus**
 
 Jalankan: `npx vitest run "src/app/(app)/master/buku"`
 Harapan: LULUS, 9 uji (2 daftar, 1 tambah, 3 detail, 3 bagian eksemplar).
 
-- [ ] **Step 23: Periksa di peramban, lalu commit**
+- [x] **Step 23: Periksa di peramban, lalu commit**
 
 Dengan `npm run dev`:
 1. Sebagai `petugas`, buka buku seed "Pemrograman Web" → tiga eksemplar `BK-00000x` tampil **tanpa** tombol ubah status.
@@ -7725,7 +7725,7 @@ Tidak ada kode baru. Task ini membuktikan bahwa seluruh rencana bekerja bersama,
 - Consumes: seluruh keluaran Task 1–8
 - Produces: bukti bahwa Rencana 02 selesai
 
-- [ ] **Step 1: Jalankan seluruh pemeriksaan otomatis**
+- [x] **Step 1: Jalankan seluruh pemeriksaan otomatis**
 
 ```bash
 npm test
@@ -7737,7 +7737,7 @@ npm run build
 
 Harapan: seluruhnya lulus. `npm run build` mencantumkan rute `/master/kategori`, `/master/rak`, `/master/siswa`, `/master/buku`, beserta `/baru` dan `/[id]` masing-masing.
 
-- [ ] **Step 2: Pastikan uji integrasi tidak meninggalkan jejak**
+- [x] **Step 2: Pastikan uji integrasi tidak meninggalkan jejak**
 
 ```bash
 npx tsx --env-file=.env.local -e "import('./src/server/db/client').then(async ({ db }) => { const { sql } = await import('drizzle-orm'); const rows = await db.execute(sql\`select (select count(*) from categories where name like 'UJI-%') + (select count(*) from racks where code like 'UJI-%') + (select count(*) from students where nis like 'UJI-%') + (select count(*) from books where title like 'UJI-%') + (select count(*) from book_copies where barcode like 'UJI-%') + (select count(*) from academic_years where name like 'UJI-%') as sisa\`); console.log('Sisa data uji:', rows[0].sisa); process.exit(0); })"
@@ -7745,7 +7745,7 @@ npx tsx --env-file=.env.local -e "import('./src/server/db/client').then(async ({
 
 Harapan: `Sisa data uji: 0`. Angka lain berarti ada uji yang ditulis di luar `withRollback()`. Temukan dan perbaiki uji itu; jangan hapus datanya dengan `delete` tanpa memahami asalnya.
 
-- [ ] **Step 3: Uji alur lengkap di peramban**
+- [x] **Step 3: Uji alur lengkap di peramban**
 
 Jalankan `npm run dev`. Bila memakai agen, gunakan skill `/browse` (bukan `mcp__claude-in-chrome__*`).
 
@@ -7771,7 +7771,7 @@ Di lebar tablet (PRD bab 9), dengan `$B viewport 768x1024` atau jendela peramban
 13. Tabel daftar buku dapat digulir ke samping di dalam kotaknya; halaman sendiri tidak ikut melebar.
 14. Grup menu **Laporan** tampil untuk petugas maupun admin (halamannya memang belum ada sampai Rencana 06).
 
-- [ ] **Step 4: Periksa jejak audit dari alur di atas**
+- [x] **Step 4: Periksa jejak audit dari alur di atas**
 
 ```bash
 npx tsx --env-file=.env.local -e "import('./src/server/db/client').then(async ({ db }) => { const { sql } = await import('drizzle-orm'); const rows = await db.execute(sql\`select a.action, p.username, a.metadata from audit_logs a join profiles p on p.id = a.user_id order by a.created_at desc limit 10\`); console.table(rows); process.exit(0); })"
@@ -7779,11 +7779,11 @@ npx tsx --env-file=.env.local -e "import('./src/server/db/client').then(async ({
 
 Harapan: baris `copy.reactivate`, `copy.deactivate`, `copy.create`, `book.create`, `rack.create`, dan `category.create` tampil dengan username pelaku yang benar (`admin` untuk dua baris teratas, `petugas` untuk sisanya).
 
-- [ ] **Step 5: Bereskan data contoh**
+- [x] **Step 5: Bereskan data contoh**
 
 Sebagai admin, nonaktifkan buku, rak, dan kategori `Contoh QA` lewat layarnya masing-masing. Data master tidak dihapus (BR-08); nonaktif sudah menyembunyikannya dari daftar bawaan.
 
-- [ ] **Step 6: Tandai rencana selesai**
+- [x] **Step 6: Tandai rencana selesai**
 
 Ubah seluruh `- [ ]` di berkas rencana ini menjadi `- [x]`, lalu commit:
 
