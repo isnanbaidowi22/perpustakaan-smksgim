@@ -56,7 +56,7 @@ export function Sidebar({ role }: { role: UserRole }) {
       aria-label="Menu utama"
       className="h-full w-60 overflow-y-auto border-r border-[var(--color-ink-100)] bg-white px-3 py-5"
     >
-      <div className="px-3 pb-6 font-serif text-lg font-semibold">Perpustakaan</div>
+      <div className="px-3 pb-6 text-lg font-semibold">Perpustakaan</div>
       {sections.map((section) => (
         <div key={section.group ?? 'utama'} className="mb-5">
           {section.group && (

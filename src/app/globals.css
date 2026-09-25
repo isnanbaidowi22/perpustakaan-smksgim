@@ -21,16 +21,19 @@
   --color-status-rusak: oklch(0.65 0.15 62);
   --color-status-hilang: oklch(0.44 0.02 258);
 
-  /* var(--font-inter) / var(--font-source-serif) datang dari next/font di
-     layout.tsx (mode variable). Harus dirujuk lewat var(), bukan literal
-     "Inter" — literal akan gagal cocok dengan font ter-self-host next/font
-     kecuali kebetulan. Diverifikasi: Tailwind v4 menyalin rujukan var() ini
-     apa adanya ke @layer theme (tidak diresolusi saat build), baik lewat
-     @theme biasa maupun @theme inline — keduanya diuji dan menghasilkan CSS
-     akhir yang identik untuk kasus ini, jadi @theme biasa dipertahankan
-     agar selaras dengan struktur token lain di berkas ini. */
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-serif: var(--font-source-serif), ui-serif, Georgia, serif;
+  /* Seluruh aplikasi memakai satu keluarga font: Plus Jakarta Sans.
+     var(--font-jakarta) datang dari next/font di layout.tsx (mode variable).
+     Harus dirujuk lewat var(), bukan literal "Plus Jakarta Sans" — literal
+     akan gagal cocok dengan font ter-self-host next/font kecuali kebetulan.
+     Tailwind v4 menyalin rujukan var() ini apa adanya ke @layer theme.
+     font-serif dan font-mono ikut diarahkan ke font yang sama agar utilitas
+     itu (mis. font-mono pada barcode dan NIS) tidak memunculkan font lain. */
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-sans);
+  --font-mono: var(--font-sans);
+  /* Dipakai preflight Tailwind untuk html serta code/kbd/pre/samp. */
+  --default-font-family: var(--font-sans);
+  --default-mono-font-family: var(--font-sans);
 }
 
 body {
@@ -41,12 +44,8 @@ body {
 
 /* Angka tabular pada tabel dan nominal. Kolom tanggal dan denda yang tidak
    sejajar secara vertikal jauh lebih lambat dipindai mata. */
-table, .tabular {
+table, .tabular, .font-mono {
   font-variant-numeric: tabular-nums;
-}
-
-h1, h2, .page-title {
-  font-family: var(--font-serif);
 }
 
 /* Cincin fokus terlihat di seluruh elemen interaktif — alur transaksi

@@ -1,9 +1,8 @@
 import type { Metadata } from 'next';
-import { Inter, Source_Serif_4 } from 'next/font/google';
+import { Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
-const serif = Source_Serif_4({ subsets: ['latin'], variable: '--font-source-serif' });
+const jakarta = Plus_Jakarta_Sans({ subsets: ['latin'], variable: '--font-jakarta' });
 
 export const metadata: Metadata = {
   title: 'Perpustakaan Sekolah',
@@ -12,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="id" className={`${inter.variable} ${serif.variable}`}>
+    <html lang="id" className={jakarta.variable}>
       <body>{children}</body>
     </html>
   );
