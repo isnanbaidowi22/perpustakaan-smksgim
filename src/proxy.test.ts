@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
 const { mockGetUser } = vi.hoisted(() => ({
-  mockGetUser: vi.fn(async () => ({ data: { user: null } })),
+  mockGetUser: vi.fn(async (): Promise<{ data: { user: { id: string } | null } }> => ({ data: { user: null } })),
 }));
 
 vi.mock('@supabase/ssr', () => ({
