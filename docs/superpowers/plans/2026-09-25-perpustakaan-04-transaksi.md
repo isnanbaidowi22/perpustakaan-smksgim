@@ -5508,6 +5508,7 @@ EOF
 | Uji end-to-end Playwright (spec §10) | Digantikan pemeriksaan peramban Task 9 lewat `/browse`, seperti Rencana 02–03. Playwright E2E akan menulis transaksi sungguhan ke database cloud; dapat ditambah bila tersedia database uji terpisah |
 | Membatalkan peminjaman yang salah catat | Belum diminta spec. Koreksi dilakukan dengan memproses pengembalian kondisi Baik pada hari yang sama (tanpa denda) |
 | Mengubah jatuh tempo (perpanjangan) | Di luar lingkup PRD Phase 1 |
+| Cari eksemplar menurut judul di meja peminjaman (spec 8.2 "cari judul") | Rencana berikutnya; saat ini hanya pindai barcode. Label rusak: cari barcode lewat Master Data → Buku |
 
 ## Verifikasi Sebelum Melanjutkan ke Rencana 05
 
