@@ -51,7 +51,7 @@ Tiga hal berbeda dari PRD v1.0 dan perlu diketahui pembaca dokumen itu.
 
 ### 2.1 Termasuk
 
-Login dan sesi · Dashboard · Data Buku dan Eksemplar · Kategori · Rak · Data Siswa · Tahun Ajaran · Peminjaman · Pengembalian · Riwayat Transaksi · Perhitungan dan pelunasan denda · Cetak struk · Cetak label barcode · Pengaturan aturan perpustakaan · Manajemen pengguna · Audit log.
+Login dan sesi · Dashboard · Data Buku dan Eksemplar · Kategori · Rak · Data Siswa · Tahun Ajaran · Peminjaman · Pengembalian · Riwayat Transaksi · Perhitungan dan pelunasan denda · Laporan (tampilan web dan cetak) · Cetak struk · Cetak label barcode · Pengaturan aturan perpustakaan · Manajemen pengguna · Audit log.
 
 **Catatan lingkup.** Empat item terakhir — Tahun Ajaran, Pengaturan, Manajemen Pengguna, dan Cetak — melampaui daftar "Phase 1" awal, tetapi menjadi konsekuensi langsung dari keputusan produk: tahun ajaran dipilih sebagai entitas master dengan satu yang aktif, struk thermal dan label barcode dipilih sebagai kebutuhan, BR-09 menuntut aturan dapat diubah tanpa menyentuh kode, dan seseorang harus dapat membuat akun petugas tanpa membuka dasbor Supabase.
 
@@ -59,7 +59,11 @@ Keempatnya sengaja dibangun **seminimal mungkin**: formulir sederhana, tanpa alu
 
 ### 2.2 Tidak Termasuk
 
-Portal mandiri siswa · Reservasi buku · Notifikasi WhatsApp/email · Pembayaran denda daring · Integrasi sistem akademik · Modul Laporan · Ekspor PDF/Excel · Import Excel.
+Portal mandiri siswa · Reservasi buku · Notifikasi WhatsApp/email · Pembayaran denda daring · Integrasi sistem akademik · Ekspor PDF/Excel · Import Excel.
+
+**Revisi 25 September 2026 — Laporan masuk lingkup.** Versi awal spec ini mencantumkan Modul Laporan di daftar "Tidak Termasuk" tanpa mencatatnya sebagai penyimpangan dari PRD, padahal PRD menempatkannya di lingkup MVP (Section 4.1, prioritas Should; FR-10; menu Laporan di Section 11; lima laporan di Section 12.2). Pemilik produk memutuskan laporan tetap dibangun, dalam bentuk **tampilan web dan cetak** melalui peramban, setelah modul transaksi selesai (Rencana 06). Ekspor PDF/Excel tetap di luar lingkup, sesuai catatan PRD Section 12.2 bahwa format itu diprioritaskan setelah alur transaksi inti stabil.
+
+**Revisi 25 September 2026 — tampilan tablet.** PRD Section 9 mewajibkan aplikasi dapat dipakai di desktop dan tablet. Di bawah lebar 1024px sidebar disembunyikan dan dibuka lewat tombol Menu, dan tabel daftar digulir ke samping di dalam kotaknya.
 
 Import Excel belum dibangun, tetapi skema dirancang menerimanya: `nis` dan `barcode` adalah kunci alami yang stabil, sehingga import di fase berikutnya tidak memerlukan migrasi data.
 
@@ -538,7 +542,7 @@ Migrasi skema dikelola berkas melalui Drizzle Kit dan masuk kendali versi.
 
 ## 13. Catatan untuk Fase Berikutnya
 
-- Modul Laporan (empat laporan pada PRD Section 12.2) — `loans.student_class` sudah menyimpan snapshot kelas sehingga laporan per kelas akurat secara historis.
+- Ekspor laporan ke PDF/Excel. Laporan sendiri kini masuk lingkup (lihat revisi di Section 2.2); `loans.student_class` sudah menyimpan snapshot kelas sehingga laporan per kelas akurat secara historis.
 - Import Excel — `nis` dan `barcode` sudah menjadi kunci alami yang stabil.
 - Ekspor PDF/Excel.
 - Portal siswa — **memerlukan pengaktifan RLS sebagai kontrol utama**, bukan sekadar jaring pengaman.

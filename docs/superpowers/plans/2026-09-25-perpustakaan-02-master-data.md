@@ -19,6 +19,9 @@
 | 03 | Pengaturan: Tahun Ajaran, Pengguna, Konfigurasi |
 | 04 | Transaksi: Peminjaman, Pengembalian, Pelunasan Denda, Riwayat |
 | 05 | Dashboard, Cetak struk dan label barcode, Tampilan audit log |
+| 06 | Laporan (PRD FR-10, bab 12.2): Peminjaman, Pengembalian, Keterlambatan, Koleksi, Riwayat Siswa |
+
+Laporan sempat keluar dari lingkup spec (2.2) tanpa dicatat sebagai penyimpangan dari PRD. Pemilik produk memutuskan pada 25 September 2026 bahwa laporan tetap dibangun, sebagai Rencana 06 setelah transaksi tersedia. Rencana ini hanya menambahkan menu Laporan di sidebar (Task 3).
 
 Transaksi (Rencana 04) tidak bergantung pada layar Rencana 03: tahun ajaran aktif, konfigurasi, dan akun sudah tersedia dari skrip seed.
 
@@ -39,6 +42,7 @@ Transaksi (Rencana 04) tidak bergantung pada layar Rencana 03: tahun ajaran akti
 - **Data master tidak pernah dihapus permanen;** dinonaktifkan lewat kolom `status`. (BR-08, PRD 13.3)
 - **Otorisasi (spec Section 7):** kelola kategori, rak, siswa, buku, dan tambah eksemplar → `admin` dan `petugas`. Ubah status eksemplar secara manual (pulihkan rusak/hilang, tarik dari koleksi, aktifkan kembali) → hanya `admin`.
 - **Next.js 16:** `params` dan `searchParams` pada halaman adalah `Promise` dan wajib di-`await`.
+- **Desktop dan tablet (PRD bab 9):** setiap tabel daftar dibungkus `<ScrollTable>`; tata letak form memakai kolom ganda hanya dari breakpoint `sm` ke atas. Tidak ada elemen yang membuat halaman melebar melewati layar 768px.
 - **Repo ini memasang hook tdd-guard.** Urutan langkah di setiap task (uji gagal → implementasi → uji lulus) wajib diikuti; hook menolak implementasi yang ditulis sebelum ujinya.
 - **Setiap commit diakhiri baris:** `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`
 
@@ -70,7 +74,9 @@ Transaksi (Rencana 04) tidak bergantung pada layar Rencana 03: tahun ajaran akti
 | `src/domain/copy/barcode.ts` | Format barcode otomatis `BK-000123` |
 | `src/domain/copy/manual-status.ts` | Perubahan status eksemplar di luar pinjam-kembali |
 | `src/components/ui/button-styles.ts` | Kelas tombol |
-| `src/components/ui/table-styles.ts` | Kelas tabel |
+| `src/components/ui/table-styles.ts` | Kelas sel tabel |
+| `src/components/ui/scroll-table.tsx` | Tabel yang dapat digulir ke samping di layar sempit |
+| `src/components/layout/app-shell.tsx` | Kerangka responsif: sidebar tetap di desktop, tombol Menu di tablet |
 | `src/components/ui/action-form.tsx` | Form dengan state dari Server Action |
 | `src/components/ui/fields.tsx` | Kolom teks, pilihan, dan area teks yang menampilkan galatnya sendiri |
 | `src/components/ui/action-button.tsx` | Tombol satu aksi dengan pesan hasil |
@@ -1381,10 +1387,13 @@ EOF
 
 ## Task 3: Komponen UI Bersama dan Kerangka yang Sadar Peran
 
+PRD bab 9 mewajibkan aplikasi dapat dipakai di **desktop dan tablet**. Di tablet tegak (768px), sidebar permanen 240px menyisakan sekitar 500px untuk tabel 6–7 kolom. Karena itu task ini juga membuat tabel yang dapat digulir ke samping (`ScrollTable`) dan sidebar yang tersembunyi di bawah lebar 1024px dan dibuka lewat tombol **Menu** (`AppShell`). PRD bab 11 juga mencantumkan grup menu **Laporan**; tautannya ditambahkan sekarang, halamannya dibuat di Rencana 06.
+
 **Files:**
 - Modify: `src/components/layout/sidebar.tsx`, `src/components/layout/sidebar.test.tsx`, `src/components/layout/topbar.tsx`, `src/components/layout/topbar.test.tsx`, `src/app/(app)/layout.tsx`, `src/app/(app)/layout.test.tsx`
+- Create: `src/components/layout/app-shell.tsx`, `src/components/layout/app-shell.test.tsx`
 - Create: `src/lib/options.ts`, `src/lib/format.ts`, `src/lib/format.test.ts`, `src/lib/pagination.ts`, `src/lib/pagination.test.ts`, `src/lib/search-params.ts`, `src/lib/search-params.test.ts`
-- Create: `src/components/ui/button-styles.ts`, `src/components/ui/table-styles.ts`, `src/components/ui/action-form.tsx`, `src/components/ui/fields.tsx`, `src/components/ui/action-form.test.tsx`, `src/components/ui/action-button.tsx`, `src/components/ui/action-button.test.tsx`, `src/components/ui/page-header.tsx`, `src/components/ui/flash.tsx`, `src/components/ui/filter-bar.tsx`, `src/components/ui/pagination.tsx`, `src/components/ui/record-status-badge.tsx`, `src/components/ui/list-parts.test.tsx`
+- Create: `src/components/ui/button-styles.ts`, `src/components/ui/table-styles.ts`, `src/components/ui/scroll-table.tsx`, `src/components/ui/action-form.tsx`, `src/components/ui/fields.tsx`, `src/components/ui/action-form.test.tsx`, `src/components/ui/action-button.tsx`, `src/components/ui/action-button.test.tsx`, `src/components/ui/page-header.tsx`, `src/components/ui/flash.tsx`, `src/components/ui/filter-bar.tsx`, `src/components/ui/pagination.tsx`, `src/components/ui/record-status-badge.tsx`, `src/components/ui/list-parts.test.tsx`
 
 **Interfaces:**
 - Consumes: `FormState`, `IDLE` dari `src/lib/form-state.ts`; `signOut` dari `src/server/actions/auth.ts`; `UserRole`, `RecordStatus` dari domain
@@ -1393,14 +1402,16 @@ EOF
   - `formatRupiah(amount: number | string): string`, `formatDate(value: string | null): string`
   - `PAGE_SIZE = 25`, `parsePage(value: string): number`, `pageCount(total: number): number`, `offsetOf(page: number): number`
   - `type SearchParams`, `type StatusFilter = 'active' | 'inactive' | 'all'`, `firstValue(value)`, `parseStatusFilter(value: string): StatusFilter`, `withQuery(path, params): string`
-  - `buttonClass(variant?: 'primary' | 'secondary' | 'danger', size?: 'md' | 'sm'): string`, `TABLE`, `TH`, `TD`
+  - `buttonClass(variant?: 'primary' | 'secondary' | 'danger', size?: 'md' | 'sm'): string`, `TH`, `TD`
+  - `<ScrollTable>`: pembungkus `<table>` yang dapat digulir ke samping; setiap tabel daftar di Task 4–8 memakainya
   - `type FormAction = (state: FormState, formData: FormData) => Promise<FormState>`
   - `<ActionForm action submitLabel cancelHref? initialState?>`, `useField(name, fallback)`
   - `<TextField>`, `<SelectField>`, `<TextAreaField>`
   - `<ActionButton action label pendingLabel? confirmText? variant?>`
   - `<PageHeader title description? actions?>`, `<Flash message>`, `<FilterBar q placeholder>`, `<FilterSelect name label value options>`, `STATUS_OPTIONS`, `<Pagination path page total query>`, `<RecordStatusBadge status>`
-  - `<Sidebar role>`: grup Pengaturan hanya tampil untuk `admin`
+  - `<Sidebar role>`: grup Laporan untuk semua peran; grup Pengaturan hanya tampil untuk `admin`
   - `<Topbar>` kini memiliki tombol **Keluar**
+  - `<AppShell sidebar topbar>`: kerangka responsif; di bawah `lg` (1024px) sidebar tersembunyi dan dibuka lewat tombol Menu
 
 - [ ] **Step 1: Tulis uji utilitas tampilan yang gagal**
 
@@ -1690,7 +1701,7 @@ export function buttonClass(variant: Variant = 'primary', size: Size = 'md'): st
 Buat `src/components/ui/table-styles.ts`:
 
 ```ts
-export const TABLE = 'w-full overflow-hidden rounded-lg border border-[var(--color-ink-100)] bg-white text-sm';
+/** Kelas sel tabel. Pembungkus tabelnya adalah `<ScrollTable>`. */
 export const TH =
   'border-b border-[var(--color-ink-100)] bg-[var(--color-ink-50)] px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-[var(--color-ink-500)]';
 export const TD = 'border-b border-[var(--color-ink-100)] px-3 py-2 align-middle';
@@ -2002,6 +2013,7 @@ import { Flash } from './flash';
 import { PageHeader } from './page-header';
 import { Pagination } from './pagination';
 import { RecordStatusBadge } from './record-status-badge';
+import { ScrollTable } from './scroll-table';
 
 describe('PageHeader', () => {
   it('menampilkan judul, keterangan, dan aksi', () => {
@@ -2056,6 +2068,18 @@ describe('RecordStatusBadge', () => {
   it('memakai teks dan ikon, tidak hanya warna', () => {
     expect(renderToStaticMarkup(<RecordStatusBadge status="active" />)).toContain('Aktif');
     expect(renderToStaticMarkup(<RecordStatusBadge status="inactive" />)).toContain('Nonaktif');
+  });
+});
+
+describe('ScrollTable', () => {
+  it('membungkus tabel dalam wadah yang dapat digulir ke samping di layar sempit', () => {
+    const html = renderToStaticMarkup(
+      <ScrollTable>
+        <tbody><tr><td>isi</td></tr></tbody>
+      </ScrollTable>,
+    );
+    expect(html).toMatch(/^<div class="[^"]*overflow-x-auto[^"]*"><table/);
+    expect(html).toContain('<td>isi</td>');
   });
 });
 ```
@@ -2210,6 +2234,25 @@ export function RecordStatusBadge({ status }: { status: RecordStatus }) {
 }
 ```
 
+Buat `src/components/ui/scroll-table.tsx`:
+
+```tsx
+import type { ReactNode } from 'react';
+
+/**
+ * Pembungkus setiap tabel daftar. PRD bab 9 mewajibkan aplikasi dapat dipakai
+ * di tablet; tabel 6–7 kolom tidak muat di 768px, jadi tabel mempertahankan
+ * lebar minimumnya dan wadahnya yang digulir ke samping, bukan halamannya.
+ */
+export function ScrollTable({ children }: { children: ReactNode }) {
+  return (
+    <div className="overflow-x-auto rounded-lg border border-[var(--color-ink-100)] bg-white">
+      <table className="w-full min-w-[40rem] text-sm">{children}</table>
+    </div>
+  );
+}
+```
+
 - [ ] **Step 16: Jalankan uji untuk memastikan lulus**
 
 Jalankan: `npx vitest run src/components/ui`
@@ -2233,6 +2276,11 @@ const COMMON = [
   '/transaksi/peminjaman',
   '/transaksi/pengembalian',
   '/transaksi/riwayat',
+  // PRD bab 11 dan 5.1: laporan terlihat oleh admin dan petugas.
+  '/laporan/peminjaman',
+  '/laporan/pengembalian',
+  '/laporan/keterlambatan',
+  '/laporan/koleksi',
 ];
 
 const ADMIN_ONLY = ['/pengaturan/tahun-ajaran', '/pengaturan/pengguna', '/pengaturan/konfigurasi'];
@@ -2290,10 +2338,48 @@ describe('Topbar', () => {
 });
 ```
 
-Di `src/app/(app)/layout.test.tsx`, tambahkan mock berikut tepat setelah `vi.mock('@/server/db/client', …)`:
+Buat `src/components/layout/app-shell.test.tsx`:
+
+```tsx
+import { describe, expect, it, vi } from 'vitest';
+import { renderToStaticMarkup } from 'react-dom/server';
+
+vi.mock('next/navigation', () => ({ usePathname: () => '/master/buku' }));
+
+import { AppShell } from './app-shell';
+
+function render() {
+  return renderToStaticMarkup(
+    <AppShell sidebar={<nav>isi sidebar</nav>} topbar={<header>isi topbar</header>}>
+      <p>isi halaman</p>
+    </AppShell>,
+  );
+}
+
+describe('AppShell', () => {
+  it('menyusun sidebar, top bar, dan isi halaman', () => {
+    const html = render();
+    expect(html).toContain('isi sidebar');
+    expect(html).toContain('isi topbar');
+    expect(html).toMatch(/<main[^>]*><p>isi halaman<\/p><\/main>/);
+  });
+
+  it('menyembunyikan sidebar di bawah lebar lg sampai tombol Menu ditekan', () => {
+    const html = render();
+    expect(html).toContain('id="navigasi-utama" class="hidden lg:flex"');
+    expect(html).toMatch(/<button[^>]*aria-expanded="false"[^>]*aria-controls="navigasi-utama"/);
+    expect(html).toContain('Menu');
+  });
+});
+```
+
+Perilaku membuka dan menutup menu diperiksa di peramban pada Task 9; uji ini memastikan susunan dan keadaan awalnya.
+
+Di `src/app/(app)/layout.test.tsx`, tambahkan dua mock berikut tepat setelah `vi.mock('@/server/db/client', …)`:
 
 ```tsx
 vi.mock('@/server/actions/auth', () => ({ signOut: vi.fn() }));
+vi.mock('next/navigation', () => ({ usePathname: () => '/dashboard' }));
 ```
 
 Lalu ubah kedua `mockRequireProfile.mockResolvedValueOnce(...)` agar menyertakan peran:
@@ -2321,7 +2407,7 @@ Dan tambahkan uji ketiga di dalam `describe('AppLayout')`:
 - [ ] **Step 18: Jalankan uji untuk memastikan gagal**
 
 Jalankan: `npx vitest run src/components/layout "src/app/(app)/layout.test.tsx"`
-Harapan: GAGAL; petugas masih melihat Pengaturan, dan tombol Keluar belum ada.
+Harapan: GAGAL; petugas masih melihat Pengaturan, menu Laporan dan tombol Keluar belum ada, dan `./app-shell` belum ada.
 
 - [ ] **Step 19: Implementasikan kerangka yang sadar peran**
 
@@ -2358,6 +2444,16 @@ const NAV: NavSection[] = [
     ],
   },
   {
+    // PRD bab 11. Halamannya dibuat di Rencana 06; sampai saat itu tautan ini 404.
+    group: 'Laporan',
+    items: [
+      { href: '/laporan/peminjaman', label: 'Peminjaman' },
+      { href: '/laporan/pengembalian', label: 'Pengembalian' },
+      { href: '/laporan/keterlambatan', label: 'Keterlambatan' },
+      { href: '/laporan/koleksi', label: 'Koleksi Buku' },
+    ],
+  },
+  {
     group: 'Pengaturan',
     roles: ['admin'],
     items: [
@@ -2372,7 +2468,10 @@ export function Sidebar({ role }: { role: UserRole }) {
   const sections = NAV.filter((section) => !section.roles || section.roles.includes(role));
 
   return (
-    <nav className="w-60 shrink-0 border-r border-[var(--color-ink-100)] bg-white px-3 py-5">
+    <nav
+      aria-label="Menu utama"
+      className="h-full w-60 overflow-y-auto border-r border-[var(--color-ink-100)] bg-white px-3 py-5"
+    >
       <div className="px-3 pb-6 font-serif text-lg font-semibold">Perpustakaan</div>
       {sections.map((section) => (
         <div key={section.group ?? 'utama'} className="mb-5">
@@ -2438,16 +2537,105 @@ export function Topbar({
 }
 ```
 
-Di `src/app/(app)/layout.tsx`, ubah baris `<Sidebar />` menjadi:
+Buat `src/components/layout/app-shell.tsx`:
 
 ```tsx
-      <Sidebar role={profile.role} />
+'use client';
+
+import { usePathname } from 'next/navigation';
+import { useState, type ReactNode } from 'react';
+import { buttonClass } from '@/components/ui/button-styles';
+
+/**
+ * Kerangka responsif (PRD bab 9: desktop dan tablet). Mulai lebar 1024px (lg)
+ * sidebar selalu tampil. Di bawahnya sidebar tersembunyi dan dibuka lewat
+ * tombol Menu sebagai panel di atas konten.
+ */
+export function AppShell({
+  sidebar,
+  topbar,
+  children,
+}: {
+  sidebar: ReactNode;
+  topbar: ReactNode;
+  children: ReactNode;
+}) {
+  const pathname = usePathname();
+  // Menu dianggap terbuka hanya di halaman tempat ia dibuka. Begitu petugas
+  // berpindah halaman lewat tautan sidebar, panel tertutup sendiri tanpa
+  // efek yang menyinkronkan state dengan URL.
+  const [openOn, setOpenOn] = useState<string | null>(null);
+  const open = openOn !== null && openOn === pathname;
+
+  return (
+    <div className="flex min-h-screen">
+      <div id="navigasi-utama" className={open ? 'fixed inset-0 z-30 flex lg:static lg:z-auto' : 'hidden lg:flex'}>
+        <div className="h-full shrink-0">{sidebar}</div>
+        {open && (
+          <button
+            type="button"
+            aria-label="Tutup menu"
+            onClick={() => setOpenOn(null)}
+            className="flex-1 bg-[var(--color-ink-900)]/40 lg:hidden"
+          />
+        )}
+      </div>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex items-center border-b border-[var(--color-ink-100)] bg-white px-4 py-2 lg:hidden">
+          <button
+            type="button"
+            aria-expanded={open}
+            aria-controls="navigasi-utama"
+            onClick={() => setOpenOn(open ? null : pathname)}
+            className={buttonClass('secondary', 'sm')}
+          >
+            <span aria-hidden="true">☰</span>&nbsp;Menu
+          </button>
+        </div>
+        {topbar}
+        <main className="flex-1 p-4 lg:p-6">{children}</main>
+      </div>
+    </div>
+  );
+}
 ```
+
+Ganti seluruh isi `src/app/(app)/layout.tsx`:
+
+```tsx
+import { eq } from 'drizzle-orm';
+import { AppShell } from '@/components/layout/app-shell';
+import { Sidebar } from '@/components/layout/sidebar';
+import { Topbar } from '@/components/layout/topbar';
+import { requireProfile } from '@/server/auth/guard';
+import { db, schema } from '@/server/db/client';
+
+export default async function AppLayout({ children }: { children: React.ReactNode }) {
+  const profile = await requireProfile();
+
+  const [year] = await db
+    .select({ name: schema.academicYears.name })
+    .from(schema.academicYears)
+    .where(eq(schema.academicYears.isActive, true))
+    .limit(1);
+
+  return (
+    <AppShell
+      sidebar={<Sidebar role={profile.role} />}
+      topbar={<Topbar academicYear={year?.name ?? null} userName={profile.fullName} />}
+    >
+      {children}
+    </AppShell>
+  );
+}
+```
+
+`Sidebar` dan `Topbar` tetap Server Component; keduanya dikirim ke `AppShell` (Client Component) sebagai prop, sehingga Server Action `signOut` di Topbar tidak ikut menjadi kode klien.
 
 - [ ] **Step 20: Jalankan uji untuk memastikan lulus**
 
 Jalankan: `npx vitest run src/components/layout "src/app/(app)/layout.test.tsx"`
-Harapan: LULUS, 8 uji.
+Harapan: LULUS, 10 uji (2 sidebar, 3 topbar, 2 app-shell, 3 layout).
 
 - [ ] **Step 21: Jalankan seluruh uji, lint, dan commit**
 
@@ -2457,11 +2645,13 @@ npm run lint
 npx tsc --noEmit
 git add -A
 git commit -m "$(cat <<'EOF'
-feat(ui): komponen form dan daftar bersama, sidebar sadar peran, tombol keluar
+feat(ui): komponen bersama, kerangka responsif, sidebar sadar peran
 
 ActionForm menyimpan isian terakhir di state karena React 19 mengosongkan
-form setelah Server Action selesai. Grup Pengaturan disembunyikan dari
-petugas; aksesnya tetap ditegakkan di server.
+form setelah Server Action selesai. Di bawah 1024px sidebar dibuka lewat
+tombol Menu dan tabel digulir ke samping, agar dapat dipakai di tablet
+(PRD bab 9). Menu Laporan ditambahkan sesuai PRD bab 11. Grup Pengaturan
+disembunyikan dari petugas; aksesnya tetap ditegakkan di server.
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 EOF
@@ -3231,7 +3421,8 @@ import { Flash } from '@/components/ui/flash';
 import { PageHeader } from '@/components/ui/page-header';
 import { Pagination } from '@/components/ui/pagination';
 import { RecordStatusBadge } from '@/components/ui/record-status-badge';
-import { TABLE, TD, TH } from '@/components/ui/table-styles';
+import { ScrollTable } from '@/components/ui/scroll-table';
+import { TD, TH } from '@/components/ui/table-styles';
 import { parsePage } from '@/lib/pagination';
 import { firstValue, parseStatusFilter, type SearchParams } from '@/lib/search-params';
 import { setCategoryStatusAction } from '@/server/actions/categories';
@@ -3256,7 +3447,7 @@ export default async function CategoriesPage({ searchParams }: { searchParams: S
         <FilterSelect name="status" label="Filter status" value={status} options={STATUS_OPTIONS} />
       </FilterBar>
 
-      <table className={TABLE}>
+      <ScrollTable>
         <thead>
           <tr>
             <th className={TH}>Nama</th>
@@ -3290,7 +3481,7 @@ export default async function CategoriesPage({ searchParams }: { searchParams: S
             </tr>
           ))}
         </tbody>
-      </table>
+      </ScrollTable>
 
       <Pagination path="/master/kategori" page={page} total={total} query={{ q, status }} />
     </>
@@ -4054,7 +4245,8 @@ import { Flash } from '@/components/ui/flash';
 import { PageHeader } from '@/components/ui/page-header';
 import { Pagination } from '@/components/ui/pagination';
 import { RecordStatusBadge } from '@/components/ui/record-status-badge';
-import { TABLE, TD, TH } from '@/components/ui/table-styles';
+import { ScrollTable } from '@/components/ui/scroll-table';
+import { TD, TH } from '@/components/ui/table-styles';
 import { parsePage } from '@/lib/pagination';
 import { firstValue, parseStatusFilter, type SearchParams } from '@/lib/search-params';
 import { setRackStatusAction } from '@/server/actions/racks';
@@ -4079,7 +4271,7 @@ export default async function RacksPage({ searchParams }: { searchParams: Search
         <FilterSelect name="status" label="Filter status" value={status} options={STATUS_OPTIONS} />
       </FilterBar>
 
-      <table className={TABLE}>
+      <ScrollTable>
         <thead>
           <tr>
             <th className={TH}>Kode</th>
@@ -4115,7 +4307,7 @@ export default async function RacksPage({ searchParams }: { searchParams: Search
             </tr>
           ))}
         </tbody>
-      </table>
+      </ScrollTable>
 
       <Pagination path="/master/rak" page={page} total={total} query={{ q, status }} />
     </>
@@ -5104,7 +5296,8 @@ import { Flash } from '@/components/ui/flash';
 import { PageHeader } from '@/components/ui/page-header';
 import { Pagination } from '@/components/ui/pagination';
 import { RecordStatusBadge } from '@/components/ui/record-status-badge';
-import { TABLE, TD, TH } from '@/components/ui/table-styles';
+import { ScrollTable } from '@/components/ui/scroll-table';
+import { TD, TH } from '@/components/ui/table-styles';
 import { parsePage } from '@/lib/pagination';
 import { firstValue, parseStatusFilter, type SearchParams } from '@/lib/search-params';
 import { setStudentStatusAction } from '@/server/actions/students';
@@ -5139,7 +5332,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Sea
         <FilterSelect name="status" label="Filter status" value={status} options={STATUS_OPTIONS} />
       </FilterBar>
 
-      <table className={TABLE}>
+      <ScrollTable>
         <thead>
           <tr>
             <th className={TH}>NIS</th>
@@ -5177,7 +5370,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Sea
             </tr>
           ))}
         </tbody>
-      </table>
+      </ScrollTable>
 
       <Pagination path="/master/siswa" page={page} total={total} query={{ q, kelas: className, status }} />
     </>
@@ -6177,7 +6370,8 @@ import { Flash } from '@/components/ui/flash';
 import { PageHeader } from '@/components/ui/page-header';
 import { Pagination } from '@/components/ui/pagination';
 import { RecordStatusBadge } from '@/components/ui/record-status-badge';
-import { TABLE, TD, TH } from '@/components/ui/table-styles';
+import { ScrollTable } from '@/components/ui/scroll-table';
+import { TD, TH } from '@/components/ui/table-styles';
 import { formatRupiah } from '@/lib/format';
 import { parsePage } from '@/lib/pagination';
 import { firstValue, parseStatusFilter, type SearchParams } from '@/lib/search-params';
@@ -6215,7 +6409,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Search
         <FilterSelect name="status" label="Filter status" value={status} options={STATUS_OPTIONS} />
       </FilterBar>
 
-      <table className={TABLE}>
+      <ScrollTable>
         <thead>
           <tr>
             <th className={TH}>Judul</th>
@@ -6262,7 +6456,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Search
             </tr>
           ))}
         </tbody>
-      </table>
+      </ScrollTable>
 
       <Pagination path="/master/buku" page={page} total={total} query={{ q, kategori: categoryId, status }} />
     </>
@@ -7317,7 +7511,8 @@ import { ActionButton } from '@/components/ui/action-button';
 import { ActionForm } from '@/components/ui/action-form';
 import { TextAreaField, TextField } from '@/components/ui/fields';
 import { StatusBadge } from '@/components/ui/status-badge';
-import { TABLE, TD, TH } from '@/components/ui/table-styles';
+import { ScrollTable } from '@/components/ui/scroll-table';
+import { TD, TH } from '@/components/ui/table-styles';
 import { availableManualActions, MANUAL_ACTION_LABELS } from '@/domain/copy/manual-status';
 import { formatDate } from '@/lib/format';
 import { addCopiesAction, changeCopyStatusAction } from '@/server/actions/copies';
@@ -7346,7 +7541,7 @@ export function CopiesSection({
         </p>
       </div>
 
-      <table className={TABLE}>
+      <ScrollTable>
         <thead>
           <tr>
             <th className={TH}>Barcode</th>
@@ -7388,7 +7583,7 @@ export function CopiesSection({
             </tr>
           ))}
         </tbody>
-      </table>
+      </ScrollTable>
 
       {bookActive ? (
         <ActionForm action={addCopiesAction.bind(null, bookId)} submitLabel="Tambah Eksemplar">
@@ -7570,6 +7765,12 @@ Sebagai **admin** (`admin` / `perpus123`):
 
 Seluruh langkah harus dapat diselesaikan dengan papan ketik saja (Tab, Enter, Spasi).
 
+Di lebar tablet (PRD bab 9), dengan `$B viewport 768x1024` atau jendela peramban selebar 768px:
+11. Sidebar tersembunyi; tombol **Menu** tampil di atas top bar. Menekannya membuka sidebar sebagai panel; mengetuk area gelap di sampingnya menutupnya.
+12. Membuka menu lalu memilih **Siswa** berpindah ke `/master/siswa` dan panel menu tertutup sendiri.
+13. Tabel daftar buku dapat digulir ke samping di dalam kotaknya; halaman sendiri tidak ikut melebar.
+14. Grup menu **Laporan** tampil untuk petugas maupun admin (halamannya memang belum ada sampai Rencana 06).
+
 - [ ] **Step 4: Periksa jejak audit dari alur di atas**
 
 ```bash
@@ -7614,6 +7815,7 @@ EOF
 | Layar Tahun Ajaran, Pengguna, Konfigurasi | Rencana 03 |
 | Peminjaman, pengembalian, pelunasan denda, riwayat | Rencana 04 |
 | Dashboard, cetak struk, cetak label barcode, tampilan audit log | Rencana 05 |
+| Halaman laporan (menunya sudah ada) | Rencana 06 |
 | Unggah sampul buku ke Supabase Storage | Ditunda. Kolom `cover_url` sudah ada; belum ada kebutuhan operasional yang mendesak |
 | Import Excel | Di luar MVP (spec 2.2). `nis` dan `barcode` sudah menjadi kunci alami yang stabil |
 | Menandai eksemplar rusak dari rak (bukan lewat pengembalian) | Belum diminta spec. Spec 4.3 hanya mengenal rusak/hilang sebagai hasil pengembalian |
