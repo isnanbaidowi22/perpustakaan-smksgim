@@ -52,7 +52,7 @@ export function StudentFields({
       <SelectField
         name="academicYearId"
         label="Tahun ajaran"
-        placeholder="— Tanpa tahun ajaran —"
+        placeholder={student ? '— Tanpa tahun ajaran —' : undefined}
         defaultValue={student?.academicYearId ?? defaultYearId ?? ''}
         options={yearOptions}
       />

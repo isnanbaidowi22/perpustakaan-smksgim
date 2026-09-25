@@ -1,9 +1,9 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 
 vi.mock('next/navigation', () => ({ usePathname: () => '/master/buku' }));
 
-import { AppShell } from './app-shell';
+import { AppShell, getIsLargeViewport, subscribeToLargeViewport } from './app-shell';
 
 function render() {
   return renderToStaticMarkup(
@@ -35,5 +35,36 @@ describe('AppShell', () => {
     expect(buttonIndex).toBeGreaterThan(-1);
     expect(panelIndex).toBeGreaterThan(-1);
     expect(buttonIndex).toBeLessThan(panelIndex);
+  });
+});
+
+describe('viewport lg (dipakai agar kolom konten tidak inert saat rotasi tablet)', () => {
+  afterEach(() => {
+    // @ts-expect-error -- window sengaja tidak ada di environment 'node'; dipasang manual per uji.
+    delete globalThis.window;
+  });
+
+  it('getIsLargeViewport membaca hasil matchMedia("(min-width: 1024px)") saat ini', () => {
+    const matchMedia = vi.fn(() => ({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() }));
+    // @ts-expect-error -- stub minimal window untuk lingkungan uji node.
+    globalThis.window = { matchMedia };
+
+    expect(getIsLargeViewport()).toBe(true);
+    expect(matchMedia).toHaveBeenCalledWith('(min-width: 1024px)');
+  });
+
+  it('subscribeToLargeViewport memasang dan melepas listener change pada MediaQueryList', () => {
+    const addEventListener = vi.fn();
+    const removeEventListener = vi.fn();
+    const matchMedia = vi.fn(() => ({ matches: false, addEventListener, removeEventListener }));
+    // @ts-expect-error -- stub minimal window untuk lingkungan uji node.
+    globalThis.window = { matchMedia };
+
+    const onChange = vi.fn();
+    const unsubscribe = subscribeToLargeViewport(onChange);
+    expect(addEventListener).toHaveBeenCalledWith('change', onChange);
+
+    unsubscribe();
+    expect(removeEventListener).toHaveBeenCalledWith('change', onChange);
   });
 });

@@ -20,4 +20,9 @@ describe('NewStudentPage', () => {
     }
     expect(html).toMatch(/<option value="y1" selected="">2026\/2027 \(aktif\)<\/option>/);
   });
+
+  it('tidak menawarkan opsi "tanpa tahun ajaran" karena tahun aktif sudah terpilih', async () => {
+    const html = renderToStaticMarkup(await NewStudentPage());
+    expect(html).not.toContain('Tanpa tahun ajaran');
+  });
 });

@@ -59,11 +59,13 @@ export async function addCopies(
   if (!isUuid(bookId)) return fail(BOOK_NOT_FOUND);
   try {
     return await executor.transaction(async (tx) => {
+      // Kunci share: mencegah setBookStatus (yang memakai for('update')) menonaktifkan
+      // buku ini di antara pemeriksaan status dan penyisipan eksemplar baru di bawah.
       const [book] = await tx
         .select({ title: books.title, status: books.status })
         .from(books)
         .where(eq(books.id, bookId))
-        .limit(1);
+        .for('share');
       if (!book) return fail(BOOK_NOT_FOUND);
       if (book.status !== 'active') {
         return fail(`Buku "${book.title}" nonaktif. Aktifkan bukunya terlebih dahulu sebelum menambah eksemplar.`);

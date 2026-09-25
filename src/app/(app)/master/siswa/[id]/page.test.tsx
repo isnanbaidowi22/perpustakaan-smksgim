@@ -32,6 +32,7 @@ describe('EditStudentPage', () => {
     expect(html).toContain('value="202600123"');
     expect(html).toContain('value="XI RPL 1"');
     expect(html).toMatch(/<option value="L" selected="">/);
+    expect(html).toContain('Tanpa tahun ajaran');
   });
 
   it('menampilkan halaman tidak ditemukan untuk id yang tidak ada', async () => {

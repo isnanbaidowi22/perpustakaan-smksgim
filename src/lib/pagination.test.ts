@@ -9,6 +9,15 @@ describe('parsePage', () => {
   it.each(['', '0', '-2', 'dua', '1.5'])('kembali ke halaman 1 untuk %j', (value) => {
     expect(parsePage(value)).toBe(1);
   });
+
+  it('kembali ke halaman 1 untuk nilai yang terlalu besar untuk OFFSET SQL', () => {
+    expect(parsePage('1e20')).toBe(1);
+    expect(parsePage('100001')).toBe(1);
+  });
+
+  it('menerima batas atas yang wajar', () => {
+    expect(parsePage('100000')).toBe(100000);
+  });
 });
 
 describe('pageCount dan offsetOf', () => {

@@ -53,7 +53,7 @@ export function rupiah(message: string) {
       const digits = (value ?? '').replace(/[.\s]/g, '');
       return digits === '' ? 0 : Number(digits);
     })
-    .pipe(z.number({ error: message }).int(message).min(0, message));
+    .pipe(z.number({ error: message }).int(message).min(0, message).max(9_999_999_999, message));
 }
 
 const uuidSchema = z.uuid();

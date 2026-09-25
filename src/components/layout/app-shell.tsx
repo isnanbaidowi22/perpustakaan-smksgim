@@ -1,8 +1,22 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
+import { useRef, useState, useSyncExternalStore, type KeyboardEvent, type ReactNode } from 'react';
 import { buttonClass } from '@/components/ui/button-styles';
+
+const LARGE_VIEWPORT_QUERY = '(min-width: 1024px)';
+
+/** Membaca lebar layar saat ini lewat matchMedia, dipakai bersama `useSyncExternalStore`. */
+export function getIsLargeViewport(): boolean {
+  return window.matchMedia(LARGE_VIEWPORT_QUERY).matches;
+}
+
+/** Dipanggil ulang setiap kali ambang breakpoint lg dilewati (mis. rotasi tablet). */
+export function subscribeToLargeViewport(onChange: () => void): () => void {
+  const query = window.matchMedia(LARGE_VIEWPORT_QUERY);
+  query.addEventListener('change', onChange);
+  return () => query.removeEventListener('change', onChange);
+}
 
 /**
  * Kerangka responsif (PRD bab 9: desktop dan tablet). Mulai lebar 1024px (lg)
@@ -29,6 +43,9 @@ export function AppShell({
   const [openOn, setOpenOn] = useState<string | null>(null);
   const open = openOn !== null && openOn === pathname;
   const toggleRef = useRef<HTMLButtonElement>(null);
+  // Snapshot server bernilai false: pada render pertama di server, breakpoint
+  // lg tidak diketahui, dan tak masalah karena `open` juga selalu false saat itu.
+  const isLargeViewport = useSyncExternalStore(subscribeToLargeViewport, getIsLargeViewport, () => false);
 
   function close() {
     setOpenOn(null);
@@ -68,7 +85,7 @@ export function AppShell({
           />
         )}
       </div>
-      <div className="flex min-w-0 flex-1 flex-col" inert={open}>
+      <div className="flex min-w-0 flex-1 flex-col" inert={open && !isLargeViewport}>
         {topbar}
         <main className="flex-1 p-4 lg:p-6">{children}</main>
       </div>

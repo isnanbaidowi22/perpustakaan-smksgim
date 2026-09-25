@@ -86,6 +86,14 @@ describe('rupiah', () => {
   it.each(['-1', 'delapan', '1,5'])('menolak %s', (value) => {
     expect(messageOf(schema.safeParse(value))).toBe('Harga harus bilangan bulat rupiah, minimal 0.');
   });
+
+  it('menolak nilai yang melebihi batas kolom numeric(12,2)', () => {
+    expect(messageOf(schema.safeParse('10000000000'))).toBe('Harga harus bilangan bulat rupiah, minimal 0.');
+  });
+
+  it('menerima batas atas kolom numeric(12,2)', () => {
+    expect(schema.parse('9999999999')).toBe(9_999_999_999);
+  });
 });
 
 describe('penjaga tipe', () => {
