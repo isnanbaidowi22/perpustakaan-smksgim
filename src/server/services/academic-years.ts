@@ -18,7 +18,7 @@ function duplicate(name: string): ServiceResult {
 /**
  * Hanya terjadi bila dua admin menambah tahun aktif pertama pada saat yang
  * sama, ketika belum ada baris untuk dikunci. Selain itu kunci di
- * `moveActiveFlag` sudah mengurutkan keduanya.
+ * `lockAcademicYears` sudah mengurutkan keduanya.
  */
 const ACTIVE_RACE = 'Tahun ajaran aktif baru saja diubah admin lain. Muat ulang halaman lalu periksa tahun ajaran aktif.';
 
@@ -29,21 +29,39 @@ function knownViolation(error: unknown, name: string): ServiceResult | null {
   return null;
 }
 
+interface LockedYear {
+  id: string;
+  name: string;
+  isActive: boolean;
+}
+
+/**
+ * Mengunci seluruh baris `academic_years` dalam urutan tetap (`id`). Tanpa
+ * kunci, dua admin yang mengaktifkan tahun berbeda bersamaan sama-sama lolos
+ * pemeriksaan dan salah satunya ditolak index `one_active_academic_year`
+ * belakangan, atau — bila mengaktifkan tahun yang sama — keduanya lolos dan
+ * menulis audit dobel. Urutan tetap mencegah dua transaksi saling mengunci
+ * baris yang berbeda lebih dulu lalu saling menunggu (deadlock). Tabelnya
+ * kecil (satu baris per tahun), jadi mengunci semuanya murah. Baris target
+ * TIDAK dikunci sendiri lebih dulu di luar kunci tabel ini — itu akan
+ * membuat dua pengaktifan tahun yang berbeda saling deadlock.
+ */
+async function lockAcademicYears(tx: Transaction): Promise<LockedYear[]> {
+  return tx
+    .select({ id: academicYears.id, name: academicYears.name, isActive: academicYears.isActive })
+    .from(academicYears)
+    .orderBy(academicYears.id)
+    .for('update');
+}
+
 /**
  * Memindahkan tanda aktif ke `id` dan mengembalikan nama tahun yang
- * sebelumnya aktif. Seluruh baris dikunci lebih dulu: tanpa kunci, dua admin
- * yang mengaktifkan tahun berbeda bersamaan sama-sama lolos dan salah satunya
- * ditolak index `one_active_academic_year`. Tabelnya kecil (satu baris per
- * tahun), jadi mengunci semuanya murah.
+ * sebelumnya aktif, menurut `rows` yang sudah dikunci oleh `lockAcademicYears`.
  *
  * Urutannya wajib: matikan yang lama dulu, baru nyalakan yang baru. Index
  * parsial itu tidak dapat ditunda sampai commit.
  */
-async function moveActiveFlag(tx: Transaction, id: string): Promise<string | null> {
-  const rows = await tx
-    .select({ id: academicYears.id, name: academicYears.name, isActive: academicYears.isActive })
-    .from(academicYears)
-    .for('update');
+async function flipActive(tx: Transaction, rows: LockedYear[], id: string): Promise<string | null> {
   const previous = rows.find((row) => row.isActive && row.id !== id);
 
   await tx
@@ -63,7 +81,7 @@ export async function createAcademicYear(
   try {
     return await executor.transaction(async (tx) => {
       const [created] = await tx.insert(academicYears).values(values).returning({ id: academicYears.id });
-      if (input.activate) await moveActiveFlag(tx, created.id);
+      if (input.activate) await flipActive(tx, await lockAcademicYears(tx), created.id);
 
       await writeAudit(tx, {
         actorId: actor.id,
@@ -120,14 +138,19 @@ export async function activateAcademicYear(id: string, actor: Actor, executor: E
   if (!isUuid(id)) return fail(NOT_FOUND);
   try {
     return await executor.transaction(async (tx) => {
-      const [target] = await tx
-        .select({ name: academicYears.name, isActive: academicYears.isActive })
-        .from(academicYears)
-        .where(eq(academicYears.id, id));
+      // Keputusan "sudah aktif atau belum" wajib diambil dari baris yang
+      // sudah terkunci, bukan dari select tanpa kunci sebelumnya. Tanpa ini,
+      // dua permintaan mengaktifkan tahun yang sama (dua admin, atau
+      // klik ganda) sama-sama lolos pemeriksaan "belum aktif", lalu yang
+      // kedua — begitu mendapat kunci tabel — menjalankan flip kosong dan
+      // menulis audit `academic_year.activate` kedua dengan `previous: null`,
+      // padahal tidak ada perubahan nyata.
+      const rows = await lockAcademicYears(tx);
+      const target = rows.find((row) => row.id === id);
       if (!target) return fail(NOT_FOUND);
       if (target.isActive) return ok(id);
 
-      const previous = await moveActiveFlag(tx, id);
+      const previous = await flipActive(tx, rows, id);
       await writeAudit(tx, {
         actorId: actor.id,
         action: 'academic_year.activate',
