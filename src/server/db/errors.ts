@@ -22,3 +22,9 @@ export function uniqueViolation(error: unknown): string | null {
   if (pg?.code !== '23505') return null;
   return typeof pg.constraint_name === 'string' ? pg.constraint_name : null;
 }
+
+/** Kode SQLSTATE galat Postgres, misalnya '55P03' (lock_not_available), atau null. */
+export function sqlState(error: unknown): string | null {
+  const pg = postgresError(error);
+  return typeof pg?.code === 'string' ? pg.code : null;
+}
