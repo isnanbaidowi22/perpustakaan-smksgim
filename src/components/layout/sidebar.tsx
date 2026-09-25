@@ -17,6 +17,7 @@ const NAV: NavSection[] = [
       { href: '/master/kategori', label: 'Kategori' },
       { href: '/master/siswa', label: 'Siswa' },
       { href: '/master/rak', label: 'Rak' },
+      { href: '/cetak/label-barcode', label: 'Label Barcode' },
     ],
   },
   {

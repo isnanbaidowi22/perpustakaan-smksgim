@@ -67,4 +67,11 @@ describe('BookDetailPage', () => {
     mockRequireProfile.mockResolvedValueOnce({ role: 'admin' });
     await expect(render()).rejects.toThrow('NEXT_NOT_FOUND');
   });
+
+  it('menawarkan cetak label untuk seluruh eksemplar judul ini', async () => {
+    mockGetBook.mockResolvedValueOnce(book);
+    mockRequireProfile.mockResolvedValueOnce({ role: 'petugas' });
+
+    expect(await render()).toContain('href="/cetak/label-barcode?buku=b1"');
+  });
 });

@@ -36,7 +36,12 @@ export default async function BookDetailPage({
       <PageHeader
         title={book.title}
         description={book.status === 'active' ? book.author : `${book.author} · Nonaktif`}
-        actions={<Link href="/master/buku" className={buttonClass('secondary')}>Kembali ke daftar</Link>}
+        actions={(
+          <>
+            <Link href={`/cetak/label-barcode?buku=${book.id}`} className={buttonClass('secondary')}>Cetak Label</Link>
+            <Link href="/master/buku" className={buttonClass('secondary')}>Kembali ke daftar</Link>
+          </>
+        )}
       />
       <Flash message={firstValue(query.pesan)} />
 

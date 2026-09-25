@@ -8,6 +8,7 @@ const COMMON = [
   '/master/kategori',
   '/master/siswa',
   '/master/rak',
+  '/cetak/label-barcode',
   '/transaksi/peminjaman',
   '/transaksi/pengembalian',
   '/transaksi/riwayat',
