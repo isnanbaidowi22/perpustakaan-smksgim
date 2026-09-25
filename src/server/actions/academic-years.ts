@@ -53,5 +53,6 @@ export async function activateAcademicYearAction(
     execute: (actor) => activateAcademicYear(id, actor),
     successMessage: 'Tahun ajaran aktif diganti. Peminjaman baru tercatat di tahun ini.',
     revalidate: [LIST],
+    redirectTo: LIST,
   });
 }

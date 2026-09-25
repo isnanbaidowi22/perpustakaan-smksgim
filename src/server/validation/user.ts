@@ -17,6 +17,18 @@ function sameConfirmation(value: { password: string; passwordConfirm?: string })
 const fullName = requiredText('Nama lengkap wajib diisi.', 100);
 const role = z.enum(['admin', 'petugas'], 'Peran harus admin atau petugas.');
 
+const USERNAME_SHAPE = 'Username harus diawali dan diakhiri huruf atau angka, tanpa titik berurutan, misalnya siti.aminah.';
+
+/**
+ * Supabase memakai username sebagai local-part surel internal (lihat
+ * `usernameToEmail`), yang menolak local-part berawal/berakhir titik atau
+ * berisi titik berurutan. `VALID_USERNAME` (login) TIDAK diubah agar
+ * username lama yang sudah terlanjur dibuat tetap bisa masuk.
+ */
+function hasValidUsernameShape(value: string): boolean {
+  return /^[a-z0-9]/.test(value) && /[a-z0-9]$/.test(value) && !value.includes('..');
+}
+
 export const newUserSchema = z
   .object({
     username: requiredText('Username wajib diisi.', 30)
@@ -24,7 +36,8 @@ export const newUserSchema = z
       .pipe(
         z.string()
           .min(3, 'Username minimal 3 karakter.')
-          .regex(VALID_USERNAME, 'Username hanya boleh berisi huruf kecil, angka, titik, dan garis bawah, misalnya siti.aminah.'),
+          .regex(VALID_USERNAME, 'Username hanya boleh berisi huruf kecil, angka, titik, dan garis bawah, misalnya siti.aminah.')
+          .pipe(z.string().refine(hasValidUsernameShape, USERNAME_SHAPE)),
       ),
     fullName,
     role,

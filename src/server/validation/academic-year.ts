@@ -49,13 +49,13 @@ function dateIssues({ name, startDate, endDate }: YearDates): { path: keyof Year
   return issues;
 }
 
-export const academicYearSchema = z.object(fields).superRefine((value, ctx) => {
+function checkDates(value: YearDates, ctx: z.RefinementCtx): void {
   for (const issue of dateIssues(value)) ctx.addIssue({ code: 'custom', path: [issue.path], message: issue.message });
-});
+}
 
-export const newAcademicYearSchema = z.object({ ...fields, activate: checkbox() }).superRefine((value, ctx) => {
-  for (const issue of dateIssues(value)) ctx.addIssue({ code: 'custom', path: [issue.path], message: issue.message });
-});
+export const academicYearSchema = z.object(fields).superRefine(checkDates);
+
+export const newAcademicYearSchema = z.object({ ...fields, activate: checkbox() }).superRefine(checkDates);
 
 export type AcademicYearInput = z.output<typeof academicYearSchema>;
 export type NewAcademicYearInput = z.output<typeof newAcademicYearSchema>;

@@ -53,6 +53,7 @@ describe('Server Action tahun ajaran', () => {
     const options = mockRunCommand.mock.calls[0]?.[0];
     expect(options.roles).toEqual(['admin']);
     expect(options.revalidate).toEqual(['/pengaturan/tahun-ajaran']);
+    expect(options.redirectTo).toBe('/pengaturan/tahun-ajaran');
     await options.execute(actor);
     expect(mockActivate).toHaveBeenCalledWith('y1', actor);
   });

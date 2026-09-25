@@ -28,6 +28,7 @@ describe('createUser', () => {
 
       if (!result.ok) throw new Error(result.message);
       expect(auth.created).toEqual([{ id: result.id, email: usernameToEmail('uji_petugas'), password: 'rahasia-uji-1' }]);
+      expect(auth.deleted).toEqual([]);
       expect(await getUser(result.id, tx)).toEqual({
         id: result.id, username: 'uji_petugas', fullName: 'UJI Petugas Baru', role: 'petugas', status: 'active',
       });

@@ -24,6 +24,9 @@ export const settingsColumns = {
 /** Bentuk baris hasil `select(settingsColumns)`: sama dengan Settings, kecuali `numeric` yang dibaca sebagai untai. */
 type SettingsRow = Omit<Settings, 'finePerDay'> & { finePerDay: string };
 
+/** Konfigurasi hanya satu baris; `id` hasilnya tidak dipakai pemanggil. */
+export const SETTINGS_ID = 1;
+
 /** `numeric` dibaca Postgres sebagai untai ('1000.00'); aturan domain butuh bilangan. */
 export function toSettings(row: SettingsRow): Settings {
   return { ...row, finePerDay: Number(row.finePerDay) };
@@ -35,7 +38,7 @@ export function toSettings(row: SettingsRow): Settings {
  * peminjaman tidak gagal hanya karena barisnya belum ada.
  */
 export async function getLibrarySettings(executor: Executor = db): Promise<Settings> {
-  const [row] = await executor.select(settingsColumns).from(librarySettings).where(eq(librarySettings.id, 1)).limit(1);
+  const [row] = await executor.select(settingsColumns).from(librarySettings).where(eq(librarySettings.id, SETTINGS_ID)).limit(1);
   if (!row) return { ...DEFAULT_SETTINGS, schoolName: null, receiptFooter: null };
   return toSettings(row);
 }

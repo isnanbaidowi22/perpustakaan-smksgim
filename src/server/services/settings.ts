@@ -4,12 +4,9 @@ import { writeAudit } from '@/server/audit';
 import { db } from '@/server/db/client';
 import type { Executor } from '@/server/db/executor';
 import { librarySettings } from '@/server/db/schema';
-import { settingsColumns, toSettings } from '@/server/queries/settings';
+import { SETTINGS_ID, settingsColumns, toSettings } from '@/server/queries/settings';
 import type { SettingsInput } from '@/server/validation/settings';
 import { ok, type ServiceResult } from './result';
-
-/** Konfigurasi hanya satu baris; `id` hasilnya tidak dipakai pemanggil. */
-const SETTINGS_ID = 1;
 
 export async function updateLibrarySettings(
   input: SettingsInput,

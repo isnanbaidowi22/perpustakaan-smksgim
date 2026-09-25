@@ -33,6 +33,20 @@ describe('newUserSchema', () => {
     }
   });
 
+  it('menolak username yang berawal, berakhir, atau berisi titik berurutan', () => {
+    for (const username of ['...', 'siti.', '.siti', 'a..b', '_siti']) {
+      expect(messagesOf(newUserSchema.safeParse({ ...valid, username }))).toEqual([
+        'Username harus diawali dan diakhiri huruf atau angka, tanpa titik berurutan, misalnya siti.aminah.',
+      ]);
+    }
+  });
+
+  it('menerima username yang berawal dan berakhir huruf atau angka tanpa titik berurutan', () => {
+    for (const username of ['siti.aminah', 'uji_petugas', 'budi2']) {
+      expect(newUserSchema.safeParse({ ...valid, username }).success).toBe(true);
+    }
+  });
+
   it('menolak username terlalu pendek dan peran yang tidak dikenal', () => {
     expect(messagesOf(newUserSchema.safeParse({ ...valid, username: 'ab', role: 'kepala' }))).toEqual([
       'Username minimal 3 karakter.',

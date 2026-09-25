@@ -56,20 +56,28 @@ async function lockAcademicYears(tx: Transaction): Promise<LockedYear[]> {
 
 /**
  * Memindahkan tanda aktif ke `id` dan mengembalikan nama tahun yang
- * sebelumnya aktif, menurut `rows` yang sudah dikunci oleh `lockAcademicYears`.
+ * sebelumnya aktif.
+ *
+ * Nama tahun sebelumnya diambil dari `.returning()` UPDATE yang mematikannya
+ * di transaksi ini, bukan dari baris yang dikunci `lockAcademicYears` di
+ * awal. Di bawah READ COMMITTED, sebuah tahun yang dibuat lalu diaktifkan
+ * dan di-commit oleh transaksi lain sementara `for('update')` di sini masih
+ * menunggu kunci, tidak akan ada di baris yang terkunci tadi — padahal
+ * UPDATE di bawah (snapshot baru, dijalankan setelah kunci didapat) tetap
+ * mematikannya. Memakai baris lama akan salah mencatat `previous: null`
+ * walau sebenarnya ada tahun yang dimatikan.
  *
  * Urutannya wajib: matikan yang lama dulu, baru nyalakan yang baru. Index
  * parsial itu tidak dapat ditunda sampai commit.
  */
-async function flipActive(tx: Transaction, rows: LockedYear[], id: string): Promise<string | null> {
-  const previous = rows.find((row) => row.isActive && row.id !== id);
-
-  await tx
+async function flipActive(tx: Transaction, id: string): Promise<string | null> {
+  const deactivated = await tx
     .update(academicYears)
     .set({ isActive: false })
-    .where(and(eq(academicYears.isActive, true), ne(academicYears.id, id)));
+    .where(and(eq(academicYears.isActive, true), ne(academicYears.id, id)))
+    .returning({ name: academicYears.name });
   await tx.update(academicYears).set({ isActive: true }).where(eq(academicYears.id, id));
-  return previous?.name ?? null;
+  return deactivated[0]?.name ?? null;
 }
 
 export async function createAcademicYear(
@@ -81,7 +89,10 @@ export async function createAcademicYear(
   try {
     return await executor.transaction(async (tx) => {
       const [created] = await tx.insert(academicYears).values(values).returning({ id: academicYears.id });
-      if (input.activate) await flipActive(tx, await lockAcademicYears(tx), created.id);
+      if (input.activate) {
+        await lockAcademicYears(tx);
+        await flipActive(tx, created.id);
+      }
 
       await writeAudit(tx, {
         actorId: actor.id,
@@ -150,7 +161,7 @@ export async function activateAcademicYear(id: string, actor: Actor, executor: E
       if (!target) return fail(NOT_FOUND);
       if (target.isActive) return ok(id);
 
-      const previous = await flipActive(tx, rows, id);
+      const previous = await flipActive(tx, id);
       await writeAudit(tx, {
         actorId: actor.id,
         action: 'academic_year.activate',
