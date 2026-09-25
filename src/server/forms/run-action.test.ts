@@ -115,6 +115,37 @@ describe('runFormAction', () => {
     ).rejects.toThrow('NEXT_REDIRECT');
     expect(mockRedirect).toHaveBeenCalledWith('/master/buku/c1?pesan=Kategori%20berhasil%20disimpan.');
   });
+
+  it('tidak mengirim balik kolom rahasia bila validasi gagal', async () => {
+    const state = await runFormAction(options({
+      formData: form({ name: '', password: 'rahasia123' }),
+      secretFields: ['password'],
+    }));
+
+    expect(state).toEqual(formError(
+      'Kategori belum dapat disimpan. Periksa kolom yang ditandai.',
+      { name: ['Nama kategori wajib diisi.'] },
+      { name: '' },
+    ));
+  });
+
+  it('tidak mengirim balik kolom rahasia bila service menolak', async () => {
+    const execute = vi.fn(async (): Promise<ServiceResult> => ({
+      ok: false, message: 'Username siti sudah dipakai. Pilih username lain.', field: 'name',
+    }));
+
+    const state = await runFormAction(options({
+      execute,
+      formData: form({ name: 'Fiksi', password: 'rahasia123' }),
+      secretFields: ['password'],
+    }));
+
+    expect(state).toEqual(formError(
+      'Username siti sudah dipakai. Pilih username lain.',
+      { name: ['Username siti sudah dipakai. Pilih username lain.'] },
+      { name: 'Fiksi' },
+    ));
+  });
 });
 
 describe('runCommand', () => {

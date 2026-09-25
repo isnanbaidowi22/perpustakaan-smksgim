@@ -15,6 +15,14 @@ describe('formToObject', () => {
     data.set('title', 'Pemrograman Web');
     expect(formToObject(data)).toEqual({ title: 'Pemrograman Web' });
   });
+
+  it('menyimpan nilai terakhir bila beberapa isian bernama sama', () => {
+    // CheckboxField bergantung pada ini: kolom tersembunyi 'off' lalu kotak 'on'.
+    const data = new FormData();
+    data.append('blockWhenOverdue', 'off');
+    data.append('blockWhenOverdue', 'on');
+    expect(formToObject(data)).toEqual({ blockWhenOverdue: 'on' });
+  });
 });
 
 describe('pembentuk state', () => {

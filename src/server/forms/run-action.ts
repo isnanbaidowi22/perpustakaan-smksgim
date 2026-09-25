@@ -24,6 +24,11 @@ interface FormActionOptions<S extends z.ZodType> extends Completion {
   formData: FormData;
   /** Pesan umum saat ada kolom tidak valid, menyebut entitasnya. */
   invalidMessage: string;
+  /**
+   * Kolom yang tidak boleh dikirim balik ke peramban bersama isian terakhir,
+   * misalnya kata sandi. Kolom ini kosong kembali setelah galat.
+   */
+  secretFields?: string[];
   execute: (data: z.output<S>, actor: Actor) => Promise<ServiceResult>;
 }
 
@@ -42,13 +47,14 @@ export async function runFormAction<S extends z.ZodType>(options: FormActionOpti
   if (!auth.ok) return formError(auth.message);
 
   const values = formToObject(options.formData);
+  const echoed = withoutFields(values, options.secretFields ?? []);
   const parsed = options.schema.safeParse(values);
   if (!parsed.success) {
-    return formError(options.invalidMessage, fieldErrorsOf(parsed.error), values);
+    return formError(options.invalidMessage, fieldErrorsOf(parsed.error), echoed);
   }
 
   const result = await options.execute(parsed.data, auth.actor);
-  return complete(result, options, values);
+  return complete(result, options, echoed);
 }
 
 /** Untuk aksi tanpa isian form, misalnya menonaktifkan data. */
@@ -58,6 +64,10 @@ export async function runCommand(options: CommandOptions): Promise<FormState> {
 
   const result = await options.execute(auth.actor);
   return complete(result, options, {});
+}
+
+function withoutFields(values: Record<string, string>, fields: string[]): Record<string, string> {
+  return Object.fromEntries(Object.entries(values).filter(([key]) => !fields.includes(key)));
 }
 
 function fieldErrorsOf(error: z.ZodError): FieldErrors {

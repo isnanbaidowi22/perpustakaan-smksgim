@@ -7,7 +7,8 @@ export interface AuditEntry {
   action: string;
   /** Nama tabel yang berubah, misalnya `categories`. */
   entity: string;
-  entityId: string;
+  /** Kosong untuk tabel tanpa id UUID, misalnya `library_settings` yang hanya satu baris. */
+  entityId?: string;
   metadata?: Record<string, unknown>;
 }
 
@@ -20,7 +21,7 @@ export async function writeAudit(executor: Executor, entry: AuditEntry): Promise
     userId: entry.actorId,
     action: entry.action,
     entity: entry.entity,
-    entityId: entry.entityId,
+    entityId: entry.entityId ?? null,
     metadata: entry.metadata ?? null,
   });
 }

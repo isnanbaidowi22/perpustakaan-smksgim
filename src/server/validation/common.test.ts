@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import type { z } from 'zod';
 import {
-  isRecordStatus, isUuid, optionalInteger, optionalText, optionalUuid, requiredText, rupiah,
+  checkbox, isoDate, isRecordStatus, isUuid, optionalInteger, optionalText, optionalUuid,
+  requiredInteger, requiredText, rupiah,
 } from './common';
 
 function messageOf(result: z.ZodSafeParseResult<unknown>): string | undefined {
@@ -107,5 +108,43 @@ describe('penjaga tipe', () => {
     expect(isRecordStatus('active')).toBe(true);
     expect(isRecordStatus('inactive')).toBe(true);
     expect(isRecordStatus('deleted')).toBe(false);
+  });
+});
+
+describe('requiredInteger', () => {
+  const message = 'Batas pinjam harus bilangan bulat 1 sampai 20.';
+  const schema = requiredInteger(message, 1, 20);
+
+  it('mengubah isian menjadi bilangan', () => {
+    expect(schema.parse(' 3 ')).toBe(3);
+  });
+
+  it('menolak isian kosong, pecahan, huruf, dan di luar rentang dengan pesan yang sama', () => {
+    for (const value of ['', '2.5', 'tiga', '0', '21', undefined]) {
+      expect(messageOf(schema.safeParse(value))).toBe(message);
+    }
+  });
+});
+
+describe('isoDate', () => {
+  const message = 'Tanggal mulai wajib diisi dengan tanggal yang valid.';
+  const schema = isoDate(message);
+
+  it('menerima tanggal dari <input type="date">', () => {
+    expect(schema.parse('2026-07-01')).toBe('2026-07-01');
+  });
+
+  it('menolak isian kosong dan format lain dengan pesan yang diberikan', () => {
+    for (const value of ['', '2026-13-01', '01/07/2026', undefined]) {
+      expect(messageOf(schema.safeParse(value))).toBe(message);
+    }
+  });
+});
+
+describe('checkbox', () => {
+  it('bernilai true hanya bila kotak dicentang', () => {
+    expect(checkbox().parse('on')).toBe(true);
+    expect(checkbox().parse('off')).toBe(false);
+    expect(checkbox().parse(undefined)).toBe(false);
   });
 });

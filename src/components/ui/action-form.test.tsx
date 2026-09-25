@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { formError } from '@/lib/form-state';
 import { ActionForm } from './action-form';
-import { SelectField, TextAreaField, TextField } from './fields';
+import { CheckboxField, SelectField, TextAreaField, TextField } from './fields';
 
 describe('ActionForm', () => {
   it('menampilkan kolom, tombol simpan, dan tautan batal', () => {
@@ -51,5 +51,41 @@ describe('ActionForm', () => {
     );
     expect(html).toContain('— Tanpa kategori —');
     expect(html).toMatch(/<option value="c2" selected="">Sains<\/option>/);
+  });
+
+  it('CheckboxField mengirim "off" lewat kolom tersembunyi dan mengikuti nilai bawaan', () => {
+    const html = renderToStaticMarkup(
+      <ActionForm action={vi.fn()} submitLabel="Simpan">
+        <CheckboxField name="blockWhenOverdue" label="Tolak bila terlambat" defaultChecked />
+      </ActionForm>,
+    );
+    expect(html).toMatch(/<input type="hidden" name="blockWhenOverdue" value="off"\/?>/);
+    expect(html).toMatch(/type="checkbox"[^>]*checked=""/);
+  });
+
+  it('CheckboxField tetap tidak dicentang setelah validasi kolom lain gagal', () => {
+    const state = formError(
+      'Konfigurasi belum dapat disimpan. Periksa kolom yang ditandai.',
+      { loanDurationDays: ['Durasi pinjam harus bilangan bulat 1 sampai 90 hari.'] },
+      { blockWhenOverdue: 'off', loanDurationDays: '0' },
+    );
+    const html = renderToStaticMarkup(
+      <ActionForm action={vi.fn()} submitLabel="Simpan" initialState={state}>
+        <CheckboxField name="blockWhenOverdue" label="Tolak bila terlambat" defaultChecked />
+      </ActionForm>,
+    );
+    expect(html).not.toMatch(/checked=""/);
+  });
+
+  it('TextField kata sandi memakai type password dan petunjuk isi otomatis', () => {
+    const html = renderToStaticMarkup(
+      <ActionForm action={vi.fn()} submitLabel="Simpan">
+        <TextField name="password" label="Kata sandi" type="password" autoComplete="new-password" />
+      </ActionForm>,
+    );
+    expect(html).toContain('type="password"');
+    // React 19 SSR merender atribut ini sebagai `autoComplete` (bukan
+    // `autocomplete`), berbeda dari asumsi markup di brief; faktanya sama.
+    expect(html).toMatch(/autocomplete="new-password"/i);
   });
 });
