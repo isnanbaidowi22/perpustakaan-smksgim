@@ -15,6 +15,14 @@ describe('parseRupiahInput', () => {
     expect(parseRupiahInput(' ')).toBeNull();
     expect(parseRupiahInput('tiga puluh')).toBeNaN();
   });
+
+  it('menerima awalan Rp seperti yang tertulis di label kolom', () => {
+    expect(parseRupiahInput('Rp60.000')).toBe(60000);
+    expect(parseRupiahInput('rp 60.000')).toBe(60000);
+    expect(parseRupiahInput('Rp. 5.000')).toBe(5000);
+    expect(parseRupiahInput('Rp')).toBeNull();
+    expect(parseRupiahInput('60.000 Rp')).toBeNaN();
+  });
 });
 
 describe('previewReturn', () => {

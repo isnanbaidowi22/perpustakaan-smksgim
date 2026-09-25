@@ -59,7 +59,8 @@ export function initialRows(items: ReturnableItem[], query?: string): Record<str
 
 /** '30.000' → 30000; kosong → null; selain angka → NaN. */
 export function parseRupiahInput(raw: string): number | null {
-  const digits = raw.replace(/[.\s]/g, '');
+  // Label kolomnya "Biaya ganti (Rp)", jadi petugas wajar mengetik "Rp60.000".
+  const digits = raw.replace(/^\s*rp\.?/i, '').replace(/[.\s]/g, '');
   if (digits === '') return null;
   return /^\d+$/.test(digits) ? Number(digits) : Number.NaN;
 }

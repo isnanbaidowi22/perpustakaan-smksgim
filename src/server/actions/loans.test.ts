@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { LOAN_SAVE_FAILED } from '@/lib/circulation-results';
 
 const {
   mockAuthorize, mockSearch, mockCard, mockFindCopy, mockCreateLoan, mockRevalidatePath,
@@ -93,5 +94,18 @@ describe('createLoanAction', () => {
     expect(await createLoanAction(input)).toEqual({ status: 'error', message: 'Siswa tidak ditemukan.' });
 
     expect(await createLoanAction({ copyIds: [], notes: '' })).toEqual({ status: 'error', message: 'Pilih siswa terlebih dahulu.' });
+  });
+
+  it('mengubah galat database tak terduga menjadi pesan yang meminta petugas memeriksa riwayat', async () => {
+    const quiet = vi.spyOn(console, 'error').mockImplementation(() => {});
+    mockCreateLoan.mockRejectedValueOnce(new Error('Connection terminated unexpectedly'));
+
+    expect(await createLoanAction(input))
+      .toEqual({ status: 'error', message: LOAN_SAVE_FAILED });
+    expect(LOAN_SAVE_FAILED).toBe(
+      'Peminjaman belum tersimpan karena gangguan koneksi ke database. Periksa Riwayat Transaksi sebelum menyimpan ulang.',
+    );
+    expect(quiet).toHaveBeenCalled();
+    quiet.mockRestore();
   });
 });

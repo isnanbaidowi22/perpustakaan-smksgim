@@ -440,7 +440,7 @@ Setiap halaman dan setiap Server Action memeriksa sesinya sendiri lewat `require
 
 Palet navy/slate dengan aksen teal, dibangun sebagai token CSS sehingga dapat diarahkan ke warna sekolah tanpa menyentuh komponen.
 
-Tipografi: **Inter** untuk antarmuka, dengan **angka tabular diaktifkan** pada seluruh tabel dan nominal — kolom tanggal dan denda yang tidak sejajar secara vertikal jauh lebih lambat dipindai mata. **Source Serif 4** untuk judul halaman, memberi bobot institusional yang membedakan aplikasi ini dari dasbor SaaS generik tanpa jatuh ke kesan kekanakan.
+Tipografi: **Plus Jakarta Sans** untuk seluruh antarmuka — judul, teks, dan kode seperti barcode, NIS, dan nomor transaksi — dengan **angka tabular diaktifkan** pada seluruh tabel, kode, dan nominal. Kolom tanggal dan denda yang tidak sejajar secara vertikal jauh lebih lambat dipindai mata. *(Revisi 25 September 2026: pemilik produk mengganti Inter dan Source Serif 4 dengan satu keluarga font.)*
 
 Warna status konsisten di seluruh aplikasi: Tersedia hijau · Dipinjam biru · Terlambat merah · Rusak oranye · Hilang abu gelap. **Setiap badge status menyertakan ikon**, tidak mengandalkan warna saja, agar tetap terbaca oleh petugas dengan buta warna.
 

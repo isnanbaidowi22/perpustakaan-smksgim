@@ -60,7 +60,10 @@ export async function processReturn(
 
     for (const item of input.items) {
       const open = byId.get(item.loanItemId);
-      if (!open) return fail(STALE);
+      // Tidak mungkin terjadi: seluruh id sudah diperiksa sebelum loop. Melempar,
+      // bukan `return fail(...)`, karena transaksi yang callback-nya kembali
+      // normal akan meng-commit item yang sudah ditulis di putaran sebelumnya.
+      if (!open) throw new Error(`Item ${item.loanItemId} tidak ada di antara item yang dikunci.`);
 
       // 2. Denda per eksemplar.
       const fine = calculateItemFine({

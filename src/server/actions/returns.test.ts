@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { RETURN_SAVE_FAILED } from '@/lib/circulation-results';
 import { formError } from '@/lib/form-state';
 
 const { mockAuthorize, mockProcessReturn, mockRevalidatePath, mockRedirect } = vi.hoisted(() => ({
@@ -60,5 +61,17 @@ describe('processReturnAction', () => {
         'Pengembalian tersimpan. Denda pengembalian ini Rp4.000. Sisa tagihan transaksi Rp4.000.',
       )}`,
     );
+  });
+
+  it('mengubah galat database tak terduga menjadi pesan tanpa mengarahkan ke halaman lain', async () => {
+    const quiet = vi.spyOn(console, 'error').mockImplementation(() => {});
+    mockProcessReturn.mockRejectedValueOnce(new Error('canceling statement due to lock timeout'));
+
+    expect(await processReturnAction(input)).toEqual(formError(RETURN_SAVE_FAILED));
+    expect(RETURN_SAVE_FAILED).toBe(
+      'Pengembalian belum tersimpan karena gangguan koneksi ke database. Buka ulang transaksi ini untuk memeriksa sebelum menyimpan ulang.',
+    );
+    expect(mockRedirect).not.toHaveBeenCalled();
+    quiet.mockRestore();
   });
 });

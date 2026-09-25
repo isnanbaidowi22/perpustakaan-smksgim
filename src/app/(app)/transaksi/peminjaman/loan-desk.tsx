@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useReducer, useRef, useState, useTransition, type FormEvent, type KeyboardEvent } from 'react';
 import { buttonClass } from '@/components/ui/button-styles';
-import type { CreateLoanState } from '@/lib/circulation-results';
+import { LOAN_SAVE_FAILED, type CreateLoanState } from '@/lib/circulation-results';
 import { formatDate } from '@/lib/format';
 import { describeViolation } from '@/lib/violation-message';
 import {
@@ -136,7 +136,14 @@ export function LoanDesk({ loanDate, dueDate, durationDays }: { loanDate: string
     if (!canSave || !desk.student) return;
     const input = { studentId: desk.student.student.id, copyIds: desk.copies.map((copy) => copy.id), notes };
     startTransition(async () => {
-      const result = await createLoanAction(input);
+      let result: CreateLoanState;
+      try {
+        result = await createLoanAction(input);
+      } catch {
+        // Jawaban server tidak pernah tiba: daftar buku dan siswa dipertahankan
+        // agar petugas dapat memeriksa riwayat lalu menyimpan ulang.
+        result = { status: 'error', message: LOAN_SAVE_FAILED };
+      }
       setOutcome(result);
       if (result.status === 'success') {
         dispatch({ type: 'reset' });

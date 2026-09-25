@@ -186,4 +186,66 @@ describe('processReturn', () => {
       });
     });
   });
+
+  it('menolak buku yang dipilih dua kali tanpa menulis apa pun', async () => {
+    await withRollback(async (tx) => {
+      const fx = await circulationFixture(tx);
+      const loan = await borrow(tx, fx, [0]);
+
+      const result = await processReturn(
+        { loanId: loan.id, items: [item(loan.items[0].id), item(loan.items[0].id)] }, fx.actor, TODAY, tx,
+      );
+
+      expect(result).toEqual({ ok: false, message: 'Setiap buku hanya boleh dipilih sekali. Muat ulang halaman.' });
+      expect(await copyStatus(tx, fx.copies[0].id)).toBe('DIPINJAM');
+    });
+  });
+
+  it('menolak buku milik transaksi lain tanpa menulis apa pun', async () => {
+    await withRollback(async (tx) => {
+      const fx = await circulationFixture(tx);
+      const mine = await borrow(tx, fx, [0]);
+      const other = await createLoan(
+        { studentId: fx.students[1].id, copyIds: [fx.copies[1].id], notes: null }, fx.actor, TODAY, tx,
+      );
+      if (!other.ok) throw new Error(JSON.stringify(other));
+      const otherDetail = await getLoanDetail(other.id, TODAY, tx);
+      if (!otherDetail) throw new Error('detail pinjaman lain tidak terbaca');
+
+      const result = await processReturn(
+        { loanId: mine.id, items: [item(otherDetail.items[0].id)] }, fx.actor, TODAY, tx,
+      );
+
+      expect(result).toEqual({
+        ok: false,
+        message: 'Salah satu buku sudah dikembalikan atau bukan bagian dari transaksi ini. Muat ulang halaman lalu pilih lagi.',
+      });
+      expect(await copyStatus(tx, fx.copies[1].id)).toBe('DIPINJAM');
+    });
+  });
+
+  it('mempertahankan denda pengembalian pertama saat pengembalian kedua juga didenda', async () => {
+    await withRollback(async (tx) => {
+      const fx = await circulationFixture(tx);
+      const loan = await borrow(tx, fx, [0, 1]);
+      const [first, second] = loan.items;
+
+      // Jatuh tempo 2090-03-05. Kembali 03-07: telat 2 hari = Rp2.000.
+      const firstResult = await processReturn({ loanId: loan.id, items: [item(first.id)] }, fx.actor, '2090-03-07', tx);
+      expect(firstResult).toEqual({
+        ok: true, id: loan.id, notice: 'Denda pengembalian ini Rp2.000. Sisa tagihan transaksi Rp2.000.',
+      });
+
+      // Kembali 03-08, rusak: telat 3 hari Rp3.000 + harga katalog Rp50.000.
+      const secondResult = await processReturn(
+        { loanId: loan.id, items: [item(second.id, 'RUSAK')] }, fx.actor, '2090-03-08', tx,
+      );
+      expect(secondResult).toEqual({
+        ok: true, id: loan.id, notice: 'Denda pengembalian ini Rp53.000. Sisa tagihan transaksi Rp55.000.',
+      });
+
+      const [row] = await tx.select({ totalFine: loans.totalFine, status: loans.status }).from(loans).where(eq(loans.id, loan.id));
+      expect(row).toEqual({ totalFine: '55000.00', status: 'SELESAI' });
+    });
+  });
 });

@@ -2,14 +2,14 @@
 
 import { revalidatePath } from 'next/cache';
 import type { UserRole } from '@/domain/shared/types';
-import type { CreateLoanState, LookupResult } from '@/lib/circulation-results';
+import { LOAN_SAVE_FAILED, type CreateLoanState, type LookupResult } from '@/lib/circulation-results';
 import { schoolToday } from '@/lib/school-date';
 import { authorize } from '@/server/auth/guard';
 import {
   findCopyByBarcode, getBorrowerCard, searchBorrowers,
   type BorrowerCard, type BorrowerOption, type CopyLookup,
 } from '@/server/queries/circulation';
-import { createLoan } from '@/server/services/loans';
+import { createLoan, type LoanResult } from '@/server/services/loans';
 import { createLoanSchema } from '@/server/validation/loan';
 
 const ROLES: UserRole[] = ['admin', 'petugas'];
@@ -52,7 +52,16 @@ export async function createLoanAction(input: unknown): Promise<CreateLoanState>
     return { status: 'error', message: parsed.error.issues[0]?.message ?? 'Data peminjaman tidak valid. Muat ulang halaman.' };
   }
 
-  const result = await createLoan(parsed.data, auth.actor, schoolToday());
+  let result: LoanResult;
+  try {
+    result = await createLoan(parsed.data, auth.actor, schoolToday());
+  } catch (error) {
+    // Pelanggaran aturan sudah dikembalikan sebagai nilai; yang sampai ke
+    // sini hanya galat infrastruktur. Tanpa tangkapan ini, layar meja
+    // peminjaman diganti error boundary dan daftar bukunya hilang.
+    console.error('createLoan gagal', error);
+    return { status: 'error', message: LOAN_SAVE_FAILED };
+  }
   if (!result.ok) {
     return 'violations' in result
       ? { status: 'rejected', violations: result.violations }

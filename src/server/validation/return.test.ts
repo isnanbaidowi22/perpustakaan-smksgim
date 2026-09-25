@@ -38,4 +38,18 @@ describe('returnSchema', () => {
       'Biaya ganti harus nominal rupiah bulat, misalnya 50000.',
     ]);
   });
+
+  it('menolak biaya ganti di atas Rp99.999.999 agar total denda muat di kolomnya', () => {
+    const tooHigh = returnSchema.safeParse({
+      loanId,
+      items: [{ loanItemId, condition: 'HILANG', replacementFee: 100_000_000, note: null }],
+    });
+    expect(messagesOf(tooHigh)).toEqual(['Biaya ganti maksimal Rp99.999.999 per buku. Periksa nominalnya.']);
+
+    const atCap = returnSchema.safeParse({
+      loanId,
+      items: [{ loanItemId, condition: 'HILANG', replacementFee: 99_999_999, note: null }],
+    });
+    expect(atCap.success).toBe(true);
+  });
 });
