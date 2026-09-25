@@ -45,8 +45,10 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 | `petugas` | `perpus123` | petugas   |
 
 Kata sandi `perpus123` sama untuk keduanya dan hanya dimaksudkan untuk
-pengembangan lokal. **Akun-akun ini wajib dihapus atau diganti kata
-sandinya sebelum aplikasi dijalankan di produksi.**
+pengembangan lokal. **Sebelum aplikasi dijalankan di produksi, ganti kata
+sandi kedua akun ini** lewat **Pengaturan → Pengguna → Ubah → Atur Ulang
+Kata Sandi**, atau nonaktifkan akun `petugas` bila tidak dipakai. Akun baru
+untuk staf dibuat dari layar yang sama; tidak perlu membuka dasbor Supabase.
 
 ## Uji
 
