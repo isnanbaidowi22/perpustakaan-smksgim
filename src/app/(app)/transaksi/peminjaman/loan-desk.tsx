@@ -79,6 +79,8 @@ export function LoanDesk({ loanDate, dueDate, durationDays }: { loanDate: string
     dispatch({ type: 'selectStudent', card: result.data });
     setCandidates([]);
     setStudentMessage(null);
+    // M3: siswa berganti — panel penolakan/galat dari peminjaman sebelumnya sudah basi.
+    setOutcome(null);
     // Spec 8.2: begitu siswa terpilih, fokus pindah ke kolom scan buku.
     copyInput.current?.focus();
   }
@@ -86,6 +88,7 @@ export function LoanDesk({ loanDate, dueDate, durationDays }: { loanDate: string
   function changeStudent() {
     studentGeneration.current += 1;
     dispatch({ type: 'clearStudent' });
+    setOutcome(null);
   }
 
   function searchStudent(event: FormEvent<HTMLFormElement>) {
@@ -124,6 +127,8 @@ export function LoanDesk({ loanDate, dueDate, durationDays }: { loanDate: string
       // F2: siswa yang dipilih berubah selagi pindaian ini ditunggu — hasilnya sudah tidak relevan.
       if (scanGeneration !== studentGeneration.current) return;
       dispatch(result.ok ? { type: 'addCopy', copy: result.data } : { type: 'notice', message: result.message });
+      // M3: daftar buku baru saja berubah (atau ditolak lagi) — panel penolakan/galat lama sudah basi.
+      setOutcome(null);
     });
   }
 
@@ -222,7 +227,11 @@ export function LoanDesk({ loanDate, dueDate, durationDays }: { loanDate: string
                   </span>
                   <button
                     type="button"
-                    onClick={() => dispatch({ type: 'removeCopy', id: copy.id })}
+                    onClick={() => {
+                      dispatch({ type: 'removeCopy', id: copy.id });
+                      // M3: daftar buku berubah — panel penolakan/galat lama sudah basi.
+                      setOutcome(null);
+                    }}
                     aria-label={`Hapus ${copy.barcode} dari daftar`}
                     className={buttonClass('secondary', 'sm')}
                   >
