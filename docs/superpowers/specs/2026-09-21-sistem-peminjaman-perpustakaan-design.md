@@ -418,6 +418,8 @@ Konsekuensi: pemulihan kata sandi lewat email tidak tersedia. Admin mereset kata
 
 Sesi dikelola cookie `httpOnly` melalui `@supabase/ssr`. Setiap Server Action memanggil penjaga yang memverifikasi sesi dan peran sebelum melakukan apa pun.
 
+Setiap halaman dan setiap Server Action memeriksa sesinya sendiri lewat `requireProfile()`/`requireRole()`; pemeriksaan di layout `(app)` bukan batas keamanan, karena layout tidak mengontrol apakah segmen rute di bawahnya tetap dirender atau muncul di RSC payload (Next.js 16, `authentication.md` § Layouts and auth checks).
+
 | Aksi | Admin | Petugas |
 |---|:---:|:---:|
 | Peminjaman, pengembalian, riwayat | Ya | Ya |

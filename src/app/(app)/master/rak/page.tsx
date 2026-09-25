@@ -11,9 +11,11 @@ import { TD, TH } from '@/components/ui/table-styles';
 import { parsePage } from '@/lib/pagination';
 import { firstValue, parseStatusFilter, type SearchParams } from '@/lib/search-params';
 import { setRackStatusAction } from '@/server/actions/racks';
+import { requireProfile } from '@/server/auth/guard';
 import { listRacks } from '@/server/queries/racks';
 
 export default async function RacksPage({ searchParams }: { searchParams: SearchParams }) {
+  await requireProfile();
   const params = await searchParams;
   const q = firstValue(params.q);
   const status = parseStatusFilter(firstValue(params.status));

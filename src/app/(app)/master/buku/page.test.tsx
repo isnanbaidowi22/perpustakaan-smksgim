@@ -8,6 +8,9 @@ vi.mock('@/server/queries/categories', () => ({
   listCategoryOptions: vi.fn(async () => [{ value: 'c1', label: 'Teknologi Informasi' }]),
 }));
 vi.mock('@/server/actions/books', () => ({ setBookStatusAction: vi.fn() }));
+vi.mock('@/server/auth/guard', () => ({
+  requireProfile: vi.fn(async () => ({ id: 'u1', role: 'petugas', fullName: 'Petugas', status: 'active' })),
+}));
 
 import BooksPage from './page';
 

@@ -11,9 +11,11 @@ import { TD, TH } from '@/components/ui/table-styles';
 import { parsePage } from '@/lib/pagination';
 import { firstValue, parseStatusFilter, type SearchParams } from '@/lib/search-params';
 import { setCategoryStatusAction } from '@/server/actions/categories';
+import { requireProfile } from '@/server/auth/guard';
 import { listCategories } from '@/server/queries/categories';
 
 export default async function CategoriesPage({ searchParams }: { searchParams: SearchParams }) {
+  await requireProfile();
   const params = await searchParams;
   const q = firstValue(params.q);
   const status = parseStatusFilter(firstValue(params.status));

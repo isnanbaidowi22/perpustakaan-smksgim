@@ -8,6 +8,9 @@ vi.mock('@/server/queries/categories', () => ({
 vi.mock('@/server/queries/racks', () => ({
   listRackOptions: vi.fn(async () => [{ value: 'r1', label: 'A-3 — Rak A Baris 3' }]),
 }));
+vi.mock('@/server/auth/guard', () => ({
+  requireProfile: vi.fn(async () => ({ id: 'u1', role: 'petugas', fullName: 'Petugas', status: 'active' })),
+}));
 
 import NewBookPage from './page';
 

@@ -1,9 +1,11 @@
 import { ActionForm } from '@/components/ui/action-form';
 import { PageHeader } from '@/components/ui/page-header';
 import { createRackAction } from '@/server/actions/racks';
+import { requireProfile } from '@/server/auth/guard';
 import { RackFields } from '../rack-fields';
 
-export default function NewRackPage() {
+export default async function NewRackPage() {
+  await requireProfile();
   return (
     <>
       <PageHeader title="Tambah Rak" />

@@ -1,9 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 
-const { mockListStudents, mockListClassNames } = vi.hoisted(() => ({
+const { mockListStudents, mockListClassNames, mockRequireProfile } = vi.hoisted(() => ({
   mockListStudents: vi.fn(),
   mockListClassNames: vi.fn(),
+  mockRequireProfile: vi.fn(async () => ({ id: 'u1', role: 'petugas', fullName: 'Petugas', status: 'active' })),
 }));
 
 vi.mock('@/server/queries/students', () => ({
@@ -11,6 +12,7 @@ vi.mock('@/server/queries/students', () => ({
   listClassNames: mockListClassNames,
 }));
 vi.mock('@/server/actions/students', () => ({ setStudentStatusAction: vi.fn() }));
+vi.mock('@/server/auth/guard', () => ({ requireProfile: mockRequireProfile }));
 
 import StudentsPage from './page';
 
@@ -42,5 +44,15 @@ describe('StudentsPage', () => {
     mockListClassNames.mockResolvedValueOnce([]);
     mockListStudents.mockResolvedValueOnce({ rows: [], total: 0 });
     expect(await render()).toContain('Belum ada siswa yang cocok.');
+  });
+
+  it('memeriksa sesi lebih dulu sebelum membaca data siswa', async () => {
+    mockRequireProfile.mockRejectedValueOnce(new Error('NEXT_REDIRECT'));
+    mockListClassNames.mockResolvedValueOnce([]);
+    mockListStudents.mockResolvedValueOnce({ rows: [], total: 0 });
+
+    await expect(render()).rejects.toThrow('NEXT_REDIRECT');
+
+    expect(mockListStudents).not.toHaveBeenCalled();
   });
 });

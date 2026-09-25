@@ -1,11 +1,13 @@
 import { ActionForm } from '@/components/ui/action-form';
 import { PageHeader } from '@/components/ui/page-header';
 import { createBookAction } from '@/server/actions/books';
+import { requireProfile } from '@/server/auth/guard';
 import { listCategoryOptions } from '@/server/queries/categories';
 import { listRackOptions } from '@/server/queries/racks';
 import { BookFields } from '../book-fields';
 
 export default async function NewBookPage() {
+  await requireProfile();
   const [categoryOptions, rackOptions] = await Promise.all([listCategoryOptions(), listRackOptions()]);
 
   return (

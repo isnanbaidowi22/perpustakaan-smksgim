@@ -12,10 +12,12 @@ import { formatRupiah } from '@/lib/format';
 import { parsePage } from '@/lib/pagination';
 import { firstValue, parseStatusFilter, type SearchParams } from '@/lib/search-params';
 import { setBookStatusAction } from '@/server/actions/books';
+import { requireProfile } from '@/server/auth/guard';
 import { listBooks } from '@/server/queries/books';
 import { listCategoryOptions } from '@/server/queries/categories';
 
 export default async function BooksPage({ searchParams }: { searchParams: SearchParams }) {
+  await requireProfile();
   const params = await searchParams;
   const q = firstValue(params.q);
   const categoryId = firstValue(params.kategori);

@@ -5,6 +5,9 @@ const { mockListCategories } = vi.hoisted(() => ({ mockListCategories: vi.fn() }
 
 vi.mock('@/server/queries/categories', () => ({ listCategories: mockListCategories }));
 vi.mock('@/server/actions/categories', () => ({ setCategoryStatusAction: vi.fn() }));
+vi.mock('@/server/auth/guard', () => ({
+  requireProfile: vi.fn(async () => ({ id: 'u1', role: 'petugas', fullName: 'Petugas', status: 'active' })),
+}));
 
 import CategoriesPage from './page';
 

@@ -11,6 +11,12 @@ import { NextResponse, type NextRequest } from 'next/server';
  * lapisan ini petugas akan terlempar ke layar masuk di tengah jam kerja
  * ketika token sesinya kedaluwarsa.
  */
+const PUBLIC_PATHS = ['/login'];
+
+function isPublicPath(pathname: string): boolean {
+  return PUBLIC_PATHS.includes(pathname);
+}
+
 export async function proxy(request: NextRequest) {
   const response = NextResponse.next({ request });
 
@@ -30,7 +36,14 @@ export async function proxy(request: NextRequest) {
 
   // Memanggil getUser() menyegarkan token yang hampir kedaluwarsa
   // dan menuliskan cookie barunya ke response.
-  await supabase.auth.getUser();
+  const { data } = await supabase.auth.getUser();
+
+  // Tanpa ini, permintaan RSC anonim ke rute terproteksi lolos sampai ke
+  // Server Component: layout hanya memeriksa sesi saat navigasi awal, bukan
+  // pada setiap request (lihat authentication.md § Layouts and auth checks).
+  if (!data.user && !isPublicPath(request.nextUrl.pathname)) {
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
 
   return response;
 }

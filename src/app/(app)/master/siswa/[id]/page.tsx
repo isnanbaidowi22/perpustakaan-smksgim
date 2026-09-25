@@ -2,11 +2,13 @@ import { notFound } from 'next/navigation';
 import { ActionForm } from '@/components/ui/action-form';
 import { PageHeader } from '@/components/ui/page-header';
 import { updateStudentAction } from '@/server/actions/students';
+import { requireProfile } from '@/server/auth/guard';
 import { listAcademicYearOptions } from '@/server/queries/academic-years';
 import { getStudent } from '@/server/queries/students';
 import { StudentFields } from '../student-fields';
 
 export default async function EditStudentPage({ params }: { params: Promise<{ id: string }> }) {
+  await requireProfile();
   const { id } = await params;
   const [student, yearOptions] = await Promise.all([getStudent(id), listAcademicYearOptions()]);
   if (!student) notFound();

@@ -6,6 +6,9 @@ vi.mock('@/server/queries/academic-years', () => ({
   listAcademicYearOptions: vi.fn(async () => [{ value: 'y1', label: '2026/2027 (aktif)' }]),
   getActiveAcademicYear: vi.fn(async () => ({ id: 'y1', name: '2026/2027' })),
 }));
+vi.mock('@/server/auth/guard', () => ({
+  requireProfile: vi.fn(async () => ({ id: 'u1', role: 'petugas', fullName: 'Petugas', status: 'active' })),
+}));
 
 import NewStudentPage from './page';
 

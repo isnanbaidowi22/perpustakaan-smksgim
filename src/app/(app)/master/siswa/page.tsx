@@ -11,9 +11,11 @@ import { TD, TH } from '@/components/ui/table-styles';
 import { parsePage } from '@/lib/pagination';
 import { firstValue, parseStatusFilter, type SearchParams } from '@/lib/search-params';
 import { setStudentStatusAction } from '@/server/actions/students';
+import { requireProfile } from '@/server/auth/guard';
 import { listClassNames, listStudents } from '@/server/queries/students';
 
 export default async function StudentsPage({ searchParams }: { searchParams: SearchParams }) {
+  await requireProfile();
   const params = await searchParams;
   const q = firstValue(params.q);
   const className = firstValue(params.kelas);

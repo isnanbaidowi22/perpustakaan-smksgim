@@ -1,4 +1,5 @@
 import { cookies } from 'next/headers';
+import { cache } from 'react';
 import { createServerClient } from '@supabase/ssr';
 import { eq } from 'drizzle-orm';
 import { db, schema } from '@/server/db/client';
@@ -27,7 +28,10 @@ export async function createSupabaseServerClient() {
   );
 }
 
-export async function getCurrentProfile(): Promise<Profile | null> {
+// `cache()` memastikan layout dan page yang sama-sama memanggil
+// `requireProfile()` pada satu request hanya melakukan satu pencarian sesi
+// dan satu kueri profil, bukan satu per pemanggil (React cache per-request).
+export const getCurrentProfile = cache(async (): Promise<Profile | null> => {
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase.auth.getUser();
   if (!data.user) return null;
@@ -41,4 +45,4 @@ export async function getCurrentProfile(): Promise<Profile | null> {
   // Akun yang dinonaktifkan tidak boleh lolos hanya karena sesinya masih hidup.
   if (!profile || profile.status !== 'active') return null;
   return profile;
-}
+});

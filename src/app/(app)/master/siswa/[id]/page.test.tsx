@@ -13,6 +13,9 @@ vi.mock('@/server/queries/academic-years', () => ({
   listAcademicYearOptions: vi.fn(async () => [{ value: 'y1', label: '2026/2027 (aktif)' }]),
 }));
 vi.mock('@/server/actions/students', () => ({ updateStudentAction: vi.fn() }));
+vi.mock('@/server/auth/guard', () => ({
+  requireProfile: vi.fn(async () => ({ id: 'u1', role: 'petugas', fullName: 'Petugas', status: 'active' })),
+}));
 vi.mock('next/navigation', () => ({ notFound: mockNotFound }));
 
 import EditStudentPage from './page';
