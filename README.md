@@ -47,3 +47,19 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 Kata sandi `perpus123` sama untuk keduanya dan hanya dimaksudkan untuk
 pengembangan lokal. **Akun-akun ini wajib dihapus atau diganti kata
 sandinya sebelum aplikasi dijalankan di produksi.**
+
+## Uji
+
+| Perintah | Isi | Butuh database |
+| --- | --- | --- |
+| `npm test` | Uji unit di `src/` | Tidak |
+| `npm run test:integration` | Uji integrasi di `tests/integration/` | Ya, dari `.env.local` |
+
+`DATABASE_URL` menunjuk ke database pengembangan di Supabase cloud yang
+berisi data seed. Karena itu setiap uji integrasi berjalan di dalam
+`withRollback()` (`tests/integration/helpers.ts`): transaksi selalu
+di-rollback, sehingga uji tidak meninggalkan jejak. **Jangan pernah menulis
+`truncate` atau `delete` tanpa `where` di uji integrasi.** Beri awalan `UJI-`
+pada nilai unik buatan uji agar tidak bertabrakan dengan data seed.
+
+Uji integrasi membutuhkan akun `admin` dari `npm run db:seed`.

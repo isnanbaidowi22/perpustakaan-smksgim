@@ -9,7 +9,7 @@
     "lint": "eslint",
     "test": "vitest run src",
     "test:watch": "vitest src",
-    "test:integration": "vitest run tests/integration",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "tsx --env-file=.env.local src/server/db/seed.ts"

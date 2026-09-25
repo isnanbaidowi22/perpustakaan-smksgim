@@ -47,3 +47,9 @@ export interface CopySnapshot {
   /** Terisi hanya bila status DIPINJAM, untuk menyusun pesan galat. */
   borrowedBy?: BorrowerSnapshot;
 }
+
+/** Pengguna yang sedang melakukan aksi, sebagaimana dilihat aturan bisnis dan audit log. */
+export interface Actor {
+  id: string;
+  role: UserRole;
+}

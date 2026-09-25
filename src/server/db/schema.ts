@@ -3,6 +3,9 @@ import {
   bigint, boolean, check, date, index, integer, jsonb,
   numeric, pgTable, text, timestamp, uniqueIndex, uuid,
 } from 'drizzle-orm/pg-core';
+import type {
+  CopyStatus, LoanStatus, RecordStatus, ReturnCondition, UserRole,
+} from '@/domain/shared/types';
 
 const stamps = {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
@@ -15,8 +18,8 @@ export const profiles = pgTable('profiles', {
   id: uuid('id').primaryKey(),
   username: text('username').notNull().unique(),
   fullName: text('full_name').notNull(),
-  role: text('role').notNull(),
-  status: text('status').notNull().default('active'),
+  role: text('role').$type<UserRole>().notNull(),
+  status: text('status').$type<RecordStatus>().notNull().default('active'),
   ...stamps,
 }, (t) => [
   check('profiles_role_valid', sql`${t.role} in ('admin','petugas')`),
@@ -39,7 +42,7 @@ export const academicYears = pgTable('academic_years', {
 export const categories = pgTable('categories', {
   id: uuid('id').primaryKey().defaultRandom(),
   name: text('name').notNull().unique(),
-  status: text('status').notNull().default('active'),
+  status: text('status').$type<RecordStatus>().notNull().default('active'),
 });
 
 export const racks = pgTable('racks', {
@@ -47,7 +50,7 @@ export const racks = pgTable('racks', {
   code: text('code').notNull().unique(),
   name: text('name').notNull(),
   location: text('location'),
-  status: text('status').notNull().default('active'),
+  status: text('status').$type<RecordStatus>().notNull().default('active'),
 });
 
 export const books = pgTable('books', {
@@ -63,7 +66,7 @@ export const books = pgTable('books', {
   price: numeric('price', { precision: 12, scale: 2 }).notNull().default('0'),
   coverUrl: text('cover_url'),
   description: text('description'),
-  status: text('status').notNull().default('active'),
+  status: text('status').$type<RecordStatus>().notNull().default('active'),
   ...stamps,
 }, (t) => [
   check('books_status_valid', sql`${t.status} in ('active','inactive')`),
@@ -73,7 +76,7 @@ export const bookCopies = pgTable('book_copies', {
   id: uuid('id').primaryKey().defaultRandom(),
   bookId: uuid('book_id').notNull().references(() => books.id, { onDelete: 'restrict' }),
   barcode: text('barcode').notNull().unique(),
-  status: text('status').notNull().default('TERSEDIA'),
+  status: text('status').$type<CopyStatus>().notNull().default('TERSEDIA'),
   acquisitionDate: date('acquisition_date'),
   notes: text('notes'),
   ...stamps,
@@ -90,10 +93,10 @@ export const students = pgTable('students', {
   name: text('name').notNull(),
   className: text('class_name').notNull(),
   major: text('major'),
-  gender: text('gender'),
+  gender: text('gender').$type<'L' | 'P'>(),
   phone: text('phone'),
   academicYearId: uuid('academic_year_id').references(() => academicYears.id),
-  status: text('status').notNull().default('active'),
+  status: text('status').$type<RecordStatus>().notNull().default('active'),
   ...stamps,
 }, (t) => [
   check('students_gender_valid', sql`${t.gender} is null or ${t.gender} in ('L','P')`),
@@ -109,7 +112,7 @@ export const loans = pgTable('loans', {
   academicYearId: uuid('academic_year_id').notNull().references(() => academicYears.id),
   loanDate: date('loan_date').notNull(),
   dueDate: date('due_date').notNull(),
-  status: text('status').notNull().default('AKTIF'),
+  status: text('status').$type<LoanStatus>().notNull().default('AKTIF'),
   totalFine: numeric('total_fine', { precision: 12, scale: 2 }).notNull().default('0'),
   notes: text('notes'),
   createdBy: uuid('created_by').notNull().references(() => profiles.id),
@@ -125,7 +128,7 @@ export const loanItems = pgTable('loan_items', {
   loanId: uuid('loan_id').notNull().references(() => loans.id, { onDelete: 'restrict' }),
   bookCopyId: uuid('book_copy_id').notNull().references(() => bookCopies.id, { onDelete: 'restrict' }),
   returnedAt: timestamp('returned_at', { withTimezone: true }),
-  returnCondition: text('return_condition'),
+  returnCondition: text('return_condition').$type<ReturnCondition>(),
   daysLate: integer('days_late').notNull().default(0),
   lateFine: numeric('late_fine', { precision: 12, scale: 2 }).notNull().default('0'),
   replacementFee: numeric('replacement_fee', { precision: 12, scale: 2 }).notNull().default('0'),
