@@ -1,4 +1,4 @@
-const VALID_USERNAME = /^[a-z0-9._]+$/;
+export const VALID_USERNAME = /^[a-z0-9._]+$/;
 
 /**
  * Supabase Auth bekerja dengan surel, sementara petugas memakai username.

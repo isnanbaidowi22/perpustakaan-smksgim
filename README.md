@@ -62,4 +62,10 @@ di-rollback, sehingga uji tidak meninggalkan jejak. **Jangan pernah menulis
 `truncate` atau `delete` tanpa `where` di uji integrasi.** Beri awalan `UJI-`
 pada nilai unik buatan uji agar tidak bertabrakan dengan data seed.
 
+Uji manajemen pengguna tidak membuat akun sungguhan di Supabase Auth.
+Service pengguna menerima port `AuthAdmin`; uji memakai `fakeAuthAdmin(tx)`
+yang menyisipkan baris `auth.users` di transaksi uji yang sama, sehingga ikut
+di-rollback. Username uji berawalan `uji_`, dan tahun ajaran uji memakai
+tahun 2090 ke atas, karena format keduanya tidak mengizinkan awalan `UJI-`.
+
 Uji integrasi membutuhkan akun `admin` dari `npm run db:seed`.
