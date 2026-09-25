@@ -11,7 +11,9 @@ export const STATUS_OPTIONS: Option[] = [
 ];
 
 /** Form GET: hasil pencarian dapat dibagikan dan di-bookmark lewat URL. */
-export function FilterBar({ q, placeholder, children }: { q: string; placeholder: string; children?: ReactNode }) {
+export function FilterBar({
+  q, placeholder, autoFocus, children,
+}: { q: string; placeholder: string; autoFocus?: boolean; children?: ReactNode }) {
   return (
     <form role="search" className="mb-4 flex flex-wrap items-center gap-2">
       <input
@@ -20,6 +22,7 @@ export function FilterBar({ q, placeholder, children }: { q: string; placeholder
         defaultValue={q}
         placeholder={placeholder}
         aria-label={placeholder}
+        autoFocus={autoFocus}
         className={`${CONTROL} min-w-64 flex-1`}
       />
       {children}

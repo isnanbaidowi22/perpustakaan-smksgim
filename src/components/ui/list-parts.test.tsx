@@ -42,6 +42,13 @@ describe('FilterBar', () => {
   });
 });
 
+describe('FilterBar autoFocus', () => {
+  it('memfokuskan kolom pencarian bila diminta, dan tidak secara bawaan', () => {
+    expect(renderToStaticMarkup(<FilterBar q="" placeholder="Cari" autoFocus />)).toMatch(/<input[^>]*autofocus=""/i);
+    expect(renderToStaticMarkup(<FilterBar q="" placeholder="Cari" />)).not.toMatch(/autofocus/i);
+  });
+});
+
 describe('Pagination', () => {
   it('tidak tampil bila hanya satu halaman', () => {
     expect(renderToStaticMarkup(<Pagination path="/master/kategori" page={1} total={3} query={{}} />)).toBe('');
