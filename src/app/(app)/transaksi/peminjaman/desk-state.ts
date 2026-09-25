@@ -63,10 +63,26 @@ function rejectionOf(state: DeskState, copy: CopyLookup): string | null {
   return null;
 }
 
+/**
+ * F3: "Ganti siswa" sengaja tidak membuang daftar buku (petugas boleh
+ * memindahkan pindaian ke siswa yang benar). Tetapi pemindahan itu senyap
+ * bila tidak diberi tahu, jadi setiap buku yang terbawa disebut eksplisit,
+ * dan kuota yang tidak cukup dikatakan langsung — server tetap menolaknya
+ * saat disimpan, tetapi petugas semestinya melihatnya lebih dulu.
+ */
+function carryOverNotice(card: BorrowerCard, carried: number): string | null {
+  if (carried === 0) return null;
+  const remaining = Math.max(0, card.maxActiveLoans - card.activeCount);
+  const base = `${carried} buku di daftar akan dipinjamkan ke ${card.student.name}`;
+  return carried > remaining
+    ? `${base}, tetapi sisa kuotanya hanya ${remaining}. Kurangi daftar buku.`
+    : `${base}.`;
+}
+
 export function deskReducer(state: DeskState, action: DeskAction): DeskState {
   switch (action.type) {
     case 'selectStudent':
-      return { ...state, student: action.card, notice: null };
+      return { ...state, student: action.card, notice: carryOverNotice(action.card, state.copies.length) };
     case 'clearStudent':
       return { ...state, student: null, notice: null };
     case 'addCopy': {

@@ -93,6 +93,37 @@ describe('deskReducer — aksi lain', () => {
   });
 });
 
+describe('deskReducer — mengganti siswa dengan buku sudah di daftar', () => {
+  it('tidak mengatur notice ketika daftar buku masih kosong', () => {
+    const state = deskReducer(INITIAL_DESK, { type: 'selectStudent', card: card() });
+    expect(state.notice).toBeNull();
+  });
+
+  it('mengatur notice yang menyebut jumlah buku dan nama siswa baru ketika daftar tidak kosong', () => {
+    const filled = deskReducer(withStudent(), { type: 'addCopy', copy: copy() });
+    const switched = deskReducer(filled, {
+      type: 'selectStudent',
+      card: card({ student: { id: 's2', nis: '202600789', name: 'Budi Santoso', className: 'XI RPL 2', status: 'active' } }),
+    });
+
+    expect(switched.notice).toBe('1 buku di daftar akan dipinjamkan ke Budi Santoso.');
+  });
+
+  it('menyebut kuota tidak cukup ketika daftar buku melebihi sisa kuota siswa baru', () => {
+    const filled = deskReducer(withStudent(), { type: 'addCopy', copy: copy() });
+    const switched = deskReducer(filled, {
+      type: 'selectStudent',
+      card: card({
+        student: { id: 's2', nis: '202600789', name: 'Budi Santoso', className: 'XI RPL 2', status: 'active' },
+        activeCount: 3,
+        maxActiveLoans: 3,
+      }),
+    });
+
+    expect(switched.notice).toBe('1 buku di daftar akan dipinjamkan ke Budi Santoso, tetapi sisa kuotanya hanya 0. Kurangi daftar buku.');
+  });
+});
+
 describe('cardWarnings', () => {
   it('menyatakan tidak ada masalah untuk siswa yang bersih', () => {
     expect(cardWarnings(card())).toEqual([{ tone: 'ok', text: 'Tidak ada keterlambatan atau tunggakan denda.' }]);

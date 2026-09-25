@@ -59,8 +59,19 @@ export function LoanDesk({ loanDate, dueDate, durationDays }: { loanDate: string
   const slots = remainingSlots(desk);
   const canSave = desk.student !== null && desk.copies.length > 0 && !pending;
 
+  // F2: setiap pencarian/pemuatan/pembatalan siswa menaikkan generasi ini.
+  // Sebuah jawaban async yang datang setelah generasinya kedaluwarsa
+  // (siswa lain sudah dipilih, atau sudah dibatalkan sementara jawaban itu
+  // masih ditunggu) diabaikan alih-alih menimpa keadaan yang lebih baru.
+  // Perbandingan `!==` sederhana ini tidak dipindah ke modul murni karena
+  // tidak ada logika bercabang untuk diuji di luar ketaksamaan itu sendiri;
+  // diverifikasi lewat `npm run build` (kompilasi tipe strict) dan review manual.
+  const studentGeneration = useRef(0);
+
   async function loadCard(studentId: string) {
+    const myGeneration = ++studentGeneration.current;
     const result = await getBorrowerCardAction(studentId);
+    if (myGeneration !== studentGeneration.current) return;
     if (!result.ok) {
       setStudentMessage(result.message);
       return;
@@ -72,11 +83,18 @@ export function LoanDesk({ loanDate, dueDate, durationDays }: { loanDate: string
     copyInput.current?.focus();
   }
 
+  function changeStudent() {
+    studentGeneration.current += 1;
+    dispatch({ type: 'clearStudent' });
+  }
+
   function searchStudent(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const query = String(new FormData(event.currentTarget).get('student') ?? '');
+    const myGeneration = ++studentGeneration.current;
     startTransition(async () => {
       const result = await searchBorrowersAction(query);
+      if (myGeneration !== studentGeneration.current) return;
       if (!result.ok) {
         setStudentMessage(result.message);
         return;
@@ -94,12 +112,18 @@ export function LoanDesk({ loanDate, dueDate, durationDays }: { loanDate: string
     event.preventDefault();
     const form = event.currentTarget;
     const barcode = String(new FormData(form).get('barcode') ?? '');
+    // F1: bersihkan kolom SEBELUM menunggu jawaban server. Pemindai barcode
+    // menembakkan scan+Enter berturut-turut; kolom yang masih terisi saat
+    // pindaian kedua tiba akan menambahkan barcode itu di belakang barcode
+    // pertama, dan pindaian keduanya jadi tidak valid.
+    form.reset();
+    copyInput.current?.focus();
+    const scanGeneration = studentGeneration.current;
     startTransition(async () => {
       const result = await lookupCopyAction(barcode);
+      // F2: siswa yang dipilih berubah selagi pindaian ini ditunggu — hasilnya sudah tidak relevan.
+      if (scanGeneration !== studentGeneration.current) return;
       dispatch(result.ok ? { type: 'addCopy', copy: result.data } : { type: 'notice', message: result.message });
-      // Spec 8.2: Enter menambahkan buku lalu mengosongkan kolom untuk pindaian berikutnya.
-      form.reset();
-      copyInput.current?.focus();
     });
   }
 
@@ -147,7 +171,7 @@ export function LoanDesk({ loanDate, dueDate, durationDays }: { loanDate: string
         <section aria-labelledby="siswa-heading" className={PANEL}>
           <h2 id="siswa-heading" className={HEADING}>Siswa</h2>
           {desk.student ? (
-            <StudentCard card={desk.student} onChange={() => dispatch({ type: 'clearStudent' })} />
+            <StudentCard card={desk.student} onChange={changeStudent} />
           ) : (
             <>
               <form role="search" onSubmit={searchStudent}>
