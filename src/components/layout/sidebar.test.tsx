@@ -19,7 +19,7 @@ const COMMON = [
   '/laporan/koleksi',
 ];
 
-const ADMIN_ONLY = ['/pengaturan/tahun-ajaran', '/pengaturan/pengguna', '/pengaturan/konfigurasi'];
+const ADMIN_ONLY = ['/pengaturan/tahun-ajaran', '/pengaturan/pengguna', '/pengaturan/konfigurasi', '/pengaturan/audit-log'];
 
 describe('Sidebar', () => {
   it('menampilkan seluruh menu untuk admin', () => {

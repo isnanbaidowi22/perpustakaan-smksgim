@@ -45,6 +45,7 @@ const NAV: NavSection[] = [
       { href: '/pengaturan/tahun-ajaran', label: 'Tahun Ajaran' },
       { href: '/pengaturan/pengguna', label: 'Pengguna' },
       { href: '/pengaturan/konfigurasi', label: 'Konfigurasi' },
+      { href: '/pengaturan/audit-log', label: 'Audit Log' },
     ],
   },
 ];
