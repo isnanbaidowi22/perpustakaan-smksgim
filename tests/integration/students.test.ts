@@ -72,6 +72,16 @@ describe('updateStudent dan setStudentStatus', () => {
       expect(moved).toEqual({ ok: true, id: created.id });
       expect((await getStudent(created.id, tx))?.className).toBe('UJI-XII RPL 1');
 
+      const audit = await tx
+        .select()
+        .from(auditLogs)
+        .where(and(eq(auditLogs.entityId, created.id), eq(auditLogs.action, 'student.update')));
+      expect(audit).toHaveLength(1);
+      expect(audit[0]?.metadata).toEqual({
+        before: { nis: input.nis, name: input.name, className: input.className },
+        after: { nis: input.nis, name: input.name, className: 'UJI-XII RPL 1' },
+      });
+
       expect((await setStudentStatus(created.id, 'inactive', actor, tx)).ok).toBe(true);
       expect((await getStudent(created.id, tx))?.status).toBe('inactive');
     });

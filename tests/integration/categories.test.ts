@@ -55,6 +55,10 @@ describe('updateCategory', () => {
         .from(auditLogs)
         .where(and(eq(auditLogs.entityId, created.id), eq(auditLogs.action, 'category.update')));
       expect(audit).toHaveLength(1);
+      expect(audit[0]?.metadata).toEqual({
+        before: { name: 'UJI-Fiksi' },
+        after: { name: 'UJI-Fiksi Remaja' },
+      });
     });
   });
 

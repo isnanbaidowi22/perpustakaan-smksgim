@@ -45,6 +45,13 @@ export async function updateBook(
 ): Promise<ServiceResult> {
   if (!isUuid(id)) return fail(NOT_FOUND);
   return executor.transaction(async (tx) => {
+    const [current] = await tx
+      .select({ title: books.title, price: books.price })
+      .from(books)
+      .where(eq(books.id, id))
+      .for('update');
+    if (!current) return fail(NOT_FOUND);
+
     const [updated] = await tx
       .update(books)
       .set({ ...toColumns(input), updatedAt: new Date() })
@@ -57,7 +64,7 @@ export async function updateBook(
       action: 'book.update',
       entity: 'books',
       entityId: id,
-      metadata: { title: input.title, price: input.price },
+      metadata: { before: current, after: { title: input.title, price: input.price } },
     });
     return ok(id, priceNotice(input));
   });

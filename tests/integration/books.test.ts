@@ -57,6 +57,16 @@ describe('updateBook', () => {
 
       expect(result).toEqual({ ok: true, id: created.id });
       expect(await getBook(created.id, tx)).toMatchObject({ price: '92000.00', publishYear: 2025 });
+
+      const audit = await tx
+        .select()
+        .from(auditLogs)
+        .where(and(eq(auditLogs.entityId, created.id), eq(auditLogs.action, 'book.update')));
+      expect(audit).toHaveLength(1);
+      expect(audit[0]?.metadata).toEqual({
+        before: { title: input.title, price: '85000.00' },
+        after: { title: input.title, price: 92_000 },
+      });
     });
   });
 

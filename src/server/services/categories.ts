@@ -52,6 +52,15 @@ export async function updateCategory(
   if (!isUuid(id)) return fail(NOT_FOUND);
   try {
     return await executor.transaction(async (tx) => {
+      // Dibaca dengan kunci sebelum menulis: audit-nya membutuhkan nilai lama,
+      // dan kunci ini mencegah pembaca lain melihat baris ini setengah jalan.
+      const [current] = await tx
+        .select({ name: categories.name })
+        .from(categories)
+        .where(eq(categories.id, id))
+        .for('update');
+      if (!current) return fail(NOT_FOUND);
+
       const [updated] = await tx
         .update(categories)
         .set({ name: input.name })
@@ -64,7 +73,7 @@ export async function updateCategory(
         action: 'category.update',
         entity: 'categories',
         entityId: id,
-        metadata: { name: input.name },
+        metadata: { before: { name: current.name }, after: { name: input.name } },
       });
       return ok(id);
     });

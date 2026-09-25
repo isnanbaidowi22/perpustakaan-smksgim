@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { and, eq } from 'drizzle-orm';
+import { and, desc, eq } from 'drizzle-orm';
 import { auditLogs, books } from '@/server/db/schema';
 import { getRack, listRackOptions, listRacks } from '@/server/queries/racks';
 import { createRack, setRackStatus, updateRack } from '@/server/services/racks';
@@ -49,6 +49,16 @@ describe('updateRack dan setRackStatus', () => {
 
       expect(await updateRack(created.id, { ...input, location: null }, actor, tx)).toEqual({ ok: true, id: created.id });
       expect((await getRack(created.id, tx))?.location).toBeNull();
+
+      const audit = await tx
+        .select()
+        .from(auditLogs)
+        .where(and(eq(auditLogs.entityId, created.id), eq(auditLogs.action, 'rack.update')))
+        .orderBy(desc(auditLogs.createdAt));
+      expect(audit[0]?.metadata).toEqual({
+        before: { code: input.code, name: input.name, location: input.location },
+        after: { code: input.code, name: input.name, location: null },
+      });
 
       expect((await setRackStatus(created.id, 'inactive', actor, tx)).ok).toBe(true);
       expect((await getRack(created.id, tx))?.status).toBe('inactive');

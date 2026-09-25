@@ -64,6 +64,13 @@ export async function updateStudent(
   if (!isUuid(id)) return fail(NOT_FOUND);
   try {
     return await executor.transaction(async (tx) => {
+      const [current] = await tx
+        .select({ nis: students.nis, name: students.name, className: students.className })
+        .from(students)
+        .where(eq(students.id, id))
+        .for('update');
+      if (!current) return fail(NOT_FOUND);
+
       const [updated] = await tx
         .update(students)
         .set({ ...input, updatedAt: new Date() })
@@ -76,7 +83,10 @@ export async function updateStudent(
         action: 'student.update',
         entity: 'students',
         entityId: id,
-        metadata: { nis: input.nis, name: input.name, className: input.className },
+        metadata: {
+          before: current,
+          after: { nis: input.nis, name: input.name, className: input.className },
+        },
       });
       return ok(id);
     });

@@ -43,6 +43,13 @@ export async function updateRack(
   if (!isUuid(id)) return fail(NOT_FOUND);
   try {
     return await executor.transaction(async (tx) => {
+      const [current] = await tx
+        .select({ code: racks.code, name: racks.name, location: racks.location })
+        .from(racks)
+        .where(eq(racks.id, id))
+        .for('update');
+      if (!current) return fail(NOT_FOUND);
+
       const [updated] = await tx.update(racks).set(input).where(eq(racks.id, id)).returning({ id: racks.id });
       if (!updated) return fail(NOT_FOUND);
 
@@ -51,7 +58,7 @@ export async function updateRack(
         action: 'rack.update',
         entity: 'racks',
         entityId: id,
-        metadata: { ...input },
+        metadata: { before: current, after: { ...input } },
       });
       return ok(id);
     });
