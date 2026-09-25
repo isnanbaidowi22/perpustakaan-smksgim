@@ -21,12 +21,14 @@ vi.mock('@/server/db/client', () => ({
   },
   schema: { academicYears: {} },
 }));
+vi.mock('@/server/actions/auth', () => ({ signOut: vi.fn() }));
+vi.mock('next/navigation', () => ({ usePathname: () => '/dashboard' }));
 
 import AppLayout from './layout';
 
 describe('AppLayout', () => {
   it('menampilkan nama petugas dan tahun ajaran aktif dari sesi sungguhan', async () => {
-    mockRequireProfile.mockResolvedValueOnce({ fullName: 'Petugas Perpustakaan' });
+    mockRequireProfile.mockResolvedValueOnce({ fullName: 'Petugas Perpustakaan', role: 'petugas' });
     mockLimit.mockResolvedValueOnce([{ name: '2026/2027' }]);
 
     const element = await AppLayout({ children: <div>isi</div> });
@@ -37,12 +39,22 @@ describe('AppLayout', () => {
   });
 
   it('meneruskan null ke Topbar ketika tidak ada tahun ajaran aktif', async () => {
-    mockRequireProfile.mockResolvedValueOnce({ fullName: 'Admin' });
+    mockRequireProfile.mockResolvedValueOnce({ fullName: 'Admin', role: 'admin' });
     mockLimit.mockResolvedValueOnce([]);
 
     const element = await AppLayout({ children: <div>isi</div> });
     const html = renderToStaticMarkup(element);
 
     expect(html).toContain('Belum ada tahun ajaran aktif');
+  });
+
+  it('meneruskan peran ke sidebar sehingga petugas tidak melihat Pengaturan', async () => {
+    mockRequireProfile.mockResolvedValueOnce({ fullName: 'Petugas Perpustakaan', role: 'petugas' });
+    mockLimit.mockResolvedValueOnce([{ name: '2026/2027' }]);
+
+    const element = await AppLayout({ children: <div>isi</div> });
+    const html = renderToStaticMarkup(element);
+
+    expect(html).not.toContain('href="/pengaturan/pengguna"');
   });
 });

@@ -1,4 +1,5 @@
 import { eq } from 'drizzle-orm';
+import { AppShell } from '@/components/layout/app-shell';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Topbar } from '@/components/layout/topbar';
 import { requireProfile } from '@/server/auth/guard';
@@ -14,12 +15,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     .limit(1);
 
   return (
-    <div className="flex min-h-screen">
-      <Sidebar />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <Topbar academicYear={year?.name ?? null} userName={profile.fullName} />
-        <main className="flex-1 p-6">{children}</main>
-      </div>
-    </div>
+    <AppShell
+      sidebar={<Sidebar role={profile.role} />}
+      topbar={<Topbar academicYear={year?.name ?? null} userName={profile.fullName} />}
+    >
+      {children}
+    </AppShell>
   );
 }

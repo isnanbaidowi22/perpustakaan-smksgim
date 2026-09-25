@@ -1,5 +1,9 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
+
+// Topbar mengimpor Server Action signOut, yang memuat klien database.
+vi.mock('@/server/actions/auth', () => ({ signOut: vi.fn() }));
+
 import { Topbar } from './topbar';
 
 describe('Topbar', () => {
@@ -13,5 +17,10 @@ describe('Topbar', () => {
     const html = renderToStaticMarkup(<Topbar academicYear={null} userName="Petugas" />);
     expect(html).toContain('Belum ada tahun ajaran aktif');
     expect(html).not.toContain('Tahun Ajaran ');
+  });
+
+  it('menyediakan tombol keluar', () => {
+    const html = renderToStaticMarkup(<Topbar academicYear="2026/2027" userName="Petugas" />);
+    expect(html).toContain('Keluar');
   });
 });

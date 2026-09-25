@@ -1,3 +1,5 @@
+import { signOut } from '@/server/actions/auth';
+
 export function Topbar({
   academicYear,
   userName,
@@ -18,7 +20,17 @@ export function Topbar({
           Belum ada tahun ajaran aktif — transaksi tidak dapat dibuat
         </span>
       )}
-      <span className="text-sm text-[var(--color-ink-700)]">{userName}</span>
+      <div className="flex items-center gap-4">
+        <span className="text-sm text-[var(--color-ink-700)]">{userName}</span>
+        <form action={signOut}>
+          <button
+            type="submit"
+            className="text-sm text-[var(--color-ink-500)] underline-offset-2 hover:text-[var(--color-ink-900)] hover:underline"
+          >
+            Keluar
+          </button>
+        </form>
+      </div>
     </header>
   );
 }
