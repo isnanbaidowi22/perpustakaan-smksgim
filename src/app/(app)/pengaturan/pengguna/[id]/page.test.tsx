@@ -26,7 +26,7 @@ beforeEach(() => {
 });
 
 describe('EditUserPage', () => {
-  it('mengisi nama dan peran, dan menyediakan form kata sandi terpisah yang kosong', async () => {
+  it('mengisi nama, dan menyediakan form kata sandi terpisah yang kosong', async () => {
     mockGet.mockResolvedValueOnce({
       id: 'u2', username: 'petugas', fullName: 'Petugas Perpustakaan', role: 'petugas', status: 'active',
     });
@@ -34,19 +34,11 @@ describe('EditUserPage', () => {
     const html = renderToStaticMarkup(await render('u2'));
 
     expect(html).toContain('value="Petugas Perpustakaan"');
-    expect(html).toMatch(/<option value="petugas" selected="">Petugas<\/option>/);
+    expect(html).not.toContain('name="role"');
     expect(html).toContain('Atur Ulang Kata Sandi');
     expect(html).toContain('Ganti Kata Sandi');
     expect(html).not.toContain('name="username"');
     expect(html).not.toContain('Peran akun Anda sendiri tidak dapat diubah');
-  });
-
-  it('memberi tahu admin bahwa perannya sendiri tidak dapat diubah', async () => {
-    mockGet.mockResolvedValueOnce({
-      id: 'u1', username: 'admin', fullName: 'Administrator', role: 'admin', status: 'active',
-    });
-
-    expect(renderToStaticMarkup(await render('u1'))).toContain('Peran akun Anda sendiri tidak dapat diubah');
   });
 
   it('menampilkan halaman tidak ditemukan untuk id yang tidak ada', async () => {

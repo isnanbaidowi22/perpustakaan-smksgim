@@ -5,7 +5,6 @@ import { newUserSchema, passwordSchema, userSchema } from './user';
 const valid = {
   username: ' Siti.Aminah ',
   fullName: 'Siti Aminah',
-  role: 'petugas',
   password: 'rahasia123',
   passwordConfirm: 'rahasia123',
 };
@@ -19,7 +18,6 @@ describe('newUserSchema', () => {
     expect(newUserSchema.parse({ ...valid, password: ' Rahasia123 ', passwordConfirm: ' Rahasia123 ' })).toEqual({
       username: 'siti.aminah',
       fullName: 'Siti Aminah',
-      role: 'petugas',
       password: ' Rahasia123 ',
       passwordConfirm: ' Rahasia123 ',
     });
@@ -48,9 +46,8 @@ describe('newUserSchema', () => {
   });
 
   it('menolak username terlalu pendek dan peran yang tidak dikenal', () => {
-    expect(messagesOf(newUserSchema.safeParse({ ...valid, username: 'ab', role: 'kepala' }))).toEqual([
+    expect(messagesOf(newUserSchema.safeParse({ ...valid, username: 'ab' }))).toEqual([
       'Username minimal 3 karakter.',
-      'Peran harus admin atau petugas.',
     ]);
   });
 
@@ -65,11 +62,15 @@ describe('newUserSchema', () => {
 });
 
 describe('userSchema', () => {
-  it('hanya menerima nama lengkap dan peran', () => {
-    expect(userSchema.parse({ fullName: ' Siti Aminah ', role: 'admin', username: 'lain' })).toEqual({
-      fullName: 'Siti Aminah',
-      role: 'admin',
+  it('hanya menerima nama lengkap; kolom peran dari form lama diabaikan', () => {
+    expect(userSchema.parse({ fullName: '  Siti Aminah ', role: 'petugas' })).toEqual({ fullName: 'Siti Aminah' });
+  });
+
+  it('akun baru tidak membawa kolom peran walau form lama mengirimnya', () => {
+    const parsed = newUserSchema.parse({
+      username: 'siti.aminah', fullName: 'Siti Aminah', role: 'petugas', password: 'rahasia123', passwordConfirm: 'rahasia123',
     });
+    expect(parsed).not.toHaveProperty('role');
   });
 });
 

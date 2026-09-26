@@ -12,7 +12,6 @@ import type { NewUserInput, PasswordInput, UserInput } from '@/server/validation
 import { fail, ok, type ServiceResult } from './result';
 
 const NOT_FOUND = 'Pengguna tidak ditemukan. Muat ulang halaman daftar pengguna.';
-const SELF_ROLE = 'Anda tidak dapat mengubah peran akun Anda sendiri. Minta admin lain melakukannya bila perlu.';
 const SELF_STATUS = 'Anda tidak dapat menonaktifkan akun Anda sendiri. Minta admin lain melakukannya bila perlu.';
 
 function duplicate(username: string): ServiceResult {
@@ -51,7 +50,8 @@ export async function createUser(
     return fail(`Akun ${input.username} belum dapat dibuat di layanan autentikasi (${account.message}). Coba lagi beberapa saat lagi.`);
   }
 
-  const profile = { username: input.username, fullName: input.fullName, role: input.role };
+  // Satu peran sejak revisi 26 September 2026: setiap akun adalah admin.
+  const profile = { username: input.username, fullName: input.fullName, role: 'admin' as const };
   try {
     return await executor.transaction(async (tx) => {
       await tx.insert(profiles).values({ id: account.id, ...profile });
@@ -80,16 +80,13 @@ export async function updateUser(
   if (!isUuid(id)) return fail(NOT_FOUND);
   return executor.transaction(async (tx) => {
     const [current] = await tx
-      .select({ username: profiles.username, fullName: profiles.fullName, role: profiles.role })
+      .select({ username: profiles.username, fullName: profiles.fullName })
       .from(profiles)
       .where(eq(profiles.id, id))
       .for('update');
     if (!current) return fail(NOT_FOUND);
-    // Admin yang menurunkan perannya sendiri dapat membuat perpustakaan
-    // tanpa admin sama sekali; tidak ada layar yang dapat memulihkannya.
-    if (id === actor.id && input.role !== current.role) return fail(SELF_ROLE, 'role');
 
-    const after = { fullName: input.fullName, role: input.role };
+    const after = { fullName: input.fullName };
     await tx.update(profiles).set({ ...after, updatedAt: new Date() }).where(eq(profiles.id, id));
 
     await writeAudit(tx, {
@@ -97,7 +94,7 @@ export async function updateUser(
       action: 'user.update',
       entity: 'profiles',
       entityId: id,
-      metadata: { username: current.username, before: { fullName: current.fullName, role: current.role }, after },
+      metadata: { username: current.username, before: { fullName: current.fullName }, after },
     });
     return ok(id);
   });

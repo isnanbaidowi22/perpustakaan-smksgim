@@ -11,7 +11,6 @@ import { firstValue, type SearchParams } from '@/lib/search-params';
 import { setUserStatusAction } from '@/server/actions/users';
 import { requireProfile } from '@/server/auth/guard';
 import { listUsers } from '@/server/queries/users';
-import { ROLE_LABELS } from './user-fields';
 
 export default async function UsersPage({ searchParams }: { searchParams: SearchParams }) {
   const profile = await requireProfile();
@@ -23,7 +22,7 @@ export default async function UsersPage({ searchParams }: { searchParams: Search
     <>
       <PageHeader
         title="Pengguna"
-        description="Akun admin dan petugas. Username tidak dapat diubah setelah dibuat."
+        description="Akun yang dapat masuk ke aplikasi. Setiap akun dapat mengelola seluruh data dan pengaturan. Username tidak dapat diubah setelah dibuat."
         actions={<Link href="/pengaturan/pengguna/baru" className={buttonClass('primary')}>Tambah Pengguna</Link>}
       />
       <Flash message={firstValue(params.pesan)} />
@@ -33,7 +32,6 @@ export default async function UsersPage({ searchParams }: { searchParams: Search
           <tr>
             <th className={TH}>Username</th>
             <th className={TH}>Nama</th>
-            <th className={TH}>Peran</th>
             <th className={TH}>Status</th>
             <th className={TH}><span className="sr-only">Aksi</span></th>
           </tr>
@@ -43,7 +41,6 @@ export default async function UsersPage({ searchParams }: { searchParams: Search
             <tr key={user.id}>
               <td className={`${TD} font-mono`}>{user.username}</td>
               <td className={TD}>{user.fullName}</td>
-              <td className={TD}>{ROLE_LABELS[user.role]}</td>
               <td className={TD}><RecordStatusBadge status={user.status} /></td>
               <td className={TD}>
                 <div className="flex items-start justify-end gap-2">

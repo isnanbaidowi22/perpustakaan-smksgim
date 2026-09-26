@@ -13,14 +13,14 @@ beforeEach(() => {
 });
 
 describe('NewUserPage', () => {
-  it('menampilkan kolom akun baru dengan peran petugas terpilih', async () => {
+  it('menampilkan kolom akun baru tanpa pilihan peran', async () => {
     const html = renderToStaticMarkup(await NewUserPage());
 
-    for (const name of ['username', 'fullName', 'role', 'password', 'passwordConfirm']) {
+    for (const name of ['username', 'fullName', 'password', 'passwordConfirm']) {
       expect(html).toContain(`name="${name}"`);
     }
     expect(html.split('type="password"').length - 1).toBe(2);
-    expect(html).toMatch(/<option value="petugas" selected="">Petugas<\/option>/);
+    expect(html).not.toContain('name="role"');
   });
 
   it('menampilkan Akses ditolak untuk petugas', async () => {

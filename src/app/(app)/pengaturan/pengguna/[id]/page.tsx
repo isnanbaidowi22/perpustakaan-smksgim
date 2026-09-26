@@ -22,7 +22,7 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
         submitLabel="Simpan Perubahan"
         cancelHref="/pengaturan/pengguna"
       >
-        <ProfileFields user={user} isSelf={user.id === profile.id} />
+        <ProfileFields user={user} />
       </ActionForm>
 
       <h2 className="page-title mb-3 mt-8 text-lg font-semibold">Atur Ulang Kata Sandi</h2>

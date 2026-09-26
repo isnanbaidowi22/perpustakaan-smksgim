@@ -40,7 +40,7 @@ describe('Server Action pengguna', () => {
     expect(options.roles).toEqual(['admin']);
     expect(options.secretFields).toEqual(['password', 'passwordConfirm']);
     expect(options.redirectTo).toBe('/pengaturan/pengguna');
-    const data = { username: 'siti', fullName: 'Siti', role: 'petugas', password: 'x', passwordConfirm: 'x' };
+    const data = { username: 'siti', fullName: 'Siti', password: 'x', passwordConfirm: 'x' };
     await options.execute(data, actor);
     expect(mockCreate).toHaveBeenCalledWith(data, actor, fakeAuth);
   });
@@ -50,8 +50,8 @@ describe('Server Action pengguna', () => {
 
     const options = mockRunFormAction.mock.calls[0]?.[0];
     expect(options.roles).toEqual(['admin']);
-    await options.execute({ fullName: 'Siti', role: 'admin' }, actor);
-    expect(mockUpdate).toHaveBeenCalledWith('p1', { fullName: 'Siti', role: 'admin' }, actor);
+    await options.execute({ fullName: 'Siti' }, actor);
+    expect(mockUpdate).toHaveBeenCalledWith('p1', { fullName: 'Siti' }, actor);
   });
 
   it('resetUserPasswordAction tetap di halaman dan tidak mengirim balik kata sandi', async () => {

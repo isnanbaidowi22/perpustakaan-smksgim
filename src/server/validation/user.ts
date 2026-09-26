@@ -15,7 +15,6 @@ function sameConfirmation(value: { password: string; passwordConfirm?: string })
 }
 
 const fullName = requiredText('Nama lengkap wajib diisi.', 100);
-const role = z.enum(['admin', 'petugas'], 'Peran harus admin atau petugas.');
 
 const USERNAME_SHAPE = 'Username harus diawali dan diakhiri huruf atau angka, tanpa titik berurutan, misalnya siti.aminah.';
 
@@ -40,14 +39,13 @@ export const newUserSchema = z
           .pipe(z.string().refine(hasValidUsernameShape, USERNAME_SHAPE)),
       ),
     fullName,
-    role,
     password,
     passwordConfirm,
   })
   .refine(sameConfirmation, { path: ['passwordConfirm'], error: CONFIRM });
 
-/** Username tidak dapat diubah: ia menjadi surel internal akun Supabase. */
-export const userSchema = z.object({ fullName, role });
+/** Username tidak dapat diubah: ia menjadi surel internal akun Supabase. Sejak revisi satu peran, hanya nama yang dapat diubah. */
+export const userSchema = z.object({ fullName });
 
 export const passwordSchema = z
   .object({ password, passwordConfirm })

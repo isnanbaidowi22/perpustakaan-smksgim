@@ -22,7 +22,7 @@ beforeEach(() => {
 });
 
 describe('UsersPage', () => {
-  it('menampilkan peran dan tidak menawarkan menonaktifkan akun sendiri', async () => {
+  it('tidak menampilkan kolom peran dan tidak menawarkan menonaktifkan akun sendiri', async () => {
     mockList.mockResolvedValueOnce([
       { id: 'u1', username: 'admin', fullName: 'Administrator', role: 'admin', status: 'active' },
       { id: 'u2', username: 'petugas', fullName: 'Petugas Perpustakaan', role: 'petugas', status: 'active' },
@@ -37,6 +37,7 @@ describe('UsersPage', () => {
     expect(html).toContain('Petugas Perpustakaan');
     expect(html).toContain('href="/pengaturan/pengguna/u2"');
     expect(html).toContain('Pengguna berhasil dibuat.');
+    expect(html).not.toContain('>Peran<');
   });
 
   it('menampilkan Akses ditolak untuk petugas tanpa membaca data', async () => {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { and, eq } from 'drizzle-orm';
 import { usernameToEmail } from '@/server/auth/username';
-import { auditLogs } from '@/server/db/schema';
+import { auditLogs, profiles } from '@/server/db/schema';
 import { getUser, listUsers } from '@/server/queries/users';
 import { createUser, resetUserPassword, setUserStatus, updateUser } from '@/server/services/users';
 import { fakeAuthAdmin, testActor, withRollback } from './helpers';
@@ -9,7 +9,6 @@ import { fakeAuthAdmin, testActor, withRollback } from './helpers';
 const input = {
   username: 'uji_petugas',
   fullName: 'UJI Petugas Baru',
-  role: 'petugas' as const,
   password: 'rahasia-uji-1',
   passwordConfirm: 'rahasia-uji-1',
 };
@@ -30,10 +29,10 @@ describe('createUser', () => {
       expect(auth.created).toEqual([{ id: result.id, email: usernameToEmail('uji_petugas'), password: 'rahasia-uji-1' }]);
       expect(auth.deleted).toEqual([]);
       expect(await getUser(result.id, tx)).toEqual({
-        id: result.id, username: 'uji_petugas', fullName: 'UJI Petugas Baru', role: 'petugas', status: 'active',
+        id: result.id, username: 'uji_petugas', fullName: 'UJI Petugas Baru', role: 'admin', status: 'active',
       });
       const [audit] = await auditOf(tx, result.id, 'user.create');
-      expect(audit?.metadata).toEqual({ username: 'uji_petugas', fullName: 'UJI Petugas Baru', role: 'petugas' });
+      expect(audit?.metadata).toEqual({ username: 'uji_petugas', fullName: 'UJI Petugas Baru', role: 'admin' });
     });
   });
 
@@ -91,44 +90,43 @@ describe('createUser', () => {
 });
 
 describe('updateUser', () => {
-  it('mengubah nama dan peran, dan mencatat nilai sebelum dan sesudah', async () => {
+  it('mengubah nama dan mencatat nilai sebelum dan sesudah', async () => {
     await withRollback(async (tx) => {
       const actor = await testActor(tx);
-      const created = await createUser(input, actor, fakeAuthAdmin(tx), tx);
-      if (!created.ok) throw new Error(created.message);
-      const changed = { fullName: 'UJI Admin Baru', role: 'admin' as const };
+      const auth = fakeAuthAdmin(tx);
+      const created = await createUser(
+        { username: 'uji.nama', fullName: 'UJI Nama Lama', password: 'rahasia123', passwordConfirm: 'rahasia123' },
+        actor, auth, tx,
+      );
+      if (!created.ok) throw new Error(JSON.stringify(created));
 
-      expect(await updateUser(created.id, changed, actor, tx)).toEqual({ ok: true, id: created.id });
+      expect(await updateUser(created.id, { fullName: 'UJI Nama Baru' }, actor, tx)).toEqual({ ok: true, id: created.id });
 
-      expect(await getUser(created.id, tx)).toMatchObject(changed);
-      const [audit] = await auditOf(tx, created.id, 'user.update');
-      expect(audit?.metadata).toEqual({
-        username: 'uji_petugas',
-        before: { fullName: 'UJI Petugas Baru', role: 'petugas' },
-        after: changed,
-      });
+      const [row] = await tx.select({ fullName: profiles.fullName, role: profiles.role }).from(profiles).where(eq(profiles.id, created.id));
+      expect(row).toEqual({ fullName: 'UJI Nama Baru', role: 'admin' });
+      const [log] = await tx.select({ metadata: auditLogs.metadata }).from(auditLogs)
+        .where(and(eq(auditLogs.action, 'user.update'), eq(auditLogs.entityId, created.id)));
+      expect(log?.metadata).toEqual({ username: 'uji.nama', before: { fullName: 'UJI Nama Lama' }, after: { fullName: 'UJI Nama Baru' } });
     });
   });
 
-  it('menolak admin mengubah perannya sendiri, tetapi mengizinkan mengubah namanya', async () => {
+  it('menyimpan setiap akun baru sebagai admin', async () => {
     await withRollback(async (tx) => {
       const actor = await testActor(tx);
-
-      expect(await updateUser(actor.id, { fullName: 'UJI Nama Admin', role: 'petugas' }, actor, tx)).toEqual({
-        ok: false,
-        field: 'role',
-        message: 'Anda tidak dapat mengubah peran akun Anda sendiri. Minta admin lain melakukannya bila perlu.',
-      });
-      expect(await updateUser(actor.id, { fullName: 'UJI Nama Admin', role: 'admin' }, actor, tx)).toEqual({
-        ok: true, id: actor.id,
-      });
+      const created = await createUser(
+        { username: 'uji.admin', fullName: 'UJI Admin', password: 'rahasia123', passwordConfirm: 'rahasia123' },
+        actor, fakeAuthAdmin(tx), tx,
+      );
+      if (!created.ok) throw new Error(JSON.stringify(created));
+      const [row] = await tx.select({ role: profiles.role }).from(profiles).where(eq(profiles.id, created.id));
+      expect(row?.role).toBe('admin');
     });
   });
 
   it('melaporkan pengguna yang tidak ada', async () => {
     await withRollback(async (tx) => {
       const actor = await testActor(tx);
-      expect(await updateUser(crypto.randomUUID(), { fullName: 'UJI', role: 'petugas' }, actor, tx)).toEqual({
+      expect(await updateUser(crypto.randomUUID(), { fullName: 'UJI' }, actor, tx)).toEqual({
         ok: false, message: 'Pengguna tidak ditemukan. Muat ulang halaman daftar pengguna.',
       });
     });
