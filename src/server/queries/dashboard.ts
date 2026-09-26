@@ -8,7 +8,7 @@ import { openItemCounts } from './loan-aggregates';
 
 /** Angka dashboard (spec 8.4). Setiap angka dapat ditelusuri ke halaman lain. */
 export interface DashboardStats {
-  /** Eksemplar yang tidak NONAKTIF: koleksi yang secara fisik masih dikelola. */
+  /** Eksemplar yang tidak NONAKTIF dari judul aktif (Task 6 ruling): judul nonaktif tidak dapat dipinjam. */
   totalCopies: number;
   /** Judul aktif. */
   totalTitles: number;
@@ -42,7 +42,7 @@ export async function getDashboardStats(today: IsoDate, executor: Executor = db)
   const [collection, [titles], [overdue], [lentToday], [returnedToday]] = await Promise.all([
     executor
       .select({
-        total: sql<number>`(count(*) filter (where ${bookCopies.status} <> 'NONAKTIF'))::int`,
+        total: sql<number>`(count(*) filter (where ${bookCopies.status} <> 'NONAKTIF' and ${books.status} = 'active'))::int`,
         available: sql<number>`(count(*) filter (where ${bookCopies.status} = 'TERSEDIA' and ${books.status} = 'active'))::int`,
         borrowed: sql<number>`(count(*) filter (where ${bookCopies.status} = 'DIPINJAM'))::int`,
       })

@@ -30,7 +30,7 @@ describe('getDashboardStats', () => {
     });
   });
 
-  it('tidak menghitung eksemplar dari judul nonaktif sebagai tersedia', async () => {
+  it('tidak menghitung eksemplar dari judul nonaktif sebagai total maupun tersedia', async () => {
     await withRollback(async (tx) => {
       const before = await getDashboardStats(TODAY, tx);
       const fx = await circulationFixture(tx, { copies: 2 });
@@ -38,7 +38,7 @@ describe('getDashboardStats', () => {
 
       const after = await getDashboardStats(TODAY, tx);
 
-      expect(after.totalCopies - before.totalCopies).toBe(2);
+      expect(after.totalCopies - before.totalCopies).toBe(0);
       expect(after.totalTitles - before.totalTitles).toBe(0);
       expect(after.availableCopies - before.availableCopies).toBe(0);
     });
