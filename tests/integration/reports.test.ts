@@ -2,7 +2,9 @@ import { and, eq } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
 import type { Transaction } from '@/server/db/executor';
 import { loanItems, students } from '@/server/db/schema';
-import { listReportClassOptions, loanReport, returnReport } from '@/server/queries/reports';
+import {
+  listReportClassOptions, loanReport, overdueReport, returnReport,
+} from '@/server/queries/reports';
 import { circulationFixture, seedLoan } from './circulation-fixture';
 import { withRollback } from './helpers';
 
@@ -144,6 +146,50 @@ describe('returnReport', () => {
       expect(report.truncated).toBe(true);
       expect(report.rows).toHaveLength(1);
       expect(report.summary.copies).toBe(2);
+    });
+  });
+});
+
+describe('overdueReport', () => {
+  it('mendaftar eksemplar belum kembali yang lewat jatuh tempo, paling lama di atas, dengan perkiraan denda', async () => {
+    await withRollback(async (tx) => {
+      const fx = await circulationFixture(tx, { copies: 5 });
+      const old = await seedLoan(tx, fx, { student: 0, copies: [0, 1], loanDate: '2090-02-20', dueDate: '2090-02-23', returned: [1] });
+      const recent = await seedLoan(tx, fx, { student: 0, copies: [2], loanDate: '2090-02-27', dueDate: '2090-03-02' });
+      // Jatuh tempo hari ini: belum terlambat.
+      await seedLoan(tx, fx, { student: 0, copies: [3], loanDate: '2090-03-03', dueDate: '2090-03-06' });
+      // Kelas lain: tersaring.
+      await seedLoan(tx, fx, { student: 1, copies: [4], loanDate: '2090-02-20', dueDate: '2090-02-23' });
+
+      const report = await overdueReport({ className: 'XI UJI 1' }, '2090-03-06', 1000, tx);
+
+      expect(report.truncated).toBe(false);
+      expect(report.rows).toEqual([
+        {
+          id: expect.any(String), loanId: old.id, transactionNumber: old.transactionNumber, studentName: 'UJI Siswa Satu',
+          studentNis: 'UJI-S1', studentClass: 'XI UJI 1', barcode: 'UJI-SRK-01', bookTitle: 'UJI-Buku Sirkulasi',
+          dueDate: '2090-02-23', daysLate: 11, estimatedFine: 11000,
+        },
+        {
+          id: expect.any(String), loanId: recent.id, transactionNumber: recent.transactionNumber, studentName: 'UJI Siswa Satu',
+          studentNis: 'UJI-S1', studentClass: 'XI UJI 1', barcode: 'UJI-SRK-03', bookTitle: 'UJI-Buku Sirkulasi',
+          dueDate: '2090-03-02', daysLate: 4, estimatedFine: 4000,
+        },
+      ]);
+      expect(report.summary).toEqual({ students: 1, copies: 2, estimatedFines: 15000 });
+    });
+  });
+
+  it('memotong baris di batas tetapi ringkasan tetap menghitung seluruhnya', async () => {
+    await withRollback(async (tx) => {
+      const fx = await circulationFixture(tx, { copies: 2 });
+      await seedLoan(tx, fx, { student: 0, copies: [0, 1], loanDate: '2090-02-20', dueDate: '2090-02-23' });
+
+      const report = await overdueReport({ className: 'XI UJI 1' }, '2090-03-06', 500, tx, 1);
+
+      expect(report.truncated).toBe(true);
+      expect(report.rows).toHaveLength(1);
+      expect(report.summary).toEqual({ students: 1, copies: 2, estimatedFines: 11000 });
     });
   });
 });

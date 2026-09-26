@@ -1,4 +1,6 @@
-import { and, asc, between, eq, isNotNull, sql } from 'drizzle-orm';
+import {
+  and, asc, between, eq, isNotNull, isNull, lt, ne, sql,
+} from 'drizzle-orm';
 import { diffDays, type IsoDate } from '@/domain/shared/date';
 import type { LoanStatus, ReturnCondition } from '@/domain/shared/types';
 import { REPORT_ROW_LIMIT } from '@/lib/report-period';
@@ -204,6 +206,90 @@ export async function returnReport(
       lost: Number(summary?.lost ?? 0),
       lateFines: Number(summary?.lateFines ?? 0),
       replacementFees: Number(summary?.replacementFees ?? 0),
+    },
+    truncated: rows.length > limit,
+  };
+}
+
+export interface OverdueReportRow {
+  id: string;
+  loanId: string;
+  transactionNumber: string;
+  studentName: string;
+  studentNis: string;
+  studentClass: string;
+  barcode: string;
+  bookTitle: string;
+  dueDate: string;
+  daysLate: number;
+  estimatedFine: number;
+}
+
+export interface OverdueReportSummary {
+  students: number;
+  copies: number;
+  estimatedFines: number;
+}
+
+/**
+ * Eksemplar yang belum kembali dari pinjaman lewat jatuh tempo, per hari ini
+ * (spec §4.2: keterlambatan dihitung saat dibaca). Perkiraan denda memakai
+ * tarif saat ini; denda sesungguhnya dicatat saat pengembalian.
+ */
+export async function overdueReport(
+  filter: { className: string },
+  today: IsoDate,
+  finePerDay: number,
+  executor: Executor = db,
+  limit: number = REPORT_ROW_LIMIT,
+): Promise<{ rows: OverdueReportRow[]; summary: OverdueReportSummary; truncated: boolean }> {
+  const where = and(
+    isNull(loanItems.returnedAt),
+    ne(loans.status, 'SELESAI'),
+    lt(loans.dueDate, today),
+    filter.className ? eq(loans.studentClass, filter.className) : undefined,
+  );
+
+  const rows = await executor
+    .select({
+      id: loanItems.id,
+      loanId: loans.id,
+      transactionNumber: loans.transactionNumber,
+      studentName: students.name,
+      studentNis: students.nis,
+      studentClass: loans.studentClass,
+      barcode: bookCopies.barcode,
+      bookTitle: books.title,
+      dueDate: loans.dueDate,
+    })
+    .from(loanItems)
+    .innerJoin(loans, eq(loans.id, loanItems.loanId))
+    .innerJoin(students, eq(students.id, loans.studentId))
+    .innerJoin(bookCopies, eq(bookCopies.id, loanItems.bookCopyId))
+    .innerJoin(books, eq(books.id, bookCopies.bookId))
+    .where(where)
+    .orderBy(asc(loans.dueDate), asc(students.name), asc(bookCopies.barcode))
+    .limit(limit + 1);
+
+  const [summary] = await executor
+    .select({
+      students: sql<number>`count(distinct ${loans.studentId})::int`,
+      copies: sql<number>`count(*)::int`,
+      totalDays: sql<number>`coalesce(sum(${today}::date - ${loans.dueDate}), 0)::int`,
+    })
+    .from(loanItems)
+    .innerJoin(loans, eq(loans.id, loanItems.loanId))
+    .where(where);
+
+  return {
+    rows: rows.slice(0, limit).map((row) => {
+      const daysLate = diffDays(row.dueDate, today);
+      return { ...row, daysLate, estimatedFine: daysLate * finePerDay };
+    }),
+    summary: {
+      students: Number(summary?.students ?? 0),
+      copies: Number(summary?.copies ?? 0),
+      estimatedFines: Number(summary?.totalDays ?? 0) * finePerDay,
     },
     truncated: rows.length > limit,
   };
