@@ -45,11 +45,4 @@ describe('EditUserPage', () => {
     mockGet.mockResolvedValueOnce(null);
     await expect(render('x')).rejects.toThrow('NEXT_NOT_FOUND');
   });
-
-  it('menampilkan Akses ditolak untuk petugas tanpa membaca data', async () => {
-    mockRequireProfile.mockResolvedValueOnce({ id: 'u2', role: 'petugas', fullName: 'Petugas', status: 'active' });
-
-    expect(renderToStaticMarkup(await render('u1'))).toContain('Akses ditolak');
-    expect(mockGet).not.toHaveBeenCalled();
-  });
 });

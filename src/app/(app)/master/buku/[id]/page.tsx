@@ -22,7 +22,7 @@ export default async function BookDetailPage({
   searchParams: SearchParams;
 }) {
   const [{ id }, query] = await Promise.all([params, searchParams]);
-  const [book, profile] = await Promise.all([getBook(id), requireProfile()]);
+  const [book] = await Promise.all([getBook(id), requireProfile()]);
   if (!book) notFound();
 
   const [categoryOptions, rackOptions, copies] = await Promise.all([
@@ -56,7 +56,6 @@ export default async function BookDetailPage({
         bookId={book.id}
         bookActive={book.status === 'active'}
         copies={copies}
-        canManageStatus={profile.role === 'admin'}
       />
     </>
   );

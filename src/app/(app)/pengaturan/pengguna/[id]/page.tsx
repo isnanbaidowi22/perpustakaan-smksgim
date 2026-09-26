@@ -1,5 +1,4 @@
 import { notFound } from 'next/navigation';
-import { AccessDenied } from '@/components/ui/access-denied';
 import { ActionForm } from '@/components/ui/action-form';
 import { PageHeader } from '@/components/ui/page-header';
 import { resetUserPasswordAction, updateUserAction } from '@/server/actions/users';
@@ -8,8 +7,7 @@ import { getUser } from '@/server/queries/users';
 import { PasswordFields, ProfileFields } from '../user-fields';
 
 export default async function EditUserPage({ params }: { params: Promise<{ id: string }> }) {
-  const profile = await requireProfile();
-  if (profile.role !== 'admin') return <AccessDenied />;
+  await requireProfile();
   const { id } = await params;
   const user = await getUser(id);
   if (!user) notFound();

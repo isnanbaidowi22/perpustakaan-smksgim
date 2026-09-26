@@ -39,13 +39,4 @@ describe('UsersPage', () => {
     expect(html).toContain('Pengguna berhasil dibuat.');
     expect(html).not.toContain('>Peran<');
   });
-
-  it('menampilkan Akses ditolak untuk petugas tanpa membaca data', async () => {
-    mockRequireProfile.mockResolvedValueOnce({ id: 'u2', role: 'petugas', fullName: 'Petugas', status: 'active' });
-
-    const html = await render();
-
-    expect(html).toContain('Akses ditolak');
-    expect(mockList).not.toHaveBeenCalled();
-  });
 });

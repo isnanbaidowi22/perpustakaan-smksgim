@@ -1,4 +1,3 @@
-import { AccessDenied } from '@/components/ui/access-denied';
 import { ActionForm } from '@/components/ui/action-form';
 import { CheckboxField, TextAreaField, TextField } from '@/components/ui/fields';
 import { PageHeader } from '@/components/ui/page-header';
@@ -9,8 +8,7 @@ import { getLibrarySettings } from '@/server/queries/settings';
 const LEGEND = 'mb-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-ink-500)]';
 
 export default async function SettingsPage() {
-  const profile = await requireProfile();
-  if (profile.role !== 'admin') return <AccessDenied />;
+  await requireProfile();
   const settings = await getLibrarySettings();
 
   return (

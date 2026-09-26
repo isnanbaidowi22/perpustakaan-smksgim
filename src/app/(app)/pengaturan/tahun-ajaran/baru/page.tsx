@@ -1,4 +1,3 @@
-import { AccessDenied } from '@/components/ui/access-denied';
 import { ActionForm } from '@/components/ui/action-form';
 import { CheckboxField } from '@/components/ui/fields';
 import { PageHeader } from '@/components/ui/page-header';
@@ -8,8 +7,7 @@ import { getActiveAcademicYear } from '@/server/queries/academic-years';
 import { AcademicYearFields } from '../academic-year-fields';
 
 export default async function NewAcademicYearPage() {
-  const profile = await requireProfile();
-  if (profile.role !== 'admin') return <AccessDenied />;
+  await requireProfile();
   const active = await getActiveAcademicYear();
 
   return (

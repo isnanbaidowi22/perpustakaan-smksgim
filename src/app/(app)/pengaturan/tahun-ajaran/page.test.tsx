@@ -41,13 +41,4 @@ describe('AcademicYearsPage', () => {
     mockList.mockResolvedValueOnce([]);
     expect(await render()).toContain('Belum ada tahun ajaran.');
   });
-
-  it('menampilkan Akses ditolak untuk petugas tanpa membaca data', async () => {
-    mockRequireProfile.mockResolvedValueOnce({ id: 'u2', role: 'petugas', fullName: 'Petugas', status: 'active' });
-
-    const html = await render();
-
-    expect(html).toContain('Akses ditolak');
-    expect(mockList).not.toHaveBeenCalled();
-  });
 });

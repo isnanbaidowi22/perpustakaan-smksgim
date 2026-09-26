@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { AccessDenied } from '@/components/ui/access-denied';
 import { FilterBar, FilterSelect } from '@/components/ui/filter-bar';
 import { PageHeader } from '@/components/ui/page-header';
 import { Pagination } from '@/components/ui/pagination';
@@ -28,8 +27,7 @@ function Subject({ row }: { row: AuditRow }) {
 }
 
 export default async function AuditLogPage({ searchParams }: { searchParams: SearchParams }) {
-  const profile = await requireProfile();
-  if (profile.role !== 'admin') return <AccessDenied />;
+  await requireProfile();
 
   const params = await searchParams;
   const q = firstValue(params.q);

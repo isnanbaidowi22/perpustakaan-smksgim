@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { AccessDenied } from '@/components/ui/access-denied';
 import { ActionButton } from '@/components/ui/action-button';
 import { buttonClass } from '@/components/ui/button-styles';
 import { Flash } from '@/components/ui/flash';
@@ -14,8 +13,7 @@ import { requireProfile } from '@/server/auth/guard';
 import { listAcademicYears } from '@/server/queries/academic-years';
 
 export default async function AcademicYearsPage({ searchParams }: { searchParams: SearchParams }) {
-  const profile = await requireProfile();
-  if (profile.role !== 'admin') return <AccessDenied />;
+  await requireProfile();
   const params = await searchParams;
   const years = await listAcademicYears();
 

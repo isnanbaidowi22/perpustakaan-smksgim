@@ -31,15 +31,6 @@ beforeEach(() => {
 });
 
 describe('AuditLogPage', () => {
-  it('menolak petugas tanpa membaca audit log', async () => {
-    mockRequireProfile.mockResolvedValueOnce({ id: 'u2', role: 'petugas', fullName: 'Petugas', status: 'active' });
-
-    const html = await render();
-
-    expect(html).toContain('Akses ditolak');
-    expect(mockList).not.toHaveBeenCalled();
-  });
-
   it('menampilkan waktu, pelaku, aksi, tautan data, dan ringkasan', async () => {
     const html = await render({ q: 'PJM-20260925-0001', jenis: 'transaksi', tanggal: '2026-09-25', hal: '2' });
 

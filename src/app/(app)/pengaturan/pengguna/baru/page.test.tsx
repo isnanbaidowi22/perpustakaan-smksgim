@@ -22,9 +22,4 @@ describe('NewUserPage', () => {
     expect(html.split('type="password"').length - 1).toBe(2);
     expect(html).not.toContain('name="role"');
   });
-
-  it('menampilkan Akses ditolak untuk petugas', async () => {
-    mockRequireProfile.mockResolvedValueOnce({ id: 'u2', role: 'petugas', fullName: 'Petugas', status: 'active' });
-    expect(renderToStaticMarkup(await NewUserPage())).toContain('Akses ditolak');
-  });
 });

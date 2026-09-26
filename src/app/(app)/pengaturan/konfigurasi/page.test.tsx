@@ -40,13 +40,4 @@ describe('SettingsPage', () => {
       expect(html).toContain(`<input type="hidden" name="${name}" value="off"/>`);
     }
   });
-
-  it('menampilkan Akses ditolak untuk petugas tanpa membaca konfigurasi', async () => {
-    mockRequireProfile.mockResolvedValueOnce({ id: 'u2', role: 'petugas', fullName: 'Petugas', status: 'active' });
-
-    const html = renderToStaticMarkup(await SettingsPage());
-
-    expect(html).toContain('Akses ditolak');
-    expect(mockGet).not.toHaveBeenCalled();
-  });
 });

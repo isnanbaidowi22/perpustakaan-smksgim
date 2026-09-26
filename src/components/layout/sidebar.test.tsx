@@ -22,22 +22,11 @@ const COMMON = [
 const ADMIN_ONLY = ['/pengaturan/tahun-ajaran', '/pengaturan/pengguna', '/pengaturan/konfigurasi', '/pengaturan/audit-log'];
 
 describe('Sidebar', () => {
-  it('menampilkan seluruh menu untuk admin', () => {
-    const html = renderToStaticMarkup(<Sidebar role="admin" />);
+  it('menampilkan seluruh menu, termasuk Pengaturan, untuk setiap akun', () => {
+    const html = renderToStaticMarkup(<Sidebar />);
     for (const href of [...COMMON, ...ADMIN_ONLY]) {
       expect(html).toContain(`href="${href}"`);
     }
     expect(html).toContain('Pengaturan');
-  });
-
-  it('menyembunyikan grup Pengaturan dari petugas', () => {
-    const html = renderToStaticMarkup(<Sidebar role="petugas" />);
-    for (const href of COMMON) {
-      expect(html).toContain(`href="${href}"`);
-    }
-    for (const href of ADMIN_ONLY) {
-      expect(html).not.toContain(`href="${href}"`);
-    }
-    expect(html).not.toContain('Pengaturan');
   });
 });

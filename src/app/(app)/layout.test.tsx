@@ -48,13 +48,13 @@ describe('AppLayout', () => {
     expect(html).toContain('Belum ada tahun ajaran aktif');
   });
 
-  it('meneruskan peran ke sidebar sehingga petugas tidak melihat Pengaturan', async () => {
-    mockRequireProfile.mockResolvedValueOnce({ fullName: 'Petugas Perpustakaan', role: 'petugas' });
+  it('menampilkan menu Pengaturan untuk setiap akun yang masuk', async () => {
+    mockRequireProfile.mockResolvedValueOnce({ fullName: 'Siti Aminah', role: 'admin' });
     mockLimit.mockResolvedValueOnce([{ name: '2026/2027' }]);
 
-    const element = await AppLayout({ children: <div>isi</div> });
-    const html = renderToStaticMarkup(element);
+    const html = renderToStaticMarkup(await AppLayout({ children: <div>isi</div> }));
 
-    expect(html).not.toContain('href="/pengaturan/pengguna"');
+    expect(html).toContain('href="/pengaturan/pengguna"');
+    expect(html).toContain('href="/pengaturan/audit-log"');
   });
 });

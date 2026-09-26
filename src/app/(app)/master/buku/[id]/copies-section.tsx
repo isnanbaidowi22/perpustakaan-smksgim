@@ -13,13 +13,10 @@ export function CopiesSection({
   bookId,
   bookActive,
   copies,
-  canManageStatus,
 }: {
   bookId: string;
   bookActive: boolean;
   copies: CopyRow[];
-  /** Hanya admin. Server tetap menegakkannya di changeCopyStatusAction. */
-  canManageStatus: boolean;
 }) {
   const available = copies.filter((copy) => copy.status === 'TERSEDIA').length;
 
@@ -57,19 +54,17 @@ export function CopiesSection({
               <td className={TD}>{formatDate(copy.acquisitionDate)}</td>
               <td className={TD}>{copy.notes ?? '—'}</td>
               <td className={TD}>
-                {canManageStatus && (
-                  <div className="flex items-start justify-end gap-2">
-                    {availableManualActions(copy.status).map((action) => (
-                      <ActionButton
-                        key={action}
-                        action={changeCopyStatusAction.bind(null, bookId, copy.id, action)}
-                        label={MANUAL_ACTION_LABELS[action]}
-                        confirmText={`${MANUAL_ACTION_LABELS[action]}: eksemplar ${copy.barcode}?`}
-                        variant={action === 'DEACTIVATE' ? 'danger' : 'secondary'}
-                      />
-                    ))}
-                  </div>
-                )}
+                <div className="flex items-start justify-end gap-2">
+                  {availableManualActions(copy.status).map((action) => (
+                    <ActionButton
+                      key={action}
+                      action={changeCopyStatusAction.bind(null, bookId, copy.id, action)}
+                      label={MANUAL_ACTION_LABELS[action]}
+                      confirmText={`${MANUAL_ACTION_LABELS[action]}: eksemplar ${copy.barcode}?`}
+                      variant={action === 'DEACTIVATE' ? 'danger' : 'secondary'}
+                    />
+                  ))}
+                </div>
               </td>
             </tr>
           ))}

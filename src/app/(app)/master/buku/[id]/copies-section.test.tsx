@@ -11,9 +11,9 @@ const copies = [
 ];
 
 describe('CopiesSection', () => {
-  it('menampilkan eksemplar, ringkasan ketersediaan, dan aksi status untuk admin', () => {
+  it('menampilkan eksemplar, ringkasan ketersediaan, dan aksi status', () => {
     const html = renderToStaticMarkup(
-      <CopiesSection bookId="b1" bookActive copies={copies} canManageStatus />,
+      <CopiesSection bookId="b1" bookActive copies={copies} />,
     );
 
     expect(html).toContain('1 dari 2 eksemplar tersedia');
@@ -26,17 +26,9 @@ describe('CopiesSection', () => {
     expect(html).toContain('name="count"');
   });
 
-  it('menyembunyikan aksi status dari petugas', () => {
-    const html = renderToStaticMarkup(
-      <CopiesSection bookId="b1" bookActive copies={copies} canManageStatus={false} />,
-    );
-    expect(html).not.toContain('Pulihkan ke tersedia');
-    expect(html).not.toContain('Tarik dari koleksi');
-  });
-
   it('mengganti form tambah dengan penjelasan bila buku nonaktif', () => {
     const html = renderToStaticMarkup(
-      <CopiesSection bookId="b1" bookActive={false} copies={[]} canManageStatus />,
+      <CopiesSection bookId="b1" bookActive={false} copies={[]} />,
     );
     expect(html).toContain('Belum ada eksemplar');
     expect(html).toContain('Buku ini nonaktif');

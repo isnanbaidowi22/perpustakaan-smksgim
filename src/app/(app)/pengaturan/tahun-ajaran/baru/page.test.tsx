@@ -37,9 +37,4 @@ describe('NewAcademicYearPage', () => {
     expect(html).toMatch(/type="checkbox"[^>]*checked=""/);
     expect(html).toContain('Belum ada tahun ajaran aktif');
   });
-
-  it('menampilkan Akses ditolak untuk petugas', async () => {
-    mockRequireProfile.mockResolvedValueOnce({ id: 'u2', role: 'petugas', fullName: 'Petugas', status: 'active' });
-    expect(renderToStaticMarkup(await NewAcademicYearPage())).toContain('Akses ditolak');
-  });
 });

@@ -50,16 +50,12 @@ describe('BookDetailPage', () => {
     expect(html).toContain('Buku berhasil ditambahkan.');
   });
 
-  it('menampilkan eksemplar, dengan aksi status hanya untuk admin', async () => {
+  it('menampilkan eksemplar beserta aksi statusnya', async () => {
     mockGetBook.mockResolvedValueOnce(book);
     mockRequireProfile.mockResolvedValueOnce({ role: 'admin' });
-    expect(await render()).toContain('Aktifkan kembali');
-
-    mockGetBook.mockResolvedValueOnce(book);
-    mockRequireProfile.mockResolvedValueOnce({ role: 'petugas' });
     const html = await render();
     expect(html).toContain('BK-000001');
-    expect(html).not.toContain('Aktifkan kembali');
+    expect(html).toContain('Aktifkan kembali');
   });
 
   it('menampilkan halaman tidak ditemukan untuk id yang tidak ada', async () => {

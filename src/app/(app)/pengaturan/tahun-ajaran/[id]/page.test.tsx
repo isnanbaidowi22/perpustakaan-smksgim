@@ -38,13 +38,4 @@ describe('EditAcademicYearPage', () => {
     mockGet.mockResolvedValueOnce(null);
     await expect(EditAcademicYearPage({ params: Promise.resolve({ id: 'x' }) })).rejects.toThrow('NEXT_NOT_FOUND');
   });
-
-  it('menampilkan Akses ditolak untuk petugas tanpa membaca data', async () => {
-    mockRequireProfile.mockResolvedValueOnce({ id: 'u2', role: 'petugas', fullName: 'Petugas', status: 'active' });
-
-    const html = renderToStaticMarkup(await EditAcademicYearPage({ params: Promise.resolve({ id: 'y1' }) }));
-
-    expect(html).toContain('Akses ditolak');
-    expect(mockGet).not.toHaveBeenCalled();
-  });
 });

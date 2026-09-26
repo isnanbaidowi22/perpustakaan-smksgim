@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { AccessDenied } from '@/components/ui/access-denied';
 import { ActionButton } from '@/components/ui/action-button';
 import { buttonClass } from '@/components/ui/button-styles';
 import { Flash } from '@/components/ui/flash';
@@ -14,7 +13,6 @@ import { listUsers } from '@/server/queries/users';
 
 export default async function UsersPage({ searchParams }: { searchParams: SearchParams }) {
   const profile = await requireProfile();
-  if (profile.role !== 'admin') return <AccessDenied />;
   const params = await searchParams;
   const users = await listUsers();
 

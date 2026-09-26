@@ -16,7 +16,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <AppShell
-      sidebar={<Sidebar role={profile.role} />}
+      sidebar={<Sidebar />}
       topbar={<Topbar academicYear={year?.name ?? null} userName={profile.fullName} />}
     >
       {children}
