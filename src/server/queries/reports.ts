@@ -1,5 +1,5 @@
 import {
-  and, asc, between, eq, isNotNull, isNull, lt, ne, sql,
+  and, asc, between, eq, ilike, isNotNull, isNull, lt, ne, or, sql,
 } from 'drizzle-orm';
 import { diffDays, type IsoDate } from '@/domain/shared/date';
 import type { LoanStatus, ReturnCondition } from '@/domain/shared/types';
@@ -9,9 +9,11 @@ import { SCHOOL_TIME_ZONE } from '@/lib/school-date';
 import { db } from '@/server/db/client';
 import type { Executor } from '@/server/db/executor';
 import {
-  bookCopies, books, loanItems, loans, students,
+  bookCopies, books, categories, loanItems, loans, racks, students,
 } from '@/server/db/schema';
+import { isUuid } from '@/server/validation/common';
 import { loanItemCounts } from './loan-aggregates';
+import { containsPattern } from './like';
 
 /**
  * Kelas untuk filter laporan, dari kelas SAAT MEMINJAM (`loans.student_class`),
@@ -290,6 +292,105 @@ export async function overdueReport(
       students: Number(summary?.students ?? 0),
       copies: Number(summary?.copies ?? 0),
       estimatedFines: Number(summary?.totalDays ?? 0) * finePerDay,
+    },
+    truncated: rows.length > limit,
+  };
+}
+
+export interface CollectionReportRow {
+  id: string;
+  title: string;
+  author: string;
+  categoryName: string | null;
+  rackCode: string | null;
+  available: number;
+  borrowed: number;
+  damaged: number;
+  lost: number;
+  inactive: number;
+  /** Eksemplar yang tidak NONAKTIF, sama dengan "Total Buku" di dashboard. */
+  total: number;
+}
+
+export interface CollectionReportSummary {
+  titles: number;
+  total: number;
+  available: number;
+  borrowed: number;
+  damaged: number;
+  lost: number;
+}
+
+function countStatus(status: string) {
+  return sql<number>`(count(${bookCopies.id}) filter (where ${bookCopies.status} = ${status}))::int`;
+}
+
+/** Judul aktif beserta jumlah eksemplarnya per status. */
+export async function collectionReport(
+  filter: { q: string; categoryId: string },
+  executor: Executor = db,
+  limit: number = REPORT_ROW_LIMIT,
+): Promise<{ rows: CollectionReportRow[]; summary: CollectionReportSummary; truncated: boolean }> {
+  const keyword = filter.q.trim();
+  const where = and(
+    eq(books.status, 'active'),
+    keyword ? or(ilike(books.title, containsPattern(keyword)), ilike(books.author, containsPattern(keyword))) : undefined,
+    filter.categoryId && isUuid(filter.categoryId) ? eq(books.categoryId, filter.categoryId) : undefined,
+  );
+
+  const rows = await executor
+    .select({
+      id: books.id,
+      title: books.title,
+      author: books.author,
+      categoryName: categories.name,
+      rackCode: racks.code,
+      available: countStatus('TERSEDIA'),
+      borrowed: countStatus('DIPINJAM'),
+      damaged: countStatus('RUSAK'),
+      lost: countStatus('HILANG'),
+      inactive: countStatus('NONAKTIF'),
+      total: sql<number>`(count(${bookCopies.id}) filter (where ${bookCopies.status} <> 'NONAKTIF'))::int`,
+    })
+    .from(books)
+    .leftJoin(categories, eq(categories.id, books.categoryId))
+    .leftJoin(racks, eq(racks.id, books.rackId))
+    .leftJoin(bookCopies, eq(bookCopies.bookId, books.id))
+    .where(where)
+    .groupBy(books.id, categories.name, racks.code)
+    .orderBy(asc(books.title), asc(books.id))
+    .limit(limit + 1);
+
+  const [summary] = await executor
+    .select({
+      titles: sql<number>`count(distinct ${books.id})::int`,
+      total: sql<number>`(count(${bookCopies.id}) filter (where ${bookCopies.status} <> 'NONAKTIF'))::int`,
+      available: countStatus('TERSEDIA'),
+      borrowed: countStatus('DIPINJAM'),
+      damaged: countStatus('RUSAK'),
+      lost: countStatus('HILANG'),
+    })
+    .from(books)
+    .leftJoin(bookCopies, eq(bookCopies.bookId, books.id))
+    .where(where);
+
+  return {
+    rows: rows.slice(0, limit).map((row) => ({
+      ...row,
+      available: Number(row.available),
+      borrowed: Number(row.borrowed),
+      damaged: Number(row.damaged),
+      lost: Number(row.lost),
+      inactive: Number(row.inactive),
+      total: Number(row.total),
+    })),
+    summary: {
+      titles: Number(summary?.titles ?? 0),
+      total: Number(summary?.total ?? 0),
+      available: Number(summary?.available ?? 0),
+      borrowed: Number(summary?.borrowed ?? 0),
+      damaged: Number(summary?.damaged ?? 0),
+      lost: Number(summary?.lost ?? 0),
     },
     truncated: rows.length > limit,
   };

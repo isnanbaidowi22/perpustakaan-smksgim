@@ -1,9 +1,9 @@
 import { and, eq } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
 import type { Transaction } from '@/server/db/executor';
-import { loanItems, students } from '@/server/db/schema';
+import { bookCopies, books, loanItems, students } from '@/server/db/schema';
 import {
-  listReportClassOptions, loanReport, overdueReport, returnReport,
+  collectionReport, listReportClassOptions, loanReport, overdueReport, returnReport,
 } from '@/server/queries/reports';
 import { circulationFixture, seedLoan } from './circulation-fixture';
 import { withRollback } from './helpers';
@@ -190,6 +190,44 @@ describe('overdueReport', () => {
       expect(report.truncated).toBe(true);
       expect(report.rows).toHaveLength(1);
       expect(report.summary).toEqual({ students: 1, copies: 2, estimatedFines: 11000 });
+    });
+  });
+});
+
+describe('collectionReport', () => {
+  it('menghitung eksemplar per status untuk tiap judul aktif; total tanpa yang nonaktif', async () => {
+    await withRollback(async (tx) => {
+      const fx = await circulationFixture(tx, { copies: 5 });
+      const statuses = ['TERSEDIA', 'DIPINJAM', 'RUSAK', 'HILANG', 'NONAKTIF'] as const;
+      for (const [index, status] of statuses.entries()) {
+        await tx.update(bookCopies).set({ status }).where(eq(bookCopies.id, fx.copies[index].id));
+      }
+
+      const report = await collectionReport({ q: 'UJI-Buku', categoryId: '' }, tx);
+
+      expect(report.truncated).toBe(false);
+      expect(report.rows).toEqual([{
+        id: fx.bookId, title: 'UJI-Buku Sirkulasi', author: 'UJI-Penulis', categoryName: null, rackCode: 'UJI-R1',
+        available: 1, borrowed: 1, damaged: 1, lost: 1, inactive: 1, total: 4,
+      }]);
+      expect(report.summary).toEqual({ titles: 1, total: 4, available: 1, borrowed: 1, damaged: 1, lost: 1 });
+    });
+  });
+
+  it('melewatkan judul nonaktif, mencari penulis juga, dan memotong baris di batas', async () => {
+    await withRollback(async (tx) => {
+      await circulationFixture(tx, { copies: 1 });
+      await tx.insert(books).values([
+        { title: 'UJI-Buku Kedua', author: 'UJI-Penulis', price: '0' },
+        { title: 'UJI-Buku Nonaktif', author: 'UJI-Penulis', price: '0', status: 'inactive' },
+      ]);
+
+      const report = await collectionReport({ q: 'UJI-Penulis', categoryId: '' }, tx, 1);
+
+      expect(report.truncated).toBe(true);
+      expect(report.rows.map((row) => row.title)).toEqual(['UJI-Buku Kedua']);
+      expect(report.summary.titles).toBe(2);
+      expect(report.summary.total).toBe(1);
     });
   });
 });
