@@ -65,10 +65,12 @@ describe('DashboardPage', () => {
     expect(mockStats).toHaveBeenCalledWith('2090-03-02');
     expect(html).toContain('Total Buku');
     expect(html).toContain('1.250');
-    expect(html).toContain('eksemplar dari 310 judul aktif');
+    expect(html).toContain('eksemplar · 310 judul aktif');
     expect(html).toContain('Buku Tersedia');
     expect(html).toContain('1.100');
+    expect(html).toContain('eksemplar siap dipinjam dari judul aktif');
     expect(html).toContain('Sedang Dipinjam');
+    expect(html).toContain('eksemplar di tangan siswa · lihat transaksinya');
     expect(html).toContain('href="/transaksi/riwayat?status=open"');
     expect(html).toContain('Terlambat');
     expect(html).toContain('href="/transaksi/riwayat?status=overdue"');
@@ -77,6 +79,7 @@ describe('DashboardPage', () => {
     expect(html).toContain('transaksi · 12 buku');
     expect(html).toContain('Pengembalian Hari Ini');
     expect(html).toContain('>9<');
+    expect(html).toContain('buku kembali hari ini');
     expect(html).toContain('02/03/2090');
   });
 

@@ -51,9 +51,9 @@ export default async function DashboardPage() {
       />
 
       <section aria-label="Ringkasan hari ini" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        <StatCard href="/master/buku" label="Total Buku" value={stats.totalCopies} detail={`eksemplar dari ${stats.totalTitles} judul aktif`} />
-        <StatCard href="/master/buku" label="Buku Tersedia" value={stats.availableCopies} detail="eksemplar siap dipinjam" />
-        <StatCard href="/transaksi/riwayat?status=open" label="Sedang Dipinjam" value={stats.borrowedCopies} detail="eksemplar di tangan siswa" />
+        <StatCard href="/master/buku" label="Total Buku" value={stats.totalCopies} detail={`eksemplar · ${stats.totalTitles} judul aktif`} />
+        <StatCard href="/master/buku" label="Buku Tersedia" value={stats.availableCopies} detail="eksemplar siap dipinjam dari judul aktif" />
+        <StatCard href="/transaksi/riwayat?status=open" label="Sedang Dipinjam" value={stats.borrowedCopies} detail="eksemplar di tangan siswa · lihat transaksinya" />
         <StatCard
           href="/transaksi/riwayat?status=overdue"
           label="Terlambat"
@@ -62,7 +62,7 @@ export default async function DashboardPage() {
           alert
         />
         <StatCard href="/transaksi/riwayat" label="Peminjaman Hari Ini" value={stats.loansToday} detail={`transaksi · ${stats.copiesLentToday} buku`} />
-        <StatCard href="/transaksi/riwayat" label="Pengembalian Hari Ini" value={stats.copiesReturnedToday} detail="buku kembali" />
+        <StatCard href="/transaksi/riwayat" label="Pengembalian Hari Ini" value={stats.copiesReturnedToday} detail="buku kembali hari ini" />
       </section>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-3">
