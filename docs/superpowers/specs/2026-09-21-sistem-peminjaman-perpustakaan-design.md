@@ -9,7 +9,7 @@
 
 ## 1. Ringkasan
 
-Aplikasi web untuk petugas dan admin perpustakaan sekolah, memusatkan pencatatan peminjaman dan pengembalian buku beserta histori transaksinya.
+Aplikasi web untuk staf perpustakaan sekolah, memusatkan pencatatan peminjaman dan pengembalian buku beserta histori transaksinya.
 
 Sasaran operasional yang mengikat desain ini: satu transaksi peminjaman normal selesai dalam **kurang dari 30 detik**, dan status setiap eksemplar buku **selalu** mencerminkan keadaan fisiknya.
 
@@ -55,7 +55,7 @@ Tiga hal berbeda dari PRD v1.0 dan perlu diketahui pembaca dokumen itu.
 
 Login dan sesi · Dashboard · Data Buku dan Eksemplar · Kategori · Rak · Data Siswa · Tahun Ajaran · Peminjaman · Pengembalian · Riwayat Transaksi · Perhitungan dan pelunasan denda · Laporan (tampilan web dan cetak) · Cetak struk · Cetak label barcode · Pengaturan aturan perpustakaan · Manajemen pengguna · Audit log.
 
-**Catatan lingkup.** Empat item terakhir — Tahun Ajaran, Pengaturan, Manajemen Pengguna, dan Cetak — melampaui daftar "Phase 1" awal, tetapi menjadi konsekuensi langsung dari keputusan produk: tahun ajaran dipilih sebagai entitas master dengan satu yang aktif, struk thermal dan label barcode dipilih sebagai kebutuhan, BR-09 menuntut aturan dapat diubah tanpa menyentuh kode, dan seseorang harus dapat membuat akun petugas tanpa membuka dasbor Supabase.
+**Catatan lingkup.** Empat item terakhir — Tahun Ajaran, Pengaturan, Manajemen Pengguna, dan Cetak — melampaui daftar "Phase 1" awal, tetapi menjadi konsekuensi langsung dari keputusan produk: tahun ajaran dipilih sebagai entitas master dengan satu yang aktif, struk thermal dan label barcode dipilih sebagai kebutuhan, BR-09 menuntut aturan dapat diubah tanpa menyentuh kode, dan seseorang harus dapat membuat akun staf tanpa membuka dasbor Supabase.
 
 Keempatnya sengaja dibangun **seminimal mungkin**: formulir sederhana, tanpa alur massal, tanpa impor. Bila lingkup perlu dipangkas demi jadwal, Manajemen Pengguna adalah kandidat pertama yang dapat ditunda — akun awal bisa dibuat lewat skrip seed.
 
@@ -140,7 +140,7 @@ create table profiles (
   id          uuid primary key references auth.users(id) on delete cascade,
   username    text not null unique,
   full_name   text not null,
-  role        text not null check (role in ('admin','petugas')),
+  role        text not null default 'admin' check (role = 'admin'), -- satu peran sejak revisi 26 September 2026
   status      text not null default 'active' check (status in ('active','inactive')),
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now()
@@ -419,11 +419,11 @@ Petugas memasukkan **username**, bukan email. Server memetakannya ke `<username>
 
 Konsekuensi: pemulihan kata sandi lewat email tidak tersedia. Admin mereset kata sandi pengguna dari layar Pengaturan → Pengguna. Ini dapat diterima karena seluruh pengguna adalah staf internal yang dapat menghubungi admin secara langsung.
 
-Sesi dikelola cookie `httpOnly` melalui `@supabase/ssr`. Setiap Server Action memanggil penjaga yang memverifikasi sesi dan peran sebelum melakukan apa pun.
+Sesi dikelola cookie `httpOnly` melalui `@supabase/ssr`. Setiap Server Action memanggil penjaga yang memverifikasi sesi sebelum membaca isian apa pun.
 
 Setiap halaman dan setiap Server Action memeriksa sesinya sendiri lewat `requireProfile()`/`requireActor()`; pemeriksaan di layout `(app)` bukan batas keamanan, karena layout tidak mengontrol apakah segmen rute di bawahnya tetap dirender atau muncul di RSC payload (Next.js 16, `authentication.md` § Layouts and auth checks).
 
-Sejak revisi 26 September 2026 hanya ada satu peran, `admin`. Setiap akun aktif yang masuk dapat menjalankan seluruh aksi: peminjaman, pengembalian, riwayat, pengelolaan data master, pelunasan denda, pemulihan eksemplar rusak/hilang, pengelolaan pengguna, konfigurasi, tahun ajaran, dan audit log. Setiap halaman dan Server Action tetap memeriksa sesinya sendiri (`requireProfile()`/`requireActor()`).
+Sejak revisi 26 September 2026 hanya ada satu peran, `admin`. Setiap akun aktif yang masuk dapat menjalankan seluruh aksi: peminjaman, pengembalian, riwayat, pengelolaan data master, pelunasan denda, pemulihan eksemplar rusak/hilang, pengelolaan pengguna, konfigurasi, tahun ajaran, dan audit log.
 
 ---
 

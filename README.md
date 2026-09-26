@@ -37,18 +37,23 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 ## Akun pengembangan (⚠️ jangan bawa ke produksi)
 
-`npm run db:seed` membuat dua akun Supabase Auth untuk pengembangan lokal:
+`npm run db:seed` membuat satu akun Supabase Auth untuk pengembangan lokal:
 
-| Username  | Kata sandi  | Peran     |
-| --------- | ----------- | --------- |
-| `admin`   | `perpus123` | admin     |
-| `petugas` | `perpus123` | petugas   |
+| Username | Kata sandi  |
+| -------- | ----------- |
+| `admin`  | `perpus123` |
 
-Kata sandi `perpus123` sama untuk keduanya dan hanya dimaksudkan untuk
-pengembangan lokal. **Sebelum aplikasi dijalankan di produksi, ganti kata
-sandi kedua akun ini** lewat **Pengaturan → Pengguna → Ubah → Atur Ulang
-Kata Sandi**, atau nonaktifkan akun `petugas` bila tidak dipakai. Akun baru
-untuk staf dibuat dari layar yang sama; tidak perlu membuka dasbor Supabase.
+Sejak 26 September 2026 aplikasi hanya memiliki satu peran: setiap akun
+adalah `admin` dan dapat menjalankan seluruh aksi, termasuk mengelola
+pengguna lain, mengubah konfigurasi, dan membuka audit log. **Sebelum
+aplikasi dijalankan di produksi, ganti kata sandi `perpus123`** lewat
+**Pengaturan → Pengguna → Ubah → Atur Ulang Kata Sandi**. Akun baru untuk
+staf dibuat dari layar yang sama; tidak perlu membuka dasbor Supabase.
+
+Basis data yang di-seed sebelum 26 September 2026 mungkin masih memiliki
+akun `petugas` (dan `qa_petugas`). Migrasi `0002_satu_peran` mengubah akun
+itu menjadi admin penuh dengan kata sandi lamanya tetap berlaku. Ganti kata
+sandinya atau nonaktifkan lewat Pengaturan → Pengguna sebelum produksi.
 
 ## Uji
 
