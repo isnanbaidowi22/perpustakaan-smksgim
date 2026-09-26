@@ -23,9 +23,15 @@ describe('AppShell', () => {
 
   it('menyembunyikan sidebar di bawah lebar lg sampai tombol Menu ditekan', () => {
     const html = render();
-    expect(html).toContain('id="navigasi-utama" class="hidden lg:flex"');
+    expect(html).toContain('id="navigasi-utama" class="hidden lg:flex print:hidden"');
     expect(html).toMatch(/<button[^>]*aria-expanded="false"[^>]*aria-controls="navigasi-utama"/);
     expect(html).toContain('Menu');
+  });
+
+  it('tidak ikut tercetak: tombol Menu, sidebar, dan bantalan halaman', () => {
+    const html = render();
+    expect(html).toMatch(/<div class="[^"]*lg:hidden[^"]*print:hidden[^"]*"><button/);
+    expect(html).toContain('<main class="flex-1 p-4 lg:p-6 print:p-0">');
   });
 
   it('menempatkan tombol Menu sebelum panel navigasi agar urutan Tab maju masuk ke menu', () => {

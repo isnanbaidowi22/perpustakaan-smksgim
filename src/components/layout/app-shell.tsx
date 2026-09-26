@@ -58,7 +58,7 @@ export function AppShell({
 
   return (
     <div className="min-h-screen lg:flex">
-      <div className="flex items-center border-b border-[var(--color-ink-100)] bg-white px-4 py-2 lg:hidden">
+      <div className="flex items-center border-b border-[var(--color-ink-100)] bg-white px-4 py-2 lg:hidden print:hidden">
         <button
           ref={toggleRef}
           type="button"
@@ -72,7 +72,7 @@ export function AppShell({
       </div>
       <div
         id="navigasi-utama"
-        className={open ? 'fixed inset-0 z-30 flex lg:static lg:z-auto' : 'hidden lg:flex'}
+        className={open ? 'fixed inset-0 z-30 flex lg:static lg:z-auto print:hidden' : 'hidden lg:flex print:hidden'}
         onKeyDown={handlePanelKeyDown}
       >
         <div className="h-full shrink-0">{sidebar}</div>
@@ -87,7 +87,7 @@ export function AppShell({
       </div>
       <div className="flex min-w-0 flex-1 flex-col" inert={open && !isLargeViewport}>
         {topbar}
-        <main className="flex-1 p-4 lg:p-6">{children}</main>
+        <main className="flex-1 p-4 lg:p-6 print:p-0">{children}</main>
       </div>
     </div>
   );

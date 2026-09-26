@@ -81,4 +81,14 @@ describe('ScrollTable', () => {
     expect(html).toMatch(/^<div class="[^"]*overflow-x-auto[^"]*"><table/);
     expect(html).toContain('<td>isi</td>');
   });
+
+  it('tidak memotong tabel saat dicetak', () => {
+    const html = renderToStaticMarkup(
+      <ScrollTable>
+        <tbody><tr><td>isi</td></tr></tbody>
+      </ScrollTable>,
+    );
+    expect(html).toContain('print:overflow-visible');
+    expect(html).toContain('print:min-w-0');
+  });
 });

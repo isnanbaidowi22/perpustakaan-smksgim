@@ -7,8 +7,8 @@ import type { ReactNode } from 'react';
  */
 export function ScrollTable({ children }: { children: ReactNode }) {
   return (
-    <div className="overflow-x-auto rounded-lg border border-[var(--color-ink-100)] bg-white">
-      <table className="w-full min-w-[40rem] text-sm">{children}</table>
+    <div className="overflow-x-auto rounded-lg border border-[var(--color-ink-100)] bg-white print:overflow-visible print:rounded-none">
+      <table className="w-full min-w-[40rem] text-sm print:min-w-0 print:text-xs">{children}</table>
     </div>
   );
 }

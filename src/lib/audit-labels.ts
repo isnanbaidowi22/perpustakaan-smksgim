@@ -1,5 +1,6 @@
 import type { IsoDate } from '@/domain/shared/date';
 import { formatDate, formatRupiah } from './format';
+import { parseIsoDate } from './iso-date';
 import type { Option } from './options';
 
 /** Map, bukan objek literal: kunci dari database seperti "constructor" tidak boleh cocok dengan properti prototipe. */
@@ -64,11 +65,9 @@ export function parseAuditKind(value: string): AuditKind {
   return match ? (match.value as AuditKind) : 'all';
 }
 
-/** `'2026-02-30'` ditolak: tanggal harus ada di kalender, bukan hanya berpola benar. */
+/** '2026-02-30' ditolak: tanggal harus ada di kalender, bukan hanya berpola benar. */
 export function parseDateFilter(value: string): IsoDate | null {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
-  const date = new Date(`${value}T00:00:00Z`);
-  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value ? value : null;
+  return parseIsoDate(value);
 }
 
 const ENTITY_PATHS = new Map<string, string>([

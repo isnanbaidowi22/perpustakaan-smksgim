@@ -23,4 +23,9 @@ describe('Topbar', () => {
     const html = renderToStaticMarkup(<Topbar academicYear="2026/2027" userName="Petugas" />);
     expect(html).toContain('Keluar');
   });
+
+  it('tidak ikut tercetak', () => {
+    const html = renderToStaticMarkup(<Topbar academicYear="2026/2027" userName="Admin" />);
+    expect(html).toMatch(/^<header class="[^"]*print:hidden/);
+  });
 });

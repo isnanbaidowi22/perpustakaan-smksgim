@@ -8,7 +8,7 @@ export function Topbar({
   userName: string;
 }) {
   return (
-    <header className="flex h-14 items-center justify-between border-b border-[var(--color-ink-100)] bg-white px-6">
+    <header className="flex h-14 items-center justify-between border-b border-[var(--color-ink-100)] bg-white px-6 print:hidden">
       {/* Tahun ajaran selalu terlihat: petugas harus tahu ke tahun mana
           transaksinya masuk, tanpa perlu membuka halaman lain. */}
       {academicYear ? (

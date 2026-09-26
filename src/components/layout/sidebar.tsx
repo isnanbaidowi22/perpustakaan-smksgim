@@ -26,7 +26,7 @@ const NAV: NavSection[] = [
     ],
   },
   {
-    // PRD bab 11. Halamannya dibuat di Rencana 06; sampai saat itu tautan ini 404.
+    // PRD bab 11: laporan terlihat oleh setiap akun.
     group: 'Laporan',
     items: [
       { href: '/laporan/peminjaman', label: 'Peminjaman' },
