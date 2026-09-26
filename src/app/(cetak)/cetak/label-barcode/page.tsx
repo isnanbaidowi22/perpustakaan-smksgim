@@ -2,7 +2,7 @@ import { PrintToolbar } from '@/components/print/print-toolbar';
 import { Barcode } from '@/components/ui/barcode';
 import { buttonClass } from '@/components/ui/button-styles';
 import { encodeCode128 } from '@/lib/code128';
-import { LABELS_PER_SHEET, MAX_LABELS, parseLabelRequest } from '@/lib/label-request';
+import { chunkSheets, LABEL_SHEET, LABELS_PER_SHEET, MAX_LABELS, parseLabelRequest } from '@/lib/label-request';
 import { firstValue, type SearchParams } from '@/lib/search-params';
 import { requireProfile } from '@/server/auth/guard';
 import { findLabelCopies, type LabelCopy } from '@/server/queries/labels';
@@ -33,19 +33,22 @@ export default async function LabelPage({ searchParams }: { searchParams: Search
 
   let problem: string | null = null;
   if (request.kind === 'invalid') problem = request.message;
-  if (batch && batch.total === 0) {
+  if (request.kind === 'book' && batch?.bookTitle === null) {
+    problem = 'Buku tidak ditemukan. Buka ulang dari Master Data → Buku.';
+  } else if (batch && batch.total === 0) {
     problem = request.kind === 'book'
       ? 'Judul ini belum punya eksemplar aktif untuk dilabeli. Tambahkan eksemplarnya di halaman buku.'
       : `Tidak ada eksemplar aktif dengan barcode ${dari.trim().toUpperCase()} sampai ${sampai.trim().toUpperCase()}.`;
   }
   const truncated = batch !== null && batch.total > MAX_LABELS
-    ? `Rentang ini berisi ${batch.total} eksemplar; sekali cetak maksimal ${MAX_LABELS} label (10 lembar). Yang tampil sampai ${copies.at(-1)?.barcode ?? ''}; cetak sisanya dengan rentang mulai setelah barcode itu.`
+    ? `${request.kind === 'book' ? 'Judul ini punya' : 'Rentang ini berisi'} ${batch.total} eksemplar; sekali cetak maksimal ${MAX_LABELS} label (10 lembar). Yang tampil sampai ${copies.at(-1)?.barcode ?? ''}; cetak sisanya dengan rentang mulai setelah barcode itu.`
     : null;
   const subject = request.kind === 'book' && copies.length > 0 ? ` untuk "${copies[0].bookTitle}"` : '';
+  const sheets = chunkSheets(copies);
 
   return (
     <>
-      <style>{'@page { size: A4; margin: 10mm 7mm; }'}</style>
+      <style>{'@page { size: A4; margin: 0; }'}</style>
       <PrintToolbar
         backHref={request.kind === 'book' ? `/master/buku/${request.bookId}` : '/master/buku'}
         backLabel={request.kind === 'book' ? 'Kembali ke buku' : 'Kembali ke Master Data'}
@@ -56,7 +59,7 @@ export default async function LabelPage({ searchParams }: { searchParams: Search
         <h1 className="page-title text-2xl font-semibold">Cetak Label Barcode</h1>
         <p className="mt-1 text-sm text-[var(--color-ink-500)]">
           Pilih rentang barcode, atau buka Master Data → Buku → pilih judul → Cetak Label untuk seluruh eksemplar satu judul.
-          Lembar label A4 berisi {LABELS_PER_SHEET} label (3 × 7, 63,5 × 38,1 mm).
+          Lembar label A4 berisi {LABELS_PER_SHEET} label. Lembar label A4 3 × 7, 63,5 × 38,1 mm (tipe L7160 atau yang setara).
         </p>
         <form className="mt-4 flex flex-wrap items-end gap-2">
           <label className="text-sm">
@@ -84,22 +87,41 @@ export default async function LabelPage({ searchParams }: { searchParams: Search
         )}
       </div>
 
-      {copies.length > 0 && (
-        <div className="mx-auto grid w-fit grid-cols-[repeat(3,63.5mm)] auto-rows-[38.1mm] print:mx-0">
-          {copies.map((copy) => (
-            <div
-              key={copy.id}
-              className="flex flex-col items-center justify-center overflow-hidden border border-dashed border-[var(--color-ink-100)] px-[3mm] text-center print:border-transparent [break-inside:avoid]"
-            >
-              <p className="w-full truncate text-[7pt]">{schoolName}</p>
-              <p className="w-full truncate text-[8pt] font-semibold">{copy.bookTitle}</p>
-              <Barcode value={copy.barcode} className="my-[1mm] h-[13mm] w-full" />
-              <p className="font-mono text-[9pt] font-semibold">{copy.barcode}</p>
-              {copy.rackCode && <p className="text-[7pt]">Rak {copy.rackCode}</p>}
-            </div>
-          ))}
+      {sheets.map((sheet, sheetIndex) => (
+        <div
+          key={sheetIndex}
+          data-sheet
+          className="mx-auto border border-[var(--color-ink-100)] print:border-0"
+          style={{
+            width: `${LABEL_SHEET.widthMm}mm`,
+            height: `${LABEL_SHEET.heightMm}mm`,
+            padding: `${LABEL_SHEET.marginTopMm}mm ${LABEL_SHEET.marginSideMm}mm`,
+            breakAfter: sheetIndex < sheets.length - 1 ? 'page' : undefined,
+          }}
+        >
+          <div
+            className="grid"
+            style={{
+              gridTemplateColumns: `repeat(${LABEL_SHEET.columns}, ${LABEL_SHEET.labelWidthMm}mm)`,
+              gridAutoRows: `${LABEL_SHEET.labelHeightMm}mm`,
+              columnGap: `${LABEL_SHEET.columnGapMm}mm`,
+            }}
+          >
+            {sheet.map((copy) => (
+              <div
+                key={copy.id}
+                className="flex flex-col items-center justify-center overflow-hidden border border-dashed border-[var(--color-ink-100)] px-[3mm] text-center print:border-transparent [break-inside:avoid]"
+              >
+                <p className="w-full truncate text-[7pt]">{schoolName}</p>
+                <p className="w-full truncate text-[8pt] font-semibold">{copy.bookTitle}</p>
+                <Barcode value={copy.barcode} className="my-[1mm] h-[13mm] w-full" />
+                <p className="font-mono text-[9pt] font-semibold">{copy.barcode}</p>
+                {copy.rackCode && <p className="text-[7pt]">Rak {copy.rackCode}</p>}
+              </div>
+            ))}
+          </div>
         </div>
-      )}
+      ))}
     </>
   );
 }

@@ -4,6 +4,32 @@ export const LABELS_PER_SHEET = 21;
 /** Sepuluh lembar sekali cetak: halaman tetap ringan dan printer tidak macet di tengah antrean panjang. */
 export const MAX_LABELS = LABELS_PER_SHEET * 10;
 
+/**
+ * Geometri lembar label A4 3 × 7, 63,5 × 38,1 mm (tipe L7160 atau yang
+ * setara): margin atas 15,15 mm, margin samping 7,25 mm, celah antar kolom
+ * 2,54 mm. Dipakai apa adanya di CSS cetak (spec I2) — jangan diketik ulang.
+ */
+export const LABEL_SHEET = {
+  widthMm: 210,
+  heightMm: 297,
+  marginTopMm: 15.15,
+  marginSideMm: 7.25,
+  columnGapMm: 2.54,
+  labelWidthMm: 63.5,
+  labelHeightMm: 38.1,
+  columns: 3,
+  rows: 7,
+} as const;
+
+/** Mengelompokkan item per lembar A4 (LABELS_PER_SHEET per lembar). */
+export function chunkSheets<T>(items: T[]): T[][] {
+  const sheets: T[][] = [];
+  for (let i = 0; i < items.length; i += LABELS_PER_SHEET) {
+    sheets.push(items.slice(i, i + LABELS_PER_SHEET));
+  }
+  return sheets;
+}
+
 export type LabelRequest =
   | { kind: 'none' }
   | { kind: 'book'; bookId: string }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { LABELS_PER_SHEET, MAX_LABELS, parseLabelRequest } from './label-request';
+import { chunkSheets, LABEL_SHEET, LABELS_PER_SHEET, MAX_LABELS, parseLabelRequest } from './label-request';
 
 const empty = { buku: '', dari: '', sampai: '' };
 
@@ -36,5 +36,34 @@ describe('parseLabelRequest', () => {
   it('memakai lembar A4 berisi 21 label dan batas 10 lembar sekali cetak', () => {
     expect(LABELS_PER_SHEET).toBe(21);
     expect(MAX_LABELS).toBe(210);
+  });
+});
+
+describe('LABEL_SHEET', () => {
+  it('geometri 3 kolom pas dengan lebar A4 210 mm', () => {
+    const { columns, labelWidthMm, columnGapMm, marginSideMm, widthMm } = LABEL_SHEET;
+    const total = columns * labelWidthMm + (columns - 1) * columnGapMm + 2 * marginSideMm;
+    expect(total).toBeCloseTo(widthMm, 0);
+  });
+
+  it('geometri 7 baris pas dengan tinggi A4 297 mm, sisa margin bawah minimal 10 mm', () => {
+    const { rows, labelHeightMm, marginTopMm, heightMm } = LABEL_SHEET;
+    const bottomMargin = heightMm - marginTopMm - rows * labelHeightMm;
+    expect(bottomMargin).toBeGreaterThanOrEqual(10);
+  });
+});
+
+describe('chunkSheets', () => {
+  it('mengelompokkan item per lembar (21 label per lembar)', () => {
+    expect(chunkSheets([])).toEqual([]);
+    expect(chunkSheets(Array.from({ length: 21 }, (_, i) => i))).toHaveLength(1);
+    expect(chunkSheets(Array.from({ length: 22 }, (_, i) => i))).toHaveLength(2);
+    expect(chunkSheets(Array.from({ length: 45 }, (_, i) => i))).toHaveLength(3);
+  });
+
+  it('lembar terakhir bisa lebih sedikit dari 21', () => {
+    const sheets = chunkSheets(Array.from({ length: 22 }, (_, i) => i));
+    expect(sheets[0]).toHaveLength(21);
+    expect(sheets[1]).toHaveLength(1);
   });
 });

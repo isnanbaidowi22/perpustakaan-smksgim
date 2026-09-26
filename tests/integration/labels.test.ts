@@ -46,7 +46,25 @@ describe('findLabelCopies', () => {
 
   it('mengembalikan kosong untuk id buku yang bukan UUID', async () => {
     await withRollback(async (tx) => {
-      expect(await findLabelCopies({ kind: 'book', bookId: 'bukan-uuid' }, tx)).toEqual({ copies: [], total: 0 });
+      expect(await findLabelCopies({ kind: 'book', bookId: 'bukan-uuid' }, tx))
+        .toEqual({ copies: [], total: 0, bookTitle: null });
+    });
+  });
+
+  it('mengembalikan bookTitle null untuk id UUID yang tidak ada di tabel buku', async () => {
+    await withRollback(async (tx) => {
+      expect(await findLabelCopies({ kind: 'book', bookId: crypto.randomUUID() }, tx))
+        .toEqual({ copies: [], total: 0, bookTitle: null });
+    });
+  });
+
+  it('membedakan buku yang ada tetapi seluruh eksemplarnya nonaktif', async () => {
+    await withRollback(async (tx) => {
+      const fx = await circulationFixture(tx, { copies: 2 });
+      await tx.update(bookCopies).set({ status: 'NONAKTIF' }).where(eq(bookCopies.bookId, fx.bookId));
+
+      expect(await findLabelCopies({ kind: 'book', bookId: fx.bookId }, tx))
+        .toEqual({ copies: [], total: 0, bookTitle: 'UJI-Buku Sirkulasi' });
     });
   });
 });

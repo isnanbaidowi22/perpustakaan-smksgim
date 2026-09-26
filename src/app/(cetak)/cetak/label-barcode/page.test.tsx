@@ -34,7 +34,8 @@ describe('LabelPage', () => {
     expect(html).toContain('name="dari"');
     expect(html).toContain('name="sampai"');
     expect(html).toContain('Cetak Label');
-    expect(html).toContain('@page { size: A4; margin: 10mm 7mm; }');
+    expect(html).toContain('@page { size: A4; margin: 0; }');
+    expect(html).toContain('Lembar label A4 3 × 7, 63,5 × 38,1 mm (tipe L7160 atau yang setara)');
   });
 
   it('menjelaskan rentang yang tidak lengkap tanpa membaca eksemplar', async () => {
@@ -46,7 +47,7 @@ describe('LabelPage', () => {
   });
 
   it('mencetak satu label per eksemplar dengan nama sekolah, judul, barcode, dan rak', async () => {
-    mockFind.mockResolvedValueOnce({ copies: [copy('BK-000001'), copy('BK-000002')], total: 2 });
+    mockFind.mockResolvedValueOnce({ copies: [copy('BK-000001'), copy('BK-000002')], total: 2, bookTitle: null });
 
     const html = await render({ dari: 'bk-000001', sampai: 'BK-000002' });
 
@@ -59,7 +60,7 @@ describe('LabelPage', () => {
   });
 
   it('per judul: menyebut judulnya dan kembali ke halaman buku', async () => {
-    mockFind.mockResolvedValueOnce({ copies: [copy('BK-000007', 'Basis Data')], total: 1 });
+    mockFind.mockResolvedValueOnce({ copies: [copy('BK-000007', 'Basis Data')], total: 1, bookTitle: 'Basis Data' });
 
     const html = await render({ buku: 'b1' });
 
@@ -68,19 +69,28 @@ describe('LabelPage', () => {
     expect(html).toContain('href="/master/buku/b1"');
   });
 
-  it('menjelaskan bila tidak ada eksemplar yang cocok', async () => {
-    mockFind.mockResolvedValueOnce({ copies: [], total: 0 });
+  it('menjelaskan bila tidak ada eksemplar yang cocok dalam rentang', async () => {
+    mockFind.mockResolvedValueOnce({ copies: [], total: 0, bookTitle: null });
     expect(await render({ dari: 'BK-900000', sampai: 'BK-900010' }))
       .toContain('Tidak ada eksemplar aktif dengan barcode BK-900000 sampai BK-900010.');
+  });
 
-    mockFind.mockResolvedValueOnce({ copies: [], total: 0 });
+  it('per judul: menjelaskan buku yang ada tetapi belum punya eksemplar aktif', async () => {
+    mockFind.mockResolvedValueOnce({ copies: [], total: 0, bookTitle: 'Basis Data' });
     expect(await render({ buku: 'b1' }))
       .toContain('Judul ini belum punya eksemplar aktif untuk dilabeli.');
   });
 
+  it('per judul: menjelaskan id yang bukan UUID atau buku yang tidak ditemukan', async () => {
+    mockFind.mockResolvedValueOnce({ copies: [], total: 0, bookTitle: null });
+    const html = await render({ buku: 'bukan-uuid' });
+    expect(html).toContain('Buku tidak ditemukan. Buka ulang dari Master Data → Buku.');
+    expect(html).not.toContain('Judul ini belum punya eksemplar aktif');
+  });
+
   it('memberi tahu bila rentang melebihi batas sekali cetak', async () => {
     const copies = Array.from({ length: 210 }, (_, index) => copy(`BK-${String(index + 1).padStart(6, '0')}`));
-    mockFind.mockResolvedValueOnce({ copies, total: 250 });
+    mockFind.mockResolvedValueOnce({ copies, total: 250, bookTitle: null });
 
     const html = await render({ dari: 'BK-000001', sampai: 'BK-000250' });
 
@@ -90,8 +100,29 @@ describe('LabelPage', () => {
     expect(html).toContain('210 label · 10 lembar A4');
   });
 
+  it('memberi tahu bila permintaan per judul melebihi batas sekali cetak', async () => {
+    const copies = Array.from({ length: 210 }, (_, index) => copy(`BK-${String(index + 1).padStart(6, '0')}`, 'Basis Data'));
+    mockFind.mockResolvedValueOnce({ copies, total: 250, bookTitle: 'Basis Data' });
+
+    const html = await render({ buku: 'b1' });
+
+    expect(html).toContain(
+      'Judul ini punya 250 eksemplar; sekali cetak maksimal 210 label (10 lembar). Yang tampil sampai BK-000210; cetak sisanya dengan rentang mulai setelah barcode itu.',
+    );
+    expect(html).not.toContain('Rentang ini berisi');
+  });
+
+  it('merender dua lembar terpisah untuk 22 label', async () => {
+    const copies = Array.from({ length: 22 }, (_, index) => copy(`BK-${String(index + 1).padStart(6, '0')}`));
+    mockFind.mockResolvedValueOnce({ copies, total: 22, bookTitle: null });
+
+    const html = await render({ dari: 'BK-000001', sampai: 'BK-000022' });
+
+    expect(html.match(/data-sheet/g)).toHaveLength(2);
+  });
+
   it('memperingatkan barcode yang tidak dapat dikodekan, tanpa menggagalkan label lain', async () => {
-    mockFind.mockResolvedValueOnce({ copies: [copy('BK-000001'), copy('BUKU-É1')], total: 2 });
+    mockFind.mockResolvedValueOnce({ copies: [copy('BK-000001'), copy('BUKU-É1')], total: 2, bookTitle: null });
 
     const html = await render({ dari: 'B', sampai: 'BZ' });
 

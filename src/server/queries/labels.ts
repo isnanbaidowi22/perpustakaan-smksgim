@@ -18,13 +18,16 @@ export type LabelQuery = { kind: 'book'; bookId: string } | { kind: 'range'; fro
  * Eksemplar untuk dicetak labelnya, maksimal MAX_LABELS. Rentang dibandingkan
  * dengan `collate "C"` (urutan byte) agar sama dengan pemeriksaan rentang
  * terbalik di `parseLabelRequest`; collation bawaan database dapat
- * mengabaikan tanda baca seperti "-".
+ * mengabaikan tanda baca seperti "-". `bookTitle` (untuk permintaan per
+ * judul) membedakan "buku tidak ditemukan" dari "buku ada tapi tidak
+ * punya eksemplar aktif" (spec F6): `null` berarti id bukan UUID atau
+ * bukunya tidak ada.
  */
 export async function findLabelCopies(
   query: LabelQuery,
   executor: Executor = db,
-): Promise<{ copies: LabelCopy[]; total: number }> {
-  if (query.kind === 'book' && !isUuid(query.bookId)) return { copies: [], total: 0 };
+): Promise<{ copies: LabelCopy[]; total: number; bookTitle: string | null }> {
+  if (query.kind === 'book' && !isUuid(query.bookId)) return { copies: [], total: 0, bookTitle: null };
 
   const where = and(
     ne(bookCopies.status, 'NONAKTIF'),
@@ -33,24 +36,32 @@ export async function findLabelCopies(
       : sql`${bookCopies.barcode} collate "C" between ${query.from} and ${query.to}`,
   );
 
-  const copies = await executor
-    .select({
-      id: bookCopies.id,
-      barcode: bookCopies.barcode,
-      bookTitle: books.title,
-      rackCode: racks.code,
-    })
-    .from(bookCopies)
-    .innerJoin(books, eq(books.id, bookCopies.bookId))
-    .leftJoin(racks, eq(racks.id, books.rackId))
-    .where(where)
-    .orderBy(sql`${bookCopies.barcode} collate "C"`)
-    .limit(MAX_LABELS);
+  const [copies, [totalRow], bookRows] = await Promise.all([
+    executor
+      .select({
+        id: bookCopies.id,
+        barcode: bookCopies.barcode,
+        bookTitle: books.title,
+        rackCode: racks.code,
+      })
+      .from(bookCopies)
+      .innerJoin(books, eq(books.id, bookCopies.bookId))
+      .leftJoin(racks, eq(racks.id, books.rackId))
+      .where(where)
+      .orderBy(sql`${bookCopies.barcode} collate "C"`)
+      .limit(MAX_LABELS),
+    executor
+      .select({ total: sql<number>`count(*)::int` })
+      .from(bookCopies)
+      .where(where),
+    query.kind === 'book'
+      ? executor.select({ title: books.title }).from(books).where(eq(books.id, query.bookId)).limit(1)
+      : Promise.resolve([]),
+  ]);
 
-  const [{ total }] = await executor
-    .select({ total: sql<number>`count(*)::int` })
-    .from(bookCopies)
-    .where(where);
-
-  return { copies, total: Number(total) };
+  return {
+    copies,
+    total: Number(totalRow.total),
+    bookTitle: query.kind === 'book' ? bookRows[0]?.title ?? null : null,
+  };
 }
