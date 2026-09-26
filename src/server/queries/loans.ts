@@ -11,7 +11,7 @@ import {
 } from '@/server/db/schema';
 import { isUuid } from '@/server/validation/common';
 import { containsPattern } from './like';
-import { openItemCounts, paidTotals } from './loan-aggregates';
+import { loanItemCounts, openItemCounts, paidTotals } from './loan-aggregates';
 
 export interface LoanItemDetail {
   id: string;
@@ -258,15 +258,7 @@ export async function listLoans(
   executor: Executor = db,
 ): Promise<{ rows: LoanRow[]; total: number }> {
   const paid = paidTotals(executor);
-  const itemCounts = executor
-    .select({
-      loanId: loanItems.loanId,
-      itemCount: sql<number>`count(*)::int`.as('item_count'),
-      openCount: sql<number>`(count(*) filter (where ${loanItems.returnedAt} is null))::int`.as('open_count'),
-    })
-    .from(loanItems)
-    .groupBy(loanItems.loanId)
-    .as('item_counts');
+  const itemCounts = loanItemCounts(executor);
 
   const keyword = filter.q.trim();
   const where = and(

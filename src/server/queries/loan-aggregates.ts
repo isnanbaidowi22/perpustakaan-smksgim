@@ -31,3 +31,16 @@ export function paidTotals(executor: Executor) {
     .groupBy(finePayments.loanId)
     .as('paid_totals');
 }
+
+/** Jumlah seluruh buku dan yang belum kembali per peminjaman. */
+export function loanItemCounts(executor: Executor) {
+  return executor
+    .select({
+      loanId: loanItems.loanId,
+      itemCount: sql<number>`count(*)::int`.as('item_count'),
+      openCount: sql<number>`(count(*) filter (where ${loanItems.returnedAt} is null))::int`.as('open_count'),
+    })
+    .from(loanItems)
+    .groupBy(loanItems.loanId)
+    .as('item_counts');
+}
