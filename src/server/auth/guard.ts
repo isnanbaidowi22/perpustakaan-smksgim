@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import type { Actor, UserRole } from '@/domain/shared/types';
+import type { Actor } from '@/domain/shared/types';
 import { getCurrentProfile, type Profile } from './session';
 
 export async function requireProfile(): Promise<Profile> {
@@ -8,35 +8,13 @@ export async function requireProfile(): Promise<Profile> {
   return profile;
 }
 
-function deniedMessage(roles: UserRole[], role: UserRole): string {
-  return `Akses ditolak. Aksi ini hanya untuk peran: ${roles.join(', ')}. Akun Anda berperan ${role}.`;
-}
-
 /**
- * Dipanggil di awal setiap Server Action yang mengubah data.
- * Otorisasi ditegakkan di server, bukan dengan menyembunyikan tombol.
+ * Pelaku Server Action: pengguna yang sedang masuk. Sejak revisi satu peran
+ * (26 September 2026) setiap akun aktif boleh menjalankan setiap aksi, jadi
+ * yang diperiksa hanya sesinya. Dipanggil sebelum isian form dibaca sama
+ * sekali; tanpa sesi, `requireProfile()` mengalihkan ke /login.
  */
-export async function requireRole(roles: UserRole[]): Promise<Profile> {
+export async function requireActor(): Promise<Actor> {
   const profile = await requireProfile();
-  if (!roles.includes(profile.role)) {
-    throw new Error(deniedMessage(roles, profile.role));
-  }
-  return profile;
-}
-
-export type Authorization =
-  | { ok: true; actor: Actor }
-  | { ok: false; message: string };
-
-/**
- * Seperti requireRole, tetapi mengembalikan hasil alih-alih melempar galat.
- * Next.js menyamarkan galat yang dilempar Server Action di produksi menjadi
- * pesan generik; hasil yang dikembalikan tetap terbaca utuh oleh petugas.
- */
-export async function authorize(roles: UserRole[]): Promise<Authorization> {
-  const profile = await requireProfile();
-  if (!roles.includes(profile.role)) {
-    return { ok: false, message: deniedMessage(roles, profile.role) };
-  }
-  return { ok: true, actor: { id: profile.id, role: profile.role } };
+  return { id: profile.id, role: profile.role };
 }

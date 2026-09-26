@@ -11,8 +11,9 @@ describe('seed script', () => {
     expect(source).toContain('await seedUsers();');
   });
 
-  it('seedUsers membuat akun admin dan petugas lewat Supabase Admin API', () => {
+  it('seedUsers membuat akun admin lewat Supabase Admin API', () => {
     const source = readFileSync(new URL('./seed.ts', import.meta.url), 'utf-8');
     expect(source).toContain('admin.auth.admin.createUser');
+    expect(source).not.toContain("role: 'petugas'");
   });
 });

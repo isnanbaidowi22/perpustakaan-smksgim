@@ -3,7 +3,8 @@ import type { IsoDate } from './date';
 export type CopyStatus = 'TERSEDIA' | 'DIPINJAM' | 'RUSAK' | 'HILANG' | 'NONAKTIF';
 export type ReturnCondition = 'BAIK' | 'RUSAK' | 'HILANG';
 export type LoanStatus = 'AKTIF' | 'SEBAGIAN_KEMBALI' | 'SELESAI';
-export type UserRole = 'admin' | 'petugas';
+/** Satu peran sejak revisi 26 September 2026 (spec §7): setiap akun adalah admin. */
+export type UserRole = 'admin';
 export type RecordStatus = 'active' | 'inactive';
 
 export interface LibrarySettings {

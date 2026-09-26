@@ -18,7 +18,7 @@ vi.mock('@/server/services/students', () => ({
 
 import { createStudentAction, setStudentStatusAction, updateStudentAction } from './students';
 
-const actor = { id: 'u1', role: 'petugas' as const };
+const actor = { id: 'u1', role: 'admin' as const };
 const data = {
   nis: '202600123', name: 'Ahmad Fauzi', className: 'XI RPL 1',
   major: null, gender: null, phone: null, academicYearId: null,
@@ -29,11 +29,10 @@ beforeEach(() => {
 });
 
 describe('Server Action siswa', () => {
-  it('createStudentAction terbuka untuk admin dan petugas, lalu kembali ke daftar', async () => {
+  it('createStudentAction kembali ke daftar setelah berhasil', async () => {
     await createStudentAction(IDLE, new FormData());
 
     const options = mockRunFormAction.mock.calls[0]?.[0];
-    expect(options.roles).toEqual(['admin', 'petugas']);
     expect(options.redirectTo).toBe('/master/siswa');
     await options.execute(data, actor);
     expect(mockCreate).toHaveBeenCalledWith(data, actor);

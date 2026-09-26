@@ -1,19 +1,17 @@
 'use server';
 
-import type { RecordStatus, UserRole } from '@/domain/shared/types';
+import type { RecordStatus } from '@/domain/shared/types';
 import { formError, type FormState } from '@/lib/form-state';
 import { runCommand, runFormAction } from '@/server/forms/run-action';
 import { createCategory, setCategoryStatus, updateCategory } from '@/server/services/categories';
 import { categorySchema } from '@/server/validation/category';
 import { isRecordStatus } from '@/server/validation/common';
 
-const ROLES: UserRole[] = ['admin', 'petugas'];
 const LIST = '/master/kategori';
 const INVALID = 'Kategori belum dapat disimpan. Periksa kolom yang ditandai.';
 
 export async function createCategoryAction(_state: FormState, formData: FormData): Promise<FormState> {
   return runFormAction({
-    roles: ROLES,
     schema: categorySchema,
     formData,
     invalidMessage: INVALID,
@@ -26,7 +24,6 @@ export async function createCategoryAction(_state: FormState, formData: FormData
 
 export async function updateCategoryAction(id: string, _state: FormState, formData: FormData): Promise<FormState> {
   return runFormAction({
-    roles: ROLES,
     schema: categorySchema,
     formData,
     invalidMessage: INVALID,
@@ -48,7 +45,6 @@ export async function setCategoryStatusAction(
     return formError('Status kategori tidak dikenal. Muat ulang halaman lalu coba lagi.');
   }
   return runCommand({
-    roles: ROLES,
     execute: (actor) => setCategoryStatus(id, status, actor),
     successMessage: status === 'active' ? 'Kategori diaktifkan.' : 'Kategori dinonaktifkan.',
     revalidate: [LIST],

@@ -28,7 +28,7 @@ beforeEach(() => {
 describe('EditUserPage', () => {
   it('mengisi nama, dan menyediakan form kata sandi terpisah yang kosong', async () => {
     mockGet.mockResolvedValueOnce({
-      id: 'u2', username: 'petugas', fullName: 'Petugas Perpustakaan', role: 'petugas', status: 'active',
+      id: 'u2', username: 'petugas', fullName: 'Petugas Perpustakaan', role: 'admin', status: 'active',
     });
 
     const html = renderToStaticMarkup(await render('u2'));

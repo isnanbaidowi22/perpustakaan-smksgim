@@ -14,7 +14,7 @@ vi.mock('@/server/queries/academic-years', () => ({
 }));
 vi.mock('@/server/actions/students', () => ({ updateStudentAction: vi.fn() }));
 vi.mock('@/server/auth/guard', () => ({
-  requireProfile: vi.fn(async () => ({ id: 'u1', role: 'petugas', fullName: 'Petugas', status: 'active' })),
+  requireProfile: vi.fn(async () => ({ id: 'u1', role: 'admin', fullName: 'Petugas', status: 'active' })),
 }));
 vi.mock('next/navigation', () => ({ notFound: mockNotFound }));
 

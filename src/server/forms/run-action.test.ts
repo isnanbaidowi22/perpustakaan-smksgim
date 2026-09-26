@@ -1,25 +1,24 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
-import type { UserRole } from '@/domain/shared/types';
 import { formError, formSuccess } from '@/lib/form-state';
 import { requiredText } from '@/server/validation/common';
 import type { ServiceResult } from '@/server/services/result';
 
-const { mockAuthorize, mockRevalidatePath, mockRedirect } = vi.hoisted(() => ({
-  mockAuthorize: vi.fn(),
+const { mockRequireActor, mockRevalidatePath, mockRedirect } = vi.hoisted(() => ({
+  mockRequireActor: vi.fn(),
   mockRevalidatePath: vi.fn(),
   mockRedirect: vi.fn(() => {
     throw new Error('NEXT_REDIRECT');
   }),
 }));
 
-vi.mock('@/server/auth/guard', () => ({ authorize: mockAuthorize }));
+vi.mock('@/server/auth/guard', () => ({ requireActor: mockRequireActor }));
 vi.mock('next/cache', () => ({ revalidatePath: mockRevalidatePath }));
 vi.mock('next/navigation', () => ({ redirect: mockRedirect }));
 
 import { runCommand, runFormAction } from './run-action';
 
-const actor = { id: 'u1', role: 'petugas' as const };
+const actor = { id: 'u1', role: 'admin' as const };
 const schema = z.object({ name: requiredText('Nama kategori wajib diisi.') });
 
 function form(fields: Record<string, string>): FormData {
@@ -30,7 +29,6 @@ function form(fields: Record<string, string>): FormData {
 
 function options(overrides: Partial<Parameters<typeof runFormAction<typeof schema>>[0]> = {}) {
   return {
-    roles: ['admin', 'petugas'] as UserRole[],
     schema,
     formData: form({ name: 'Fiksi' }),
     invalidMessage: 'Kategori belum dapat disimpan. Periksa kolom yang ditandai.',
@@ -43,17 +41,18 @@ function options(overrides: Partial<Parameters<typeof runFormAction<typeof schem
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mockAuthorize.mockResolvedValue({ ok: true, actor });
+  mockRequireActor.mockResolvedValue(actor);
 });
 
 describe('runFormAction', () => {
-  it('menolak sebelum membaca isian bila peran tidak diizinkan', async () => {
-    mockAuthorize.mockResolvedValueOnce({ ok: false, message: 'Akses ditolak.' });
+  it('tidak membaca isian bila pengunjung belum masuk', async () => {
+    mockRequireActor.mockRejectedValueOnce(new Error('NEXT_REDIRECT'));
     const execute = vi.fn();
+    const formData = form({ name: 'Fiksi' });
+    const get = vi.spyOn(formData, 'entries');
 
-    const state = await runFormAction(options({ execute }));
-
-    expect(state).toEqual(formError('Akses ditolak.'));
+    await expect(runFormAction(options({ execute, formData }))).rejects.toThrow('NEXT_REDIRECT');
+    expect(get).not.toHaveBeenCalled();
     expect(execute).not.toHaveBeenCalled();
   });
 
@@ -149,13 +148,11 @@ describe('runFormAction', () => {
 });
 
 describe('runCommand', () => {
-  it('menolak tanpa memanggil service bila peran tidak diizinkan', async () => {
-    mockAuthorize.mockResolvedValueOnce({ ok: false, message: 'Akses ditolak.' });
+  it('tidak memanggil service bila pengunjung belum masuk', async () => {
+    mockRequireActor.mockRejectedValueOnce(new Error('NEXT_REDIRECT'));
     const execute = vi.fn();
 
-    const state = await runCommand({ roles: ['admin'], execute, successMessage: 'Selesai.', revalidate: [] });
-
-    expect(state).toEqual(formError('Akses ditolak.'));
+    await expect(runCommand({ execute, successMessage: 'Selesai.', revalidate: [] })).rejects.toThrow('NEXT_REDIRECT');
     expect(execute).not.toHaveBeenCalled();
   });
 
@@ -163,7 +160,7 @@ describe('runCommand', () => {
     const execute = vi.fn(async (): Promise<ServiceResult> => ({ ok: true, id: 'c1' }));
 
     const state = await runCommand({
-      roles: ['admin', 'petugas'], execute, successMessage: 'Kategori dinonaktifkan.', revalidate: ['/master/kategori'],
+      execute, successMessage: 'Kategori dinonaktifkan.', revalidate: ['/master/kategori'],
     });
 
     expect(execute).toHaveBeenCalledWith(actor);

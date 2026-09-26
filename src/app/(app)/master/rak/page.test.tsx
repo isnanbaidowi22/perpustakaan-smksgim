@@ -6,7 +6,7 @@ const { mockListRacks } = vi.hoisted(() => ({ mockListRacks: vi.fn() }));
 vi.mock('@/server/queries/racks', () => ({ listRacks: mockListRacks }));
 vi.mock('@/server/actions/racks', () => ({ setRackStatusAction: vi.fn() }));
 vi.mock('@/server/auth/guard', () => ({
-  requireProfile: vi.fn(async () => ({ id: 'u1', role: 'petugas', fullName: 'Petugas', status: 'active' })),
+  requireProfile: vi.fn(async () => ({ id: 'u1', role: 'admin', fullName: 'Petugas', status: 'active' })),
 }));
 
 import RacksPage from './page';

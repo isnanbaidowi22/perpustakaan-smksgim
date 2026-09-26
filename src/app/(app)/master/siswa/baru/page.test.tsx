@@ -12,7 +12,7 @@ vi.mock('@/server/queries/academic-years', () => ({
   getActiveAcademicYear: mockGetActive,
 }));
 vi.mock('@/server/auth/guard', () => ({
-  requireProfile: vi.fn(async () => ({ id: 'u1', role: 'petugas', fullName: 'Petugas', status: 'active' })),
+  requireProfile: vi.fn(async () => ({ id: 'u1', role: 'admin', fullName: 'Petugas', status: 'active' })),
 }));
 
 import NewStudentPage from './page';

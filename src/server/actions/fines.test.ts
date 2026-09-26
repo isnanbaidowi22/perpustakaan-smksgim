@@ -16,16 +16,15 @@ beforeEach(() => {
 });
 
 describe('payFineAction', () => {
-  it('terbuka untuk admin dan petugas, lalu kembali ke detail transaksi agar pesannya tetap terlihat', async () => {
+  it('kembali ke detail transaksi agar pesannya tetap terlihat', async () => {
     await payFineAction('loan-1', IDLE, new FormData());
 
     const options = mockRunFormAction.mock.calls[0]?.[0];
-    expect(options.roles).toEqual(['admin', 'petugas']);
     // Form pelunasan hilang setelah lunas; pesan sukses dibawa lewat ?pesan=.
     expect(options.redirectTo).toBe('/transaksi/riwayat/loan-1');
     expect(options.revalidate).toEqual(['/transaksi/riwayat', '/transaksi/riwayat/loan-1']);
 
-    const actor = { id: 'u1', role: 'petugas' as const };
+    const actor = { id: 'u1', role: 'admin' as const };
     await options.execute({ amount: 4000, note: null }, actor);
     expect(mockPayFine).toHaveBeenCalledWith('loan-1', { amount: 4000, note: null }, actor);
   });

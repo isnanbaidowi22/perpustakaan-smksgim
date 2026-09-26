@@ -40,7 +40,7 @@ async function render(params: Record<string, string> = {}) {
 describe('BookDetailPage', () => {
   it('mengisi form dengan data buku, harga tanpa desimal', async () => {
     mockGetBook.mockResolvedValueOnce(book);
-    mockRequireProfile.mockResolvedValueOnce({ role: 'petugas' });
+    mockRequireProfile.mockResolvedValueOnce({ role: 'admin' });
 
     const html = await render({ pesan: 'Buku berhasil ditambahkan.' });
 
@@ -66,7 +66,7 @@ describe('BookDetailPage', () => {
 
   it('menawarkan cetak label untuk seluruh eksemplar judul ini', async () => {
     mockGetBook.mockResolvedValueOnce(book);
-    mockRequireProfile.mockResolvedValueOnce({ role: 'petugas' });
+    mockRequireProfile.mockResolvedValueOnce({ role: 'admin' });
 
     expect(await render()).toContain('href="/cetak/label-barcode?buku=b1"');
   });

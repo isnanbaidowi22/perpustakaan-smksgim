@@ -25,8 +25,8 @@ describe('UsersPage', () => {
   it('tidak menampilkan kolom peran dan tidak menawarkan menonaktifkan akun sendiri', async () => {
     mockList.mockResolvedValueOnce([
       { id: 'u1', username: 'admin', fullName: 'Administrator', role: 'admin', status: 'active' },
-      { id: 'u2', username: 'petugas', fullName: 'Petugas Perpustakaan', role: 'petugas', status: 'active' },
-      { id: 'u3', username: 'lama', fullName: 'Petugas Lama', role: 'petugas', status: 'inactive' },
+      { id: 'u2', username: 'petugas', fullName: 'Petugas Perpustakaan', role: 'admin', status: 'active' },
+      { id: 'u3', username: 'lama', fullName: 'Petugas Lama', role: 'admin', status: 'inactive' },
     ]);
 
     const html = await render({ pesan: 'Pengguna berhasil dibuat.' });

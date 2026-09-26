@@ -23,7 +23,7 @@ Keputusan berikut sudah divalidasi bersama pemilik produk dan menjadi dasar selu
 | Region | Vercel dan Supabase sama-sama `ap-southeast-1` (Singapore) |
 | Model koleksi | `books` (judul) → `book_copies` (eksemplar fisik, barcode unik) |
 | Autentikasi | Username + password, dipetakan ke email internal pada Supabase Auth |
-| Peran | `admin` dan `petugas` |
+| Peran | Satu peran, `admin`: setiap akun dapat melakukan seluruh aksi *(revisi 26 September 2026)* |
 | Batas pinjam | 3 eksemplar aktif per siswa — permintaan melebihi batas **ditolak** |
 | Keterlambatan | Siswa dengan pinjaman lewat jatuh tempo **diblokir** dari peminjaman baru |
 | Durasi pinjam | 3 hari (dapat dikonfigurasi) |
@@ -44,6 +44,8 @@ Tiga hal berbeda dari PRD v1.0 dan perlu diketahui pembaca dokumen itu.
 **Kelebihan kuota ditolak, bukan didenda.** PRD Section 6.3 menulis "Siswa melewati batas maksimal pinjaman → terhitung denda". Ini tidak koheren: denda adalah konsekuensi keterlambatan, bukan konsekuensi kuota. Kuota penuh menghasilkan penolakan transaksi disertai pesan yang menjelaskan sisa slot.
 
 **Tabel `books` mendapat kolom `price`.** Dibutuhkan karena rusak/hilang dikonversi menjadi biaya ganti nominal. PRD Section 10.1 belum mencantumkannya.
+
+**Satu peran, bukan admin dan petugas (revisi 26 September 2026).** Pemilik produk menyatukan peran menjadi `admin`. Setiap akun dapat mengubah konfigurasi, mengelola pengguna, memulihkan eksemplar, dan membuka audit log. Pertanggungjawaban tetap terjaga karena audit log mencatat pelaku setiap perubahan per akun.
 
 ---
 
@@ -419,18 +421,9 @@ Konsekuensi: pemulihan kata sandi lewat email tidak tersedia. Admin mereset kata
 
 Sesi dikelola cookie `httpOnly` melalui `@supabase/ssr`. Setiap Server Action memanggil penjaga yang memverifikasi sesi dan peran sebelum melakukan apa pun.
 
-Setiap halaman dan setiap Server Action memeriksa sesinya sendiri lewat `requireProfile()`/`requireRole()`; pemeriksaan di layout `(app)` bukan batas keamanan, karena layout tidak mengontrol apakah segmen rute di bawahnya tetap dirender atau muncul di RSC payload (Next.js 16, `authentication.md` § Layouts and auth checks).
+Setiap halaman dan setiap Server Action memeriksa sesinya sendiri lewat `requireProfile()`/`requireActor()`; pemeriksaan di layout `(app)` bukan batas keamanan, karena layout tidak mengontrol apakah segmen rute di bawahnya tetap dirender atau muncul di RSC payload (Next.js 16, `authentication.md` § Layouts and auth checks).
 
-| Aksi | Admin | Petugas |
-|---|:---:|:---:|
-| Peminjaman, pengembalian, riwayat | Ya | Ya |
-| Kelola buku, eksemplar, kategori, rak, siswa | Ya | Ya |
-| Tandai denda lunas | Ya | Ya |
-| Pulihkan eksemplar rusak/hilang ke tersedia | Ya | Tidak |
-| Kelola pengguna | Ya | Tidak |
-| Ubah konfigurasi perpustakaan | Ya | Tidak |
-| Kelola tahun ajaran | Ya | Tidak |
-| Lihat audit log | Ya | Tidak |
+Sejak revisi 26 September 2026 hanya ada satu peran, `admin`. Setiap akun aktif yang masuk dapat menjalankan seluruh aksi: peminjaman, pengembalian, riwayat, pengelolaan data master, pelunasan denda, pemulihan eksemplar rusak/hilang, pengelolaan pengguna, konfigurasi, tahun ajaran, dan audit log. Setiap halaman dan Server Action tetap memeriksa sesinya sendiri (`requireProfile()`/`requireActor()`).
 
 ---
 

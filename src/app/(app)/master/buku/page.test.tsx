@@ -9,7 +9,7 @@ vi.mock('@/server/queries/categories', () => ({
 }));
 vi.mock('@/server/actions/books', () => ({ setBookStatusAction: vi.fn() }));
 vi.mock('@/server/auth/guard', () => ({
-  requireProfile: vi.fn(async () => ({ id: 'u1', role: 'petugas', fullName: 'Petugas', status: 'active' })),
+  requireProfile: vi.fn(async () => ({ id: 'u1', role: 'admin', fullName: 'Petugas', status: 'active' })),
 }));
 
 import BooksPage from './page';

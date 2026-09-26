@@ -28,11 +28,10 @@ beforeEach(() => {
 });
 
 describe('Server Action tahun ajaran', () => {
-  it('createAcademicYearAction hanya untuk admin, lalu kembali ke daftar', async () => {
+  it('createAcademicYearAction kembali ke daftar setelah berhasil', async () => {
     await createAcademicYearAction(IDLE, new FormData());
 
     const options = mockRunFormAction.mock.calls[0]?.[0];
-    expect(options.roles).toEqual(['admin']);
     expect(options.redirectTo).toBe('/pengaturan/tahun-ajaran');
     await options.execute({ ...data, activate: true }, actor);
     expect(mockCreate).toHaveBeenCalledWith({ ...data, activate: true }, actor);
@@ -42,16 +41,14 @@ describe('Server Action tahun ajaran', () => {
     await updateAcademicYearAction('y1', IDLE, new FormData());
 
     const options = mockRunFormAction.mock.calls[0]?.[0];
-    expect(options.roles).toEqual(['admin']);
     await options.execute(data, actor);
     expect(mockUpdate).toHaveBeenCalledWith('y1', data, actor);
   });
 
-  it('activateAcademicYearAction hanya untuk admin dan meneruskan id', async () => {
+  it('activateAcademicYearAction meneruskan id ke service', async () => {
     await activateAcademicYearAction('y1', IDLE, new FormData());
 
     const options = mockRunCommand.mock.calls[0]?.[0];
-    expect(options.roles).toEqual(['admin']);
     expect(options.revalidate).toEqual(['/pengaturan/tahun-ajaran']);
     expect(options.redirectTo).toBe('/pengaturan/tahun-ajaran');
     await options.execute(actor);

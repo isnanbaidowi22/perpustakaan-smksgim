@@ -16,7 +16,7 @@ vi.mock('@/lib/school-date', () => ({
   formatSchoolDateTime: () => '09/03/2090 10.15',
 }));
 vi.mock('@/server/auth/guard', () => ({
-  requireProfile: vi.fn(async () => ({ id: 'u1', role: 'petugas', fullName: 'Petugas', status: 'active' })),
+  requireProfile: vi.fn(async () => ({ id: 'u1', role: 'admin', fullName: 'Petugas', status: 'active' })),
 }));
 vi.mock('next/navigation', () => ({ notFound: mockNotFound }));
 

@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import { RETURN_SAVE_FAILED } from '@/lib/circulation-results';
 import { formError, type FormState } from '@/lib/form-state';
 import { schoolToday } from '@/lib/school-date';
-import { authorize } from '@/server/auth/guard';
+import { requireActor } from '@/server/auth/guard';
 import { processReturn } from '@/server/services/returns';
 import type { ServiceResult } from '@/server/services/result';
 import { returnSchema } from '@/server/validation/return';
@@ -15,8 +15,7 @@ import { returnSchema } from '@/server/validation/return';
  * beberapa buku, masing-masing dengan kondisi dan biaya gantinya.
  */
 export async function processReturnAction(input: unknown): Promise<FormState> {
-  const auth = await authorize(['admin', 'petugas']);
-  if (!auth.ok) return formError(auth.message);
+  const actor = await requireActor();
 
   const parsed = returnSchema.safeParse(input);
   if (!parsed.success) {
@@ -25,7 +24,7 @@ export async function processReturnAction(input: unknown): Promise<FormState> {
 
   let result: ServiceResult;
   try {
-    result = await processReturn(parsed.data, auth.actor, schoolToday());
+    result = await processReturn(parsed.data, actor, schoolToday());
   } catch (error) {
     console.error('processReturn gagal', error);
     return formError(RETURN_SAVE_FAILED);

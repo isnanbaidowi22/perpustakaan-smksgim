@@ -18,7 +18,7 @@ vi.mock('@/server/services/books', () => ({
 
 import { createBookAction, setBookStatusAction, updateBookAction } from './books';
 
-const actor = { id: 'u1', role: 'petugas' as const };
+const actor = { id: 'u1', role: 'admin' as const };
 const data = {
   isbn: null, title: 'Pemrograman Web', author: 'Budi Raharjo', publisher: null,
   publishYear: null, categoryId: null, rackId: null, price: 85_000, description: null,
@@ -33,7 +33,6 @@ describe('Server Action buku', () => {
     await createBookAction(IDLE, new FormData());
 
     const options = mockRunFormAction.mock.calls[0]?.[0];
-    expect(options.roles).toEqual(['admin', 'petugas']);
     expect(options.redirectTo('b9')).toBe('/master/buku/b9');
     await options.execute(data, actor);
     expect(mockCreate).toHaveBeenCalledWith(data, actor);

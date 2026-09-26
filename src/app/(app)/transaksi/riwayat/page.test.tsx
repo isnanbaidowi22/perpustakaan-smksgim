@@ -6,7 +6,7 @@ const { mockListLoans } = vi.hoisted(() => ({ mockListLoans: vi.fn() }));
 vi.mock('@/server/queries/loans', () => ({ listLoans: mockListLoans }));
 vi.mock('@/lib/school-date', () => ({ schoolToday: () => '2090-03-09' }));
 vi.mock('@/server/auth/guard', () => ({
-  requireProfile: vi.fn(async () => ({ id: 'u1', role: 'petugas', fullName: 'Petugas', status: 'active' })),
+  requireProfile: vi.fn(async () => ({ id: 'u1', role: 'admin', fullName: 'Petugas', status: 'active' })),
 }));
 
 import HistoryPage from './page';

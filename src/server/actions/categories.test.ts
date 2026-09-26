@@ -18,18 +18,17 @@ vi.mock('@/server/services/categories', () => ({
 
 import { createCategoryAction, setCategoryStatusAction, updateCategoryAction } from './categories';
 
-const actor = { id: 'u1', role: 'petugas' as const };
+const actor = { id: 'u1', role: 'admin' as const };
 
 beforeEach(() => {
   vi.clearAllMocks();
 });
 
 describe('createCategoryAction', () => {
-  it('terbuka untuk admin dan petugas, lalu kembali ke daftar', async () => {
+  it('kembali ke daftar setelah berhasil', async () => {
     await createCategoryAction(IDLE, new FormData());
 
     const options = mockRunFormAction.mock.calls[0]?.[0];
-    expect(options.roles).toEqual(['admin', 'petugas']);
     expect(options.redirectTo).toBe('/master/kategori');
     expect(options.revalidate).toEqual(['/master/kategori']);
 
@@ -60,7 +59,6 @@ describe('setCategoryStatusAction', () => {
     await setCategoryStatusAction('c1', 'inactive', IDLE, new FormData());
 
     const options = mockRunCommand.mock.calls[0]?.[0];
-    expect(options.roles).toEqual(['admin', 'petugas']);
     await options.execute(actor);
     expect(mockSetStatus).toHaveBeenCalledWith('c1', 'inactive', actor);
   });

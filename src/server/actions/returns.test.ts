@@ -2,8 +2,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { RETURN_SAVE_FAILED } from '@/lib/circulation-results';
 import { formError } from '@/lib/form-state';
 
-const { mockAuthorize, mockProcessReturn, mockRevalidatePath, mockRedirect } = vi.hoisted(() => ({
-  mockAuthorize: vi.fn(),
+const { mockRequireActor, mockProcessReturn, mockRevalidatePath, mockRedirect } = vi.hoisted(() => ({
+  mockRequireActor: vi.fn(),
   mockProcessReturn: vi.fn(),
   mockRevalidatePath: vi.fn(),
   mockRedirect: vi.fn(() => {
@@ -11,7 +11,7 @@ const { mockAuthorize, mockProcessReturn, mockRevalidatePath, mockRedirect } = v
   }),
 }));
 
-vi.mock('@/server/auth/guard', () => ({ authorize: mockAuthorize }));
+vi.mock('@/server/auth/guard', () => ({ requireActor: mockRequireActor }));
 vi.mock('@/server/services/returns', () => ({ processReturn: mockProcessReturn }));
 vi.mock('@/lib/school-date', () => ({ schoolToday: () => '2090-03-09' }));
 vi.mock('next/cache', () => ({ revalidatePath: mockRevalidatePath }));
@@ -19,21 +19,20 @@ vi.mock('next/navigation', () => ({ redirect: mockRedirect }));
 
 import { processReturnAction } from './returns';
 
-const actor = { id: 'u1', role: 'petugas' as const };
+const actor = { id: 'u1', role: 'admin' as const };
 const loanId = '6f1c2b1e-4b1a-4c3e-9f7a-2d1e3c4b5a6f';
 const loanItemId = '0a1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d';
 const input = { loanId, items: [{ loanItemId, condition: 'BAIK', replacementFee: null, note: null }] };
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mockAuthorize.mockResolvedValue({ ok: true, actor });
+  mockRequireActor.mockResolvedValue(actor);
 });
 
 describe('processReturnAction', () => {
-  it('menolak sebelum membaca isian bila peran tidak diizinkan', async () => {
-    mockAuthorize.mockResolvedValueOnce({ ok: false, message: 'Akses ditolak.' });
-    expect(await processReturnAction(input)).toEqual(formError('Akses ditolak.'));
-    expect(mockAuthorize).toHaveBeenCalledWith(['admin', 'petugas']);
+  it('menolak sebelum membaca isian bila pengunjung belum masuk', async () => {
+    mockRequireActor.mockRejectedValueOnce(new Error('NEXT_REDIRECT'));
+    await expect(processReturnAction(input)).rejects.toThrow('NEXT_REDIRECT');
     expect(mockProcessReturn).not.toHaveBeenCalled();
   });
 

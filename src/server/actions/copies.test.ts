@@ -20,11 +20,10 @@ beforeEach(() => {
 });
 
 describe('addCopiesAction', () => {
-  it('terbuka untuk admin dan petugas, tetap di halaman buku', async () => {
+  it('tetap di halaman buku setelah berhasil', async () => {
     await addCopiesAction('b1', IDLE, new FormData());
 
     const options = mockRunFormAction.mock.calls[0]?.[0];
-    expect(options.roles).toEqual(['admin', 'petugas']);
     expect(options.redirectTo).toBeUndefined();
     expect(options.revalidate).toEqual(['/master/buku', '/master/buku/b1']);
 
@@ -35,11 +34,10 @@ describe('addCopiesAction', () => {
 });
 
 describe('changeCopyStatusAction', () => {
-  it('hanya untuk admin', async () => {
+  it('meneruskan aksi yang sah ke service', async () => {
     await changeCopyStatusAction('b1', 'k1', 'RESTORE', IDLE, new FormData());
 
     const options = mockRunCommand.mock.calls[0]?.[0];
-    expect(options.roles).toEqual(['admin']);
     await options.execute(actor);
     expect(mockChangeStatus).toHaveBeenCalledWith('k1', 'RESTORE', actor);
   });

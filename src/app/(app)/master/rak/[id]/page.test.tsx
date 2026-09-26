@@ -11,7 +11,7 @@ const { mockGetRack, mockNotFound } = vi.hoisted(() => ({
 vi.mock('@/server/queries/racks', () => ({ getRack: mockGetRack }));
 vi.mock('@/server/actions/racks', () => ({ updateRackAction: vi.fn() }));
 vi.mock('@/server/auth/guard', () => ({
-  requireProfile: vi.fn(async () => ({ id: 'u1', role: 'petugas', fullName: 'Petugas', status: 'active' })),
+  requireProfile: vi.fn(async () => ({ id: 'u1', role: 'admin', fullName: 'Petugas', status: 'active' })),
 }));
 vi.mock('next/navigation', () => ({ notFound: mockNotFound }));
 

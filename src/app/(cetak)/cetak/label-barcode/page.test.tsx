@@ -7,7 +7,7 @@ const { mockFind, mockSettings } = vi.hoisted(() => ({ mockFind: vi.fn(), mockSe
 vi.mock('@/server/queries/labels', () => ({ findLabelCopies: mockFind }));
 vi.mock('@/server/queries/settings', () => ({ getLibrarySettings: mockSettings }));
 vi.mock('@/server/auth/guard', () => ({
-  requireProfile: vi.fn(async () => ({ id: 'u1', role: 'petugas', fullName: 'Petugas', status: 'active' })),
+  requireProfile: vi.fn(async () => ({ id: 'u1', role: 'admin', fullName: 'Petugas', status: 'active' })),
 }));
 
 import LabelPage from './page';

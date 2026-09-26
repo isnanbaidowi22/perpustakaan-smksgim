@@ -1,9 +1,9 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import type { z } from 'zod';
-import type { Actor, UserRole } from '@/domain/shared/types';
+import type { Actor } from '@/domain/shared/types';
 import { formError, formSuccess, formToObject, type FieldErrors, type FormState } from '@/lib/form-state';
-import { authorize } from '@/server/auth/guard';
+import { requireActor } from '@/server/auth/guard';
 import type { ServiceResult } from '@/server/services/result';
 
 interface Completion {
@@ -19,7 +19,6 @@ interface Completion {
 }
 
 interface FormActionOptions<S extends z.ZodType> extends Completion {
-  roles: UserRole[];
   schema: S;
   formData: FormData;
   /** Pesan umum saat ada kolom tidak valid, menyebut entitasnya. */
@@ -33,18 +32,16 @@ interface FormActionOptions<S extends z.ZodType> extends Completion {
 }
 
 interface CommandOptions extends Completion {
-  roles: UserRole[];
   execute: (actor: Actor) => Promise<ServiceResult>;
 }
 
 /**
  * Urutan baku setiap Server Action penulis data:
- * otorisasi → validasi → service → revalidasi → (pindah halaman).
- * Otorisasi selalu pertama, sebelum isian form dibaca sama sekali.
+ * sesi → validasi → service → revalidasi → (pindah halaman).
+ * Sesi selalu pertama, sebelum isian form dibaca sama sekali.
  */
 export async function runFormAction<S extends z.ZodType>(options: FormActionOptions<S>): Promise<FormState> {
-  const auth = await authorize(options.roles);
-  if (!auth.ok) return formError(auth.message);
+  const actor = await requireActor();
 
   const values = formToObject(options.formData);
   const echoed = withoutFields(values, options.secretFields ?? []);
@@ -53,16 +50,14 @@ export async function runFormAction<S extends z.ZodType>(options: FormActionOpti
     return formError(options.invalidMessage, fieldErrorsOf(parsed.error), echoed);
   }
 
-  const result = await options.execute(parsed.data, auth.actor);
+  const result = await options.execute(parsed.data, actor);
   return complete(result, options, echoed);
 }
 
 /** Untuk aksi tanpa isian form, misalnya menonaktifkan data. */
 export async function runCommand(options: CommandOptions): Promise<FormState> {
-  const auth = await authorize(options.roles);
-  if (!auth.ok) return formError(auth.message);
-
-  const result = await options.execute(auth.actor);
+  const actor = await requireActor();
+  const result = await options.execute(actor);
   return complete(result, options, {});
 }
 

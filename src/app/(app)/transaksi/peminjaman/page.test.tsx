@@ -15,7 +15,7 @@ vi.mock('@/server/queries/settings', () => ({
 vi.mock('@/server/queries/academic-years', () => ({ getActiveAcademicYear: mockActiveYear }));
 vi.mock('@/lib/school-date', () => ({ schoolToday: () => '2090-03-02' }));
 vi.mock('@/server/auth/guard', () => ({
-  requireProfile: vi.fn(async () => ({ id: 'u1', role: 'petugas', fullName: 'Petugas', status: 'active' })),
+  requireProfile: vi.fn(async () => ({ id: 'u1', role: 'admin', fullName: 'Petugas', status: 'active' })),
 }));
 
 import LoanPage from './page';

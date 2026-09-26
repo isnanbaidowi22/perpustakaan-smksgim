@@ -16,11 +16,10 @@ beforeEach(() => {
 });
 
 describe('updateSettingsAction', () => {
-  it('hanya untuk admin, tetap di halaman yang sama, dan meneruskan data ke service', async () => {
+  it('tetap di halaman yang sama dan meneruskan data ke service', async () => {
     await updateSettingsAction(IDLE, new FormData());
 
     const options = mockRunFormAction.mock.calls[0]?.[0];
-    expect(options.roles).toEqual(['admin']);
     expect(options.redirectTo).toBeUndefined();
     expect(options.revalidate).toEqual(['/pengaturan/konfigurasi']);
 

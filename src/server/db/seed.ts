@@ -27,7 +27,6 @@ async function seedUsers() {
 
   const accounts = [
     { username: 'admin', fullName: 'Administrator', role: 'admin' as const },
-    { username: 'petugas', fullName: 'Petugas Perpustakaan', role: 'petugas' as const },
   ];
 
   for (const account of accounts) {

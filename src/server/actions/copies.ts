@@ -12,7 +12,6 @@ function affectedPages(bookId: string): string[] {
 
 export async function addCopiesAction(bookId: string, _state: FormState, formData: FormData): Promise<FormState> {
   return runFormAction({
-    roles: ['admin', 'petugas'],
     schema: addCopiesSchema,
     formData,
     invalidMessage: 'Eksemplar belum dapat ditambahkan. Periksa kolom yang ditandai.',
@@ -22,7 +21,7 @@ export async function addCopiesAction(bookId: string, _state: FormState, formDat
   });
 }
 
-/** Spec Section 7: memulihkan eksemplar rusak/hilang hanya boleh dilakukan admin. */
+/** Spec §7: memulihkan eksemplar rusak/hilang memerlukan akun yang sedang masuk. */
 export async function changeCopyStatusAction(
   bookId: string,
   copyId: string,
@@ -34,7 +33,6 @@ export async function changeCopyStatusAction(
     return formError('Aksi eksemplar tidak dikenal. Muat ulang halaman lalu coba lagi.');
   }
   return runCommand({
-    roles: ['admin'],
     execute: (actor) => changeCopyStatus(copyId, action, actor),
     successMessage: 'Status eksemplar diperbarui.',
     revalidate: affectedPages(bookId),

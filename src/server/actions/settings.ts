@@ -7,7 +7,6 @@ import { settingsSchema } from '@/server/validation/settings';
 
 export async function updateSettingsAction(_state: FormState, formData: FormData): Promise<FormState> {
   return runFormAction({
-    roles: ['admin'],
     schema: settingsSchema,
     formData,
     invalidMessage: 'Konfigurasi belum dapat disimpan. Periksa kolom yang ditandai.',

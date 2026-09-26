@@ -1,10 +1,9 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import type { UserRole } from '@/domain/shared/types';
 import { LOAN_SAVE_FAILED, type CreateLoanState, type LookupResult } from '@/lib/circulation-results';
 import { schoolToday } from '@/lib/school-date';
-import { authorize } from '@/server/auth/guard';
+import { requireActor } from '@/server/auth/guard';
 import {
   findCopyByBarcode, getBorrowerCard, searchBorrowers,
   type BorrowerCard, type BorrowerOption, type CopyLookup,
@@ -12,17 +11,13 @@ import {
 import { createLoan, type LoanResult } from '@/server/services/loans';
 import { createLoanSchema } from '@/server/validation/loan';
 
-const ROLES: UserRole[] = ['admin', 'petugas'];
-
 export async function searchBorrowersAction(query: string): Promise<LookupResult<BorrowerOption[]>> {
-  const auth = await authorize(ROLES);
-  if (!auth.ok) return { ok: false, message: auth.message };
+  await requireActor();
   return { ok: true, data: await searchBorrowers(String(query ?? '')) };
 }
 
 export async function getBorrowerCardAction(studentId: string): Promise<LookupResult<BorrowerCard>> {
-  const auth = await authorize(ROLES);
-  if (!auth.ok) return { ok: false, message: auth.message };
+  await requireActor();
   const card = await getBorrowerCard(String(studentId ?? ''), schoolToday());
   return card
     ? { ok: true, data: card }
@@ -30,8 +25,7 @@ export async function getBorrowerCardAction(studentId: string): Promise<LookupRe
 }
 
 export async function lookupCopyAction(barcode: string): Promise<LookupResult<CopyLookup>> {
-  const auth = await authorize(ROLES);
-  if (!auth.ok) return { ok: false, message: auth.message };
+  await requireActor();
   const code = String(barcode ?? '').trim().toUpperCase();
   if (!code) return { ok: false, message: 'Pindai atau ketik barcode buku terlebih dahulu.' };
   const copy = await findCopyByBarcode(code);
@@ -44,8 +38,7 @@ export async function lookupCopyAction(barcode: string): Promise<LookupResult<Co
 }
 
 export async function createLoanAction(input: unknown): Promise<CreateLoanState> {
-  const auth = await authorize(ROLES);
-  if (!auth.ok) return { status: 'error', message: auth.message };
+  const actor = await requireActor();
 
   const parsed = createLoanSchema.safeParse(input);
   if (!parsed.success) {
@@ -54,7 +47,7 @@ export async function createLoanAction(input: unknown): Promise<CreateLoanState>
 
   let result: LoanResult;
   try {
-    result = await createLoan(parsed.data, auth.actor, schoolToday());
+    result = await createLoan(parsed.data, actor, schoolToday());
   } catch (error) {
     // Pelanggaran aturan sudah dikembalikan sebagai nilai; yang sampai ke
     // sini hanya galat infrastruktur. Tanpa tangkapan ini, layar meja

@@ -28,7 +28,7 @@ import AppLayout from './layout';
 
 describe('AppLayout', () => {
   it('menampilkan nama petugas dan tahun ajaran aktif dari sesi sungguhan', async () => {
-    mockRequireProfile.mockResolvedValueOnce({ fullName: 'Petugas Perpustakaan', role: 'petugas' });
+    mockRequireProfile.mockResolvedValueOnce({ fullName: 'Petugas Perpustakaan', role: 'admin' });
     mockLimit.mockResolvedValueOnce([{ name: '2026/2027' }]);
 
     const element = await AppLayout({ children: <div>isi</div> });

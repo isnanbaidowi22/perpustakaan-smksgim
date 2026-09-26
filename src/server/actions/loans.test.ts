@@ -2,9 +2,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { LOAN_SAVE_FAILED } from '@/lib/circulation-results';
 
 const {
-  mockAuthorize, mockSearch, mockCard, mockFindCopy, mockCreateLoan, mockRevalidatePath,
+  mockRequireActor, mockSearch, mockCard, mockFindCopy, mockCreateLoan, mockRevalidatePath,
 } = vi.hoisted(() => ({
-  mockAuthorize: vi.fn(),
+  mockRequireActor: vi.fn(),
   mockSearch: vi.fn(),
   mockCard: vi.fn(),
   mockFindCopy: vi.fn(),
@@ -12,7 +12,7 @@ const {
   mockRevalidatePath: vi.fn(),
 }));
 
-vi.mock('@/server/auth/guard', () => ({ authorize: mockAuthorize }));
+vi.mock('@/server/auth/guard', () => ({ requireActor: mockRequireActor }));
 vi.mock('@/server/queries/circulation', () => ({
   searchBorrowers: mockSearch,
   getBorrowerCard: mockCard,
@@ -26,21 +26,20 @@ import {
   createLoanAction, getBorrowerCardAction, lookupCopyAction, searchBorrowersAction,
 } from './loans';
 
-const actor = { id: 'u1', role: 'petugas' as const };
+const actor = { id: 'u1', role: 'admin' as const };
 const studentId = '6f1c2b1e-4b1a-4c3e-9f7a-2d1e3c4b5a6f';
 const copyId = '0a1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d';
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mockAuthorize.mockResolvedValue({ ok: true, actor });
+  mockRequireActor.mockResolvedValue(actor);
 });
 
 describe('Server Action baca meja peminjaman', () => {
-  it('menolak tanpa membaca data bila peran tidak diizinkan', async () => {
-    mockAuthorize.mockResolvedValueOnce({ ok: false, message: 'Akses ditolak.' });
+  it('melempar redirect tanpa membaca data bila pengunjung belum masuk', async () => {
+    mockRequireActor.mockRejectedValueOnce(new Error('NEXT_REDIRECT'));
 
-    expect(await searchBorrowersAction('ahmad')).toEqual({ ok: false, message: 'Akses ditolak.' });
-    expect(mockAuthorize).toHaveBeenCalledWith(['admin', 'petugas']);
+    await expect(searchBorrowersAction('ahmad')).rejects.toThrow('NEXT_REDIRECT');
     expect(mockSearch).not.toHaveBeenCalled();
   });
 

@@ -12,7 +12,7 @@ vi.mock('@/server/queries/dashboard', () => ({ getDashboardStats: mockStats, lis
 vi.mock('@/server/queries/loans', () => ({ listLoans: mockListLoans }));
 vi.mock('@/lib/school-date', () => ({ schoolToday: () => '2090-03-02' }));
 vi.mock('@/server/auth/guard', () => ({
-  requireProfile: vi.fn(async () => ({ id: 'u1', role: 'petugas', fullName: 'Siti Petugas', status: 'active' })),
+  requireProfile: vi.fn(async () => ({ id: 'u1', role: 'admin', fullName: 'Siti Petugas', status: 'active' })),
 }));
 
 import DashboardPage from './page';

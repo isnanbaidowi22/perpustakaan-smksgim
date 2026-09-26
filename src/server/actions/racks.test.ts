@@ -18,7 +18,7 @@ vi.mock('@/server/services/racks', () => ({
 
 import { createRackAction, setRackStatusAction, updateRackAction } from './racks';
 
-const actor = { id: 'u1', role: 'petugas' as const };
+const actor = { id: 'u1', role: 'admin' as const };
 const data = { code: 'A-3', name: 'Rak A Baris 3', location: null };
 
 beforeEach(() => {
@@ -26,11 +26,10 @@ beforeEach(() => {
 });
 
 describe('Server Action rak', () => {
-  it('createRackAction terbuka untuk admin dan petugas, lalu kembali ke daftar', async () => {
+  it('createRackAction kembali ke daftar setelah berhasil', async () => {
     await createRackAction(IDLE, new FormData());
 
     const options = mockRunFormAction.mock.calls[0]?.[0];
-    expect(options.roles).toEqual(['admin', 'petugas']);
     expect(options.redirectTo).toBe('/master/rak');
     await options.execute(data, actor);
     expect(mockCreate).toHaveBeenCalledWith(data, actor);

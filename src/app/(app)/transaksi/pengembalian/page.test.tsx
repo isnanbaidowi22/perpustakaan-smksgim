@@ -8,7 +8,7 @@ vi.mock('@/server/queries/settings', () => ({ getLibrarySettings: vi.fn(async ()
 vi.mock('@/server/actions/returns', () => ({ processReturnAction: vi.fn() }));
 vi.mock('@/lib/school-date', () => ({ schoolToday: () => '2090-03-09' }));
 vi.mock('@/server/auth/guard', () => ({
-  requireProfile: vi.fn(async () => ({ id: 'u1', role: 'petugas', fullName: 'Petugas', status: 'active' })),
+  requireProfile: vi.fn(async () => ({ id: 'u1', role: 'admin', fullName: 'Petugas', status: 'active' })),
 }));
 
 import ReturnPage from './page';

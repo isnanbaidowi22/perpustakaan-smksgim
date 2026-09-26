@@ -33,11 +33,10 @@ beforeEach(() => {
 });
 
 describe('Server Action pengguna', () => {
-  it('createUserAction hanya untuk admin, tidak mengirim balik kata sandi, dan memakai Supabase Auth', async () => {
+  it('createUserAction tidak mengirim balik kata sandi dan memakai Supabase Auth', async () => {
     await createUserAction(IDLE, new FormData());
 
     const options = mockRunFormAction.mock.calls[0]?.[0];
-    expect(options.roles).toEqual(['admin']);
     expect(options.secretFields).toEqual(['password', 'passwordConfirm']);
     expect(options.redirectTo).toBe('/pengaturan/pengguna');
     const data = { username: 'siti', fullName: 'Siti', password: 'x', passwordConfirm: 'x' };
@@ -49,7 +48,6 @@ describe('Server Action pengguna', () => {
     await updateUserAction('p1', IDLE, new FormData());
 
     const options = mockRunFormAction.mock.calls[0]?.[0];
-    expect(options.roles).toEqual(['admin']);
     await options.execute({ fullName: 'Siti' }, actor);
     expect(mockUpdate).toHaveBeenCalledWith('p1', { fullName: 'Siti' }, actor);
   });
@@ -58,7 +56,6 @@ describe('Server Action pengguna', () => {
     await resetUserPasswordAction('p1', IDLE, new FormData());
 
     const options = mockRunFormAction.mock.calls[0]?.[0];
-    expect(options.roles).toEqual(['admin']);
     expect(options.secretFields).toEqual(['password', 'passwordConfirm']);
     expect(options.redirectTo).toBeUndefined();
     const data = { password: 'baru12345', passwordConfirm: 'baru12345' };
@@ -73,11 +70,10 @@ describe('Server Action pengguna', () => {
     expect(mockRunCommand).not.toHaveBeenCalled();
   });
 
-  it('setUserStatusAction hanya untuk admin dan meneruskan status yang sah', async () => {
+  it('setUserStatusAction meneruskan status yang sah', async () => {
     await setUserStatusAction('p1', 'inactive', IDLE, new FormData());
 
     const options = mockRunCommand.mock.calls[0]?.[0];
-    expect(options.roles).toEqual(['admin']);
     await options.execute(actor);
     expect(mockSetStatus).toHaveBeenCalledWith('p1', 'inactive', actor);
   });

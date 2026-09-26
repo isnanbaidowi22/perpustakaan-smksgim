@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 
 vi.mock('@/server/actions/categories', () => ({ createCategoryAction: vi.fn() }));
 vi.mock('@/server/auth/guard', () => ({
-  requireProfile: vi.fn(async () => ({ id: 'u1', role: 'petugas', fullName: 'Petugas', status: 'active' })),
+  requireProfile: vi.fn(async () => ({ id: 'u1', role: 'admin', fullName: 'Petugas', status: 'active' })),
 }));
 
 import NewCategoryPage from './page';

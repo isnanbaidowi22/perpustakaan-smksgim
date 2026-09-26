@@ -1,6 +1,6 @@
 'use server';
 
-import type { RecordStatus, UserRole } from '@/domain/shared/types';
+import type { RecordStatus } from '@/domain/shared/types';
 import { formError, type FormState } from '@/lib/form-state';
 import { supabaseAuthAdmin } from '@/server/auth/auth-admin';
 import { runCommand, runFormAction } from '@/server/forms/run-action';
@@ -8,13 +8,11 @@ import { createUser, resetUserPassword, setUserStatus, updateUser } from '@/serv
 import { isRecordStatus } from '@/server/validation/common';
 import { newUserSchema, passwordSchema, userSchema } from '@/server/validation/user';
 
-const ROLES: UserRole[] = ['admin'];
 const LIST = '/pengaturan/pengguna';
 const SECRET = ['password', 'passwordConfirm'];
 
 export async function createUserAction(_state: FormState, formData: FormData): Promise<FormState> {
   return runFormAction({
-    roles: ROLES,
     schema: newUserSchema,
     formData,
     invalidMessage: 'Pengguna belum dapat dibuat. Periksa kolom yang ditandai.',
@@ -28,7 +26,6 @@ export async function createUserAction(_state: FormState, formData: FormData): P
 
 export async function updateUserAction(id: string, _state: FormState, formData: FormData): Promise<FormState> {
   return runFormAction({
-    roles: ROLES,
     schema: userSchema,
     formData,
     invalidMessage: 'Perubahan pengguna belum dapat disimpan. Periksa kolom yang ditandai.',
@@ -41,7 +38,6 @@ export async function updateUserAction(id: string, _state: FormState, formData: 
 
 export async function resetUserPasswordAction(id: string, _state: FormState, formData: FormData): Promise<FormState> {
   return runFormAction({
-    roles: ROLES,
     schema: passwordSchema,
     formData,
     invalidMessage: 'Kata sandi belum dapat diganti. Periksa kolom yang ditandai.',
@@ -62,7 +58,6 @@ export async function setUserStatusAction(
     return formError('Status pengguna tidak dikenal. Muat ulang halaman lalu coba lagi.');
   }
   return runCommand({
-    roles: ROLES,
     execute: (actor) => setUserStatus(id, status, actor),
     successMessage: status === 'active' ? 'Pengguna diaktifkan.' : 'Pengguna dinonaktifkan.',
     revalidate: [LIST],

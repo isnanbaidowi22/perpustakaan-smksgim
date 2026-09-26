@@ -11,7 +11,7 @@ const { mockGetCategory, mockNotFound } = vi.hoisted(() => ({
 vi.mock('@/server/queries/categories', () => ({ getCategory: mockGetCategory }));
 vi.mock('@/server/actions/categories', () => ({ updateCategoryAction: vi.fn() }));
 vi.mock('@/server/auth/guard', () => ({
-  requireProfile: vi.fn(async () => ({ id: 'u1', role: 'petugas', fullName: 'Petugas', status: 'active' })),
+  requireProfile: vi.fn(async () => ({ id: 'u1', role: 'admin', fullName: 'Petugas', status: 'active' })),
 }));
 vi.mock('next/navigation', () => ({ notFound: mockNotFound }));
 

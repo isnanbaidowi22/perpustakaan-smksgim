@@ -18,11 +18,11 @@ export const profiles = pgTable('profiles', {
   id: uuid('id').primaryKey(),
   username: text('username').notNull().unique(),
   fullName: text('full_name').notNull(),
-  role: text('role').$type<UserRole>().notNull(),
+  role: text('role').$type<UserRole>().notNull().default('admin'),
   status: text('status').$type<RecordStatus>().notNull().default('active'),
   ...stamps,
 }, (t) => [
-  check('profiles_role_valid', sql`${t.role} in ('admin','petugas')`),
+  check('profiles_role_valid', sql`${t.role} = 'admin'`),
   check('profiles_status_valid', sql`${t.status} in ('active','inactive')`),
 ]);
 

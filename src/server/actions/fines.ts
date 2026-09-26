@@ -8,7 +8,6 @@ import { finePaymentSchema } from '@/server/validation/fine';
 export async function payFineAction(loanId: string, _state: FormState, formData: FormData): Promise<FormState> {
   const detail = `/transaksi/riwayat/${loanId}`;
   return runFormAction({
-    roles: ['admin', 'petugas'],
     schema: finePaymentSchema,
     formData,
     invalidMessage: 'Pembayaran denda belum dapat dicatat. Periksa kolom yang ditandai.',

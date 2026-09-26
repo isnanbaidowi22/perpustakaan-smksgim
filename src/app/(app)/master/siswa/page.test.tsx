@@ -4,7 +4,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 const { mockListStudents, mockListClassNames, mockRequireProfile } = vi.hoisted(() => ({
   mockListStudents: vi.fn(),
   mockListClassNames: vi.fn(),
-  mockRequireProfile: vi.fn(async () => ({ id: 'u1', role: 'petugas', fullName: 'Petugas', status: 'active' })),
+  mockRequireProfile: vi.fn(async () => ({ id: 'u1', role: 'admin', fullName: 'Petugas', status: 'active' })),
 }));
 
 vi.mock('@/server/queries/students', () => ({
