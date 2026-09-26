@@ -4,7 +4,7 @@ import { LoanStatusBadge } from '@/components/ui/loan-status-badge';
 import { ScrollTable } from '@/components/ui/scroll-table';
 import { TD, TH } from '@/components/ui/table-styles';
 import { formatDate } from '@/lib/format';
-import { formatPeriod, parseReportPeriod, TRUNCATED_MESSAGE } from '@/lib/report-period';
+import { formatPeriod, parseReportPeriod, truncatedMessage } from '@/lib/report-period';
 import { schoolToday } from '@/lib/school-date';
 import { firstValue, type SearchParams } from '@/lib/search-params';
 import { requireProfile } from '@/server/auth/guard';
@@ -39,7 +39,10 @@ export default async function LoanReportPage({ searchParams }: { searchParams: S
       />
       <ReportFilters from={period.from} to={period.to} className={className} classOptions={classOptions} />
       <ReportNotice message={periodResult.ok ? null : periodResult.message} />
-      <ReportNotice message={report.truncated ? TRUNCATED_MESSAGE : null} />
+      <ReportNotice
+        message={report.truncated ? truncatedMessage('Persempit periode atau pilih satu kelas agar lengkap.') : null}
+        printable
+      />
       <SummaryGrid
         items={[
           { label: 'Transaksi', value: count(report.summary.loans) },

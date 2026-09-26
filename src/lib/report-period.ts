@@ -7,8 +7,10 @@ export const REPORT_ROW_LIMIT = 1000;
 
 export const MAX_REPORT_DAYS = 366;
 
-export const TRUNCATED_MESSAGE =
-  'Laporan ini memuat lebih dari 1.000 baris; yang tampil 1.000 baris pertama. Persempit periode atau pilih satu kelas agar lengkap.';
+/** Pesan pemotongan baris, dengan saran yang sesuai kontrol laporan masing-masing (I1). */
+export function truncatedMessage(advice: string): string {
+  return `Laporan ini memuat lebih dari 1.000 baris; yang tampil 1.000 baris pertama. ${advice}`;
+}
 
 export interface ReportPeriod {
   from: IsoDate;

@@ -27,6 +27,7 @@ export function ReportHeader({
       <div className="mb-4 hidden text-center print:block"><p className="text-base font-bold">{schoolName}</p>
         <p className="text-lg font-semibold">{title}</p>
         {period && <p className="text-sm">{period}</p>}
+        <p className="text-xs text-[var(--color-ink-500)]">{description}</p>
         <p className="text-xs">Dicetak {formatSchoolDateTime(new Date())}</p>
       </div>
     </>
@@ -81,10 +82,11 @@ export function SummaryGrid({ items }: { items: { label: string; value: string }
   );
 }
 
-export function ReportNotice({ message }: { message: string | null }) {
+export function ReportNotice({ message, printable }: { message: string | null; printable?: boolean }) {
   if (!message) return null;
+  const base = 'mb-4 rounded-md bg-[var(--color-status-rusak)]/10 px-3 py-2 text-sm text-[var(--color-status-rusak)]';
   return (
-    <p role="alert" className="mb-4 rounded-md bg-[var(--color-status-rusak)]/10 px-3 py-2 text-sm text-[var(--color-status-rusak)] print:hidden">
+    <p role="alert" className={printable ? base : `${base} print:hidden`}>
       {message}
     </p>
   );

@@ -4,7 +4,7 @@ import { buttonClass } from '@/components/ui/button-styles';
 import { ScrollTable } from '@/components/ui/scroll-table';
 import { TD, TH } from '@/components/ui/table-styles';
 import { formatDate } from '@/lib/format';
-import { TRUNCATED_MESSAGE } from '@/lib/report-period';
+import { truncatedMessage } from '@/lib/report-period';
 import { schoolToday } from '@/lib/school-date';
 import { firstValue, type SearchParams } from '@/lib/search-params';
 import { requireProfile } from '@/server/auth/guard';
@@ -60,7 +60,7 @@ export default async function CollectionReportPage({ searchParams }: { searchPar
         </label>
         <button type="submit" className={buttonClass('secondary')}>Tampilkan</button>
       </form>
-      <ReportNotice message={report.truncated ? TRUNCATED_MESSAGE : null} />
+      <ReportNotice message={report.truncated ? truncatedMessage('Saring per kategori atau kata kunci agar lengkap.') : null} printable />
       <SummaryGrid
         items={[
           { label: 'Judul', value: count(summary.titles) },

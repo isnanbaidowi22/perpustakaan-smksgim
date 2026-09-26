@@ -3,7 +3,7 @@ import { ReportFilters, ReportHeader, ReportNotice, SummaryGrid } from '@/compon
 import { ScrollTable } from '@/components/ui/scroll-table';
 import { TD, TH } from '@/components/ui/table-styles';
 import { formatDate, formatRupiah } from '@/lib/format';
-import { TRUNCATED_MESSAGE } from '@/lib/report-period';
+import { truncatedMessage } from '@/lib/report-period';
 import { schoolToday } from '@/lib/school-date';
 import { firstValue, type SearchParams } from '@/lib/search-params';
 import { requireProfile } from '@/server/auth/guard';
@@ -29,17 +29,15 @@ export default async function OverdueReportPage({ searchParams }: { searchParams
         period={`Per ${formatDate(today)}${className ? ` · Kelas ${className}` : ''}`}
       />
       <ReportFilters className={className} classOptions={classOptions} />
-      <ReportNotice message={report.truncated ? TRUNCATED_MESSAGE : null} />
+      <ReportNotice message={report.truncated ? truncatedMessage('Pilih satu kelas agar lengkap.') : null} printable />
       <SummaryGrid
         items={[
+          { label: 'Transaksi terlambat', value: summary.loans.toLocaleString('id-ID') },
           { label: 'Siswa terlambat', value: summary.students.toLocaleString('id-ID') },
           { label: 'Buku terlambat', value: summary.copies.toLocaleString('id-ID') },
           { label: 'Perkiraan denda', value: formatRupiah(summary.estimatedFines) },
         ]}
       />
-      <p className="mb-4 text-sm text-[var(--color-ink-500)] print:hidden">
-        Per {formatDate(today)}, tarif {formatRupiah(settings.finePerDay)} per hari.
-      </p>
 
       <ScrollTable>
         <thead>

@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { formatPeriod, MAX_REPORT_DAYS, parseReportPeriod, REPORT_ROW_LIMIT, TRUNCATED_MESSAGE } from './report-period';
+import {
+  formatPeriod, MAX_REPORT_DAYS, parseReportPeriod, REPORT_ROW_LIMIT, truncatedMessage,
+} from './report-period';
 
 const today = '2026-09-26';
 const monthSoFar = { from: '2026-09-01', to: '2026-09-26' };
@@ -37,6 +39,19 @@ describe('parseReportPeriod', () => {
     });
   });
 
+  it('kembali ke periode bawaan dengan pesan bila tahun kurang dari 1000, tanpa melempar galat', () => {
+    expect(parseReportPeriod({ dari: '0026-09-01', sampai: '' }, today)).toEqual({
+      ok: false,
+      period: monthSoFar,
+      message: 'Tanggal tidak valid. Pilih tanggal dari kalender, misalnya 01/09/2026 sampai 30/09/2026.',
+    });
+    expect(parseReportPeriod({ dari: '', sampai: '0026-09-30' }, today)).toEqual({
+      ok: false,
+      period: monthSoFar,
+      message: 'Tanggal tidak valid. Pilih tanggal dari kalender, misalnya 01/09/2026 sampai 30/09/2026.',
+    });
+  });
+
   it('menolak periode lebih dari 366 hari', () => {
     expect(MAX_REPORT_DAYS).toBe(366);
     expect(parseReportPeriod({ dari: '2025-01-01', sampai: '2026-01-01' }, today).ok).toBe(true);
@@ -53,10 +68,13 @@ describe('formatPeriod dan batas baris', () => {
     expect(formatPeriod(monthSoFar)).toBe('01/09/2026 – 26/09/2026');
   });
 
-  it('membatasi 1.000 baris dengan pesan yang meminta periode dipersempit', () => {
+  it('membatasi 1.000 baris dengan pesan yang menyertakan saran tiap laporan', () => {
     expect(REPORT_ROW_LIMIT).toBe(1000);
-    expect(TRUNCATED_MESSAGE).toBe(
+    expect(truncatedMessage('Persempit periode atau pilih satu kelas agar lengkap.')).toBe(
       'Laporan ini memuat lebih dari 1.000 baris; yang tampil 1.000 baris pertama. Persempit periode atau pilih satu kelas agar lengkap.',
+    );
+    expect(truncatedMessage('Saring per kategori atau kata kunci agar lengkap.')).toBe(
+      'Laporan ini memuat lebih dari 1.000 baris; yang tampil 1.000 baris pertama. Saring per kategori atau kata kunci agar lengkap.',
     );
   });
 });

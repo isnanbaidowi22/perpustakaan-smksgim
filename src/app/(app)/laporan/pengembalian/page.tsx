@@ -4,7 +4,7 @@ import { ScrollTable } from '@/components/ui/scroll-table';
 import { TD, TH } from '@/components/ui/table-styles';
 import { RETURN_CONDITION_LABELS } from '@/lib/circulation-labels';
 import { formatRupiah } from '@/lib/format';
-import { formatPeriod, parseReportPeriod, TRUNCATED_MESSAGE } from '@/lib/report-period';
+import { formatPeriod, parseReportPeriod, truncatedMessage } from '@/lib/report-period';
 import { formatSchoolDateTime, schoolToday } from '@/lib/school-date';
 import { firstValue, type SearchParams } from '@/lib/search-params';
 import { requireProfile } from '@/server/auth/guard';
@@ -39,11 +39,14 @@ export default async function ReturnReportPage({ searchParams }: { searchParams:
       />
       <ReportFilters from={period.from} to={period.to} className={className} classOptions={classOptions} />
       <ReportNotice message={periodResult.ok ? null : periodResult.message} />
-      <ReportNotice message={report.truncated ? TRUNCATED_MESSAGE : null} />
+      <ReportNotice
+        message={report.truncated ? truncatedMessage('Persempit periode atau pilih satu kelas agar lengkap.') : null}
+        printable
+      />
       <SummaryGrid
         items={[
           { label: 'Buku kembali', value: summary.copies.toLocaleString('id-ID') },
-          { label: 'Rusak / hilang', value: `${summary.damaged} / ${summary.lost}` },
+          { label: 'Rusak / hilang', value: `${summary.damaged.toLocaleString('id-ID')} / ${summary.lost.toLocaleString('id-ID')}` },
           { label: 'Denda telat', value: formatRupiah(summary.lateFines) },
           { label: 'Biaya ganti', value: formatRupiah(summary.replacementFees) },
         ]}

@@ -17,6 +17,9 @@ describe('ReportHeader', () => {
     expect(html).toMatch(/<div class="[^"]*hidden[^"]*print:block[^"]*"><p[^>]*>SMK Negeri 1 Contoh<\/p>/);
     expect(html).toContain('Periode 01/09/2026 – 26/09/2026');
     expect(html).toContain('Dicetak 26/09/2026 10.15');
+    // M1: deskripsi laporan juga tampil di kop cetak, tidak hanya di layar.
+    const printBlock = html.slice(html.indexOf('print:block'));
+    expect(printBlock).toContain('Menurut tanggal pinjam.');
   });
 });
 
@@ -60,5 +63,11 @@ describe('SummaryGrid dan ReportNotice', () => {
     const html = renderToStaticMarkup(<ReportNotice message="Periode maksimal 366 hari." />);
     expect(html).toContain('role="alert"');
     expect(html).toContain('print:hidden');
+  });
+
+  it('ikut tercetak bila printable, misalnya pemberitahuan pemotongan baris', () => {
+    const html = renderToStaticMarkup(<ReportNotice message="Laporan ini memuat lebih dari 1.000 baris." printable />);
+    expect(html).toContain('role="alert"');
+    expect(html).not.toContain('print:hidden');
   });
 });
