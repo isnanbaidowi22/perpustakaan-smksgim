@@ -83,7 +83,7 @@
   - `createUser` selalu menyimpan `role: 'admin'`; `updateUser` hanya mengubah `fullName`
   - `ProfileFields({ user? })` hanya berisi nama lengkap (prop `isSelf` dihapus)
 
-- [ ] **Step 1: Tulis uji validasi yang gagal**
+- [x] **Step 1: Tulis uji validasi yang gagal**
 
 Di `src/server/validation/user.test.ts`, lakukan tiga perubahan:
 - Ganti uji `'menolak username terlalu pendek dan peran yang tidak dikenal'`: hapus bagian yang mengharapkan pesan "Peran harus admin atau petugas.", dan pertahankan bagian username terlalu pendek.
@@ -103,7 +103,7 @@ Di `src/server/validation/user.test.ts`, lakukan tiga perubahan:
   });
 ```
 
-- [ ] **Step 2: Jalankan uji dan pastikan gagal**
+- [x] **Step 2: Jalankan uji dan pastikan gagal**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/server/validation/user.test.ts
@@ -111,7 +111,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/server/validation/user.test.t
 
 Harapan: FAIL. `userSchema` masih mewajibkan dan mengembalikan `role`.
 
-- [ ] **Step 3: Hapus peran dari skema**
+- [x] **Step 3: Hapus peran dari skema**
 
 Di `src/server/validation/user.ts`:
 - hapus baris `const role = z.enum(['admin', 'petugas'], 'Peran harus admin atau petugas.');`;
@@ -123,7 +123,7 @@ Di `src/server/validation/user.ts`:
 export const userSchema = z.object({ fullName });
 ```
 
-- [ ] **Step 4: Jalankan uji dan pastikan lulus**
+- [x] **Step 4: Jalankan uji dan pastikan lulus**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/server/validation/user.test.ts
@@ -131,7 +131,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/server/validation/user.test.t
 
 Harapan: PASS. `npx tsc --noEmit` kini melaporkan galat di `services/users.ts`, karena `input.role` tidak ada lagi. Itu diselesaikan di Step 5–7.
 
-- [ ] **Step 5: Tulis uji integrasi service pengguna yang gagal**
+- [x] **Step 5: Tulis uji integrasi service pengguna yang gagal**
 
 Di `tests/integration/users.test.ts`:
 - Hapus `role` dari setiap masukan `createUser(...)`/`updateUser(...)`.
@@ -175,7 +175,7 @@ Di `tests/integration/users.test.ts`:
 
 Sesuaikan impor (`and`, `eq`, `auditLogs`, `profiles`) dengan yang sudah ada di berkas. Pertahankan uji `'menolak admin menonaktifkan akunnya sendiri'` apa adanya (Review Focus 5).
 
-- [ ] **Step 6: Jalankan uji dan pastikan gagal**
+- [x] **Step 6: Jalankan uji dan pastikan gagal**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm run test:integration -- tests/integration/users.test.ts
@@ -183,7 +183,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm run test:integration -- tests/integration
 
 Harapan: FAIL. Service masih membaca `input.role` dan menulis `role` di metadata audit.
 
-- [ ] **Step 7: Sederhanakan service pengguna**
+- [x] **Step 7: Sederhanakan service pengguna**
 
 Di `src/server/services/users.ts`:
 - hapus konstanta `SELF_ROLE`;
@@ -216,7 +216,7 @@ Di `updateUser`, ganti isi transaksi mulai dari `const [current]` sampai sebelum
     });
 ```
 
-- [ ] **Step 8: Jalankan uji dan pastikan lulus**
+- [x] **Step 8: Jalankan uji dan pastikan lulus**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm run test:integration -- tests/integration/users.test.ts
@@ -224,7 +224,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm run test:integration -- tests/integration
 
 Harapan: PASS.
 
-- [ ] **Step 9: Tulis uji halaman pengguna yang gagal**
+- [x] **Step 9: Tulis uji halaman pengguna yang gagal**
 
 Ubah ketiga berkas uji halaman berikut. Pertahankan uji "Akses ditolak" di ketiganya untuk saat ini; uji itu dihapus di Task 2.
 - **`src/app/(app)/pengaturan/pengguna/page.test.tsx`**, uji `'menampilkan peran dan tidak menawarkan menonaktifkan akun sendiri'`:
@@ -237,7 +237,7 @@ Ubah ketiga berkas uji halaman berikut. Pertahankan uji "Akses ditolak" di ketig
   - hapus uji `'memberi tahu admin bahwa perannya sendiri tidak dapat diubah'`;
   - di uji `'mengisi nama dan peran, …'`, ganti namanya menjadi `'mengisi nama, dan menyediakan form kata sandi terpisah yang kosong'`, lalu ganti harapan peran menjadi `expect(html).not.toContain('name="role"')`.
 
-- [ ] **Step 10: Jalankan uji dan pastikan gagal**
+- [x] **Step 10: Jalankan uji dan pastikan gagal**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- pengaturan/pengguna
@@ -245,7 +245,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- pengaturan/pengguna
 
 Harapan: FAIL. Form masih menampilkan `name="role"`, dan daftar masih punya kolom Peran.
 
-- [ ] **Step 11: Hapus peran dari form dan daftar pengguna**
+- [x] **Step 11: Hapus peran dari form dan daftar pengguna**
 
 Ganti `ProfileFields` di `src/app/(app)/pengaturan/pengguna/user-fields.tsx`, dan hapus `ROLE_LABELS`, `ROLE_OPTIONS`, serta impor `SelectField`, `UserRole`, `Option` yang tak terpakai:
 
@@ -265,7 +265,7 @@ Di `src/app/(app)/pengaturan/pengguna/page.tsx`:
 
 Di `src/server/actions/users.test.ts`, hapus `role` dari setiap isian `FormData` dan dari harapan data yang diteruskan ke service.
 
-- [ ] **Step 12: Jalankan pemeriksaan lalu commit**
+- [x] **Step 12: Jalankan pemeriksaan lalu commit**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test && npm run test:integration -- tests/integration/users.test.ts && npm run lint && npx tsc --noEmit
@@ -297,7 +297,7 @@ EOF
 **Interfaces:**
 - Produces: `Sidebar()` tanpa prop; `CopiesSection({ bookId, bookActive, copies })` tanpa `canManageStatus`
 
-- [ ] **Step 1: Ubah uji layar agar menggambarkan satu peran (gagal)**
+- [x] **Step 1: Ubah uji layar agar menggambarkan satu peran (gagal)**
 
 1. **Uji "Akses ditolak" per halaman.** Hapus uji-uji berikut:
    - `audit-log/page.test.tsx`: `'menolak petugas tanpa membaca audit log'`
@@ -339,7 +339,7 @@ EOF
 4. **`copies-section.test.tsx`.** Hapus uji `'menyembunyikan aksi status dari petugas'`. Hapus prop `canManageStatus` dari render di uji yang tersisa, dan ubah nama uji pertama menjadi `'menampilkan eksemplar, ringkasan ketersediaan, dan aksi status'`.
 5. **`master/buku/[id]/page.test.tsx`.** Ganti uji `'menampilkan eksemplar, dengan aksi status hanya untuk admin'` menjadi `'menampilkan eksemplar beserta aksi statusnya'`. Uji itu merender satu kali dengan profil ber-`role: 'admin'` dan menegaskan tombol aksi status (misalnya "Nonaktifkan") tampil. Hapus bagian yang merender sebagai petugas dan menegaskan tombolnya hilang.
 
-- [ ] **Step 2: Jalankan uji dan pastikan gagal**
+- [x] **Step 2: Jalankan uji dan pastikan gagal**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/components/layout "src/app/(app)/layout" copies-section
@@ -347,7 +347,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/components/layout "src/app/(a
 
 Harapan: FAIL. `Sidebar` masih mewajibkan prop `role`, dan `CopiesSection` masih mewajibkan `canManageStatus`.
 
-- [ ] **Step 3: Hapus pembatasan di layar**
+- [x] **Step 3: Hapus pembatasan di layar**
 
 1. **Delapan halaman.** Di tiap halaman, hapus impor `AccessDenied` dan baris `if (profile.role !== 'admin') return <AccessDenied />;`. Bila `profile` tidak dipakai lagi, ganti `const profile = await requireProfile();` menjadi `await requireProfile();`. Halaman `pengguna/page.tsx` dan `pengguna/[id]/page.tsx` masih memakai `profile.id`, jadi biarkan variabelnya di sana.
 2. **Hapus komponen.** Hapus `src/components/ui/access-denied.tsx`.
@@ -386,7 +386,7 @@ export function Sidebar() {
 
 6. **`master/buku/[id]/page.tsx`.** Hapus `canManageStatus={profile.role === 'admin'}`. Bila `profile` tidak dipakai lagi, panggil `requireProfile()` tanpa menyimpan hasilnya: `const [book] = await Promise.all([getBook(id), requireProfile()]);`.
 
-- [ ] **Step 4: Jalankan uji dan pastikan lulus**
+- [x] **Step 4: Jalankan uji dan pastikan lulus**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test && npm run lint && npx tsc --noEmit
@@ -394,7 +394,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test && npm run lint && npx tsc --noEmit
 
 Harapan: PASS. `grep -rn "AccessDenied\|canManageStatus" src` tidak menemukan apa pun.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add -A src/app src/components
@@ -426,7 +426,7 @@ EOF
   - `type UserRole = 'admin'`
   - Constraint `profiles_role_valid`: `role = 'admin'`, bawaan kolom `'admin'`
 
-- [ ] **Step 1: Tulis uji pengaman yang gagal**
+- [x] **Step 1: Tulis uji pengaman yang gagal**
 
 Ganti isi `describe('requireRole')` dan `describe('authorize')` di `src/server/auth/guard.test.ts` dengan satu blok baru, dan ubah impornya menjadi `import { requireActor, requireProfile } from './guard';`:
 
@@ -479,7 +479,7 @@ Lalu ganti kedua uji penolakan peran:
 
 Bila `formToObject` tidak membaca lewat `formData.entries()`, periksa implementasinya di `src/lib/form-state.ts` dan mata-matai metode yang benar-benar dipakainya. Tujuannya menegaskan bahwa isian tidak dibaca sama sekali.
 
-- [ ] **Step 2: Jalankan uji dan pastikan gagal**
+- [x] **Step 2: Jalankan uji dan pastikan gagal**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/server/auth/guard.test.ts src/server/forms/run-action.test.ts
@@ -487,7 +487,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/server/auth/guard.test.ts src
 
 Harapan: FAIL. `requireActor` belum diekspor.
 
-- [ ] **Step 3: Ganti pengaman server**
+- [x] **Step 3: Ganti pengaman server**
 
 Di `src/server/auth/guard.ts`, hapus `deniedMessage`, `requireRole`, `Authorization`, dan `authorize`, lalu tambahkan:
 
@@ -536,7 +536,7 @@ export async function runCommand(options: CommandOptions): Promise<FormState> {
 
 Ubah komentar urutan baku menjadi "sesi → validasi → service → revalidasi → (pindah halaman). Sesi selalu pertama, sebelum isian form dibaca sama sekali."
 
-- [ ] **Step 4: Jalankan uji dan pastikan lulus**
+- [x] **Step 4: Jalankan uji dan pastikan lulus**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/server/auth/guard.test.ts src/server/forms/run-action.test.ts
@@ -544,7 +544,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/server/auth/guard.test.ts src
 
 Harapan: PASS.
 
-- [ ] **Step 5: Ubah uji Server Action (gagal)**
+- [x] **Step 5: Ubah uji Server Action (gagal)**
 
 Terapkan aturan berikut di setiap `src/server/actions/*.test.ts` yang memakai mock `authorize`:
 - **Mock.** Ganti `vi.mock('@/server/auth/guard', () => ({ authorize: mockAuthorize }))` dengan `vi.mock('@/server/auth/guard', () => ({ requireActor: mockRequireActor }))`. Ganti nama variabel mock yang sesuai.
@@ -556,7 +556,7 @@ Terapkan aturan berikut di setiap `src/server/actions/*.test.ts` yang memakai mo
 
 Jalankan `npm test -- src/server/actions`. Harapan: FAIL, karena action masih mengimpor `authorize` dan mengirim `roles`.
 
-- [ ] **Step 6: Ubah Server Action**
+- [x] **Step 6: Ubah Server Action**
 
 Di setiap `src/server/actions/*.ts`:
 - hapus konstanta `ROLES` dan impor `UserRole`;
@@ -578,7 +578,7 @@ Semuanya ikut dihapus, karena penolakan sesi kini berupa redirect.
 
 Jalankan `npm test -- src/server/actions`. Harapan: PASS.
 
-- [ ] **Step 7: Satu nilai peran di tipe, skema, dan seed**
+- [x] **Step 7: Satu nilai peran di tipe, skema, dan seed**
 
 1. **`src/domain/shared/types.ts`.**
 
@@ -591,7 +591,7 @@ export type UserRole = 'admin';
 3. **`src/server/db/seed.ts`.** Hapus akun `petugas` dari larik `accounts`, sehingga hanya `{ username: 'admin', fullName: 'Administrator', role: 'admin' as const }` yang tersisa.
 4. **`src/server/db/seed.test.ts`.** Ganti nama uji kedua menjadi `'seedUsers membuat akun admin lewat Supabase Admin API'`, lalu tambahkan `expect(source).not.toContain("role: 'petugas'");`.
 
-- [ ] **Step 8: Buat berkas migrasi (jangan diterapkan)**
+- [x] **Step 8: Buat berkas migrasi (jangan diterapkan)**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npx drizzle-kit generate --name satu_peran
@@ -614,7 +614,7 @@ ALTER TABLE "profiles" ADD CONSTRAINT "profiles_role_valid" CHECK ("profiles"."r
 ALTER TABLE "profiles" ALTER COLUMN "role" SET DEFAULT 'admin';
 ```
 
-- [ ] **Step 9: Bereskan sisa peran petugas di uji**
+- [x] **Step 9: Bereskan sisa peran petugas di uji**
 
 `npx tsc --noEmit` kini menandai setiap literal `'petugas'` yang bertipe `UserRole`. Di berkas uji berikut, ganti `role: 'petugas'` dengan `role: 'admin'`. Jangan mengubah teks lain yang mengandung kata "petugas" (nama lengkap, username `petugas`, nama uji tentang biaya yang ditimpa petugas):
 - `dashboard`, `master/buku`, `master/buku/baru`, `master/buku/[id]`, `master/kategori`, `master/kategori/baru`, `master/kategori/[id]`, `master/rak`, `master/rak/baru`, `master/rak/[id]`, `master/siswa`, `master/siswa/baru`, `master/siswa/[id]`
@@ -628,7 +628,7 @@ Semua di atas adalah `page.test.tsx` di bawah `src/app/(app)/` atau `src/app/`.
 
 Jalankan `npx tsc --noEmit` dan `grep -rn "role: 'petugas'" src tests`. Harapan: tsc bersih; grep hanya menemukan baris audit-labels itu.
 
-- [ ] **Step 10: Revisi spec**
+- [x] **Step 10: Revisi spec**
 
 Di `docs/superpowers/specs/2026-09-21-sistem-peminjaman-perpustakaan-design.md`:
 
@@ -652,7 +652,7 @@ Sejak revisi 26 September 2026 hanya ada satu peran, `admin`. Setiap akun aktif 
 
 Pada paragraf sebelum tabel, ganti rujukan `requireRole()` dengan `requireActor()`.
 
-- [ ] **Step 11: Jalankan seluruh pemeriksaan lalu commit**
+- [x] **Step 11: Jalankan seluruh pemeriksaan lalu commit**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test && npm run test:integration && npm run lint && npx tsc --noEmit && npm run build
