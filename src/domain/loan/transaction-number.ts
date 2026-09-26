@@ -21,3 +21,26 @@ export function formatTransactionNumber(date: IsoDate, sequence: number): string
   }
   return `PJM-${compact(date)}-${String(sequence).padStart(4, '0')}`;
 }
+
+const TRANSACTION_NUMBER = /^PJM-(\d{8})-(\d{4,})$/i;
+/** Kode pindai digit-saja: tanggal (8 digit) + nomor urut (4 digit atau lebih). */
+const SCAN_CODE = /^(\d{8})(\d{4,})$/;
+
+/** Digit-saja dari nomor transaksi, dipakai sebagai muatan barcode Code128 subset C. */
+export function transactionScanCode(transactionNumber: string): string {
+  return transactionNumber.replace(/\D/g, '');
+}
+
+/**
+ * Menormalkan masukan pencarian ke bentuk baku `PJM-YYYYMMDD-NNNN`.
+ * Menerima format baku (huruf besar/kecil) atau kode pindai digit-saja
+ * (hasil pindai barcode struk). Mengembalikan `null` bila tidak cocok.
+ */
+export function normalizeTransactionNumber(input: string): string | null {
+  const trimmed = input.trim();
+  const standard = TRANSACTION_NUMBER.exec(trimmed);
+  if (standard) return `PJM-${standard[1]}-${standard[2]}`;
+  const scanCode = SCAN_CODE.exec(trimmed);
+  if (scanCode) return `PJM-${scanCode[1]}-${scanCode[2]}`;
+  return null;
+}

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { transactionScanCode } from '@/domain/loan/transaction-number';
 import { finePayments } from '@/server/db/schema';
 import { findLoansForReturn, getLoanDetail, listLoans } from '@/server/queries/loans';
 import { createLoan } from '@/server/services/loans';
@@ -86,6 +87,21 @@ describe('findLoansForReturn', () => {
     });
   });
 
+  it('ditemukan lewat kode pindai digit-saja hasil pindai barcode struk', async () => {
+    await withRollback(async (tx) => {
+      const fx = await circulationFixture(tx);
+      const created = await createLoan({
+        studentId: fx.students[0].id, copyIds: [fx.copies[0].id], notes: null,
+      }, fx.actor, TODAY, tx);
+      if (!created.ok) throw new Error(JSON.stringify(created));
+      const scanCode = transactionScanCode(created.transactionNumber);
+
+      expect(await findLoansForReturn(scanCode, '2090-03-07', tx)).toEqual([
+        expect.objectContaining({ id: created.id, transactionNumber: created.transactionNumber }),
+      ]);
+    });
+  });
+
   it('tidak menampilkan pinjaman yang seluruh bukunya sudah kembali', async () => {
     await withRollback(async (tx) => {
       const fx = await circulationFixture(tx);
@@ -122,6 +138,24 @@ describe('listLoans', () => {
       expect(await idsFor('done')).toEqual([unpaid.id]);
       expect(await idsFor('all', 'uji siswa dua')).toEqual(expect.arrayContaining([onTime.id, unpaid.id]));
       expect(await idsFor('all', late.transactionNumber.toLowerCase())).toEqual([late.id]);
+    });
+  });
+
+  it('ditemukan lewat kode pindai digit-saja hasil pindai barcode struk', async () => {
+    await withRollback(async (tx) => {
+      const fx = await circulationFixture(tx);
+      const created = await createLoan({
+        studentId: fx.students[0].id, copyIds: [fx.copies[0].id], notes: null,
+      }, fx.actor, TODAY, tx);
+      if (!created.ok) throw new Error(JSON.stringify(created));
+
+      const { rows } = await listLoans(
+        { q: transactionScanCode(created.transactionNumber), status: 'all', page: 1 },
+        TODAY,
+        tx,
+      );
+
+      expect(rows.map((row) => row.id)).toEqual([created.id]);
     });
   });
 

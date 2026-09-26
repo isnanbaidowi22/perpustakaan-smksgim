@@ -49,6 +49,24 @@ describe('code128Values', () => {
   });
 });
 
+describe('code128Values — subset C', () => {
+  it('memakai START C untuk teks angka genap dan menghitung pasangan digit', () => {
+    // Checksum: (105+20+52+27+100+0+6) mod 103 = 1
+    expect(code128Values('202609250001')).toEqual([105, 20, 26, 9, 25, 0, 1, 1, 106]);
+  });
+
+  it('memakai START B untuk teks angka ganjil (tidak dapat dipasangkan)', () => {
+    expect(code128Values('123')?.[0]).toBe(104);
+  });
+});
+
+describe('code128Bars — subset C', () => {
+  it('menghitung total modul untuk 12 digit dikodekan sebagai 6 simbol subset C', () => {
+    // 8 simbol data × 11 modul + STOP 13 modul + 2×10 zona sepi = 121
+    expect(code128Bars('202609250001')?.totalModules).toBe(8 * 11 + 13 + 20);
+  });
+});
+
 describe('encodeCode128', () => {
   it('menghasilkan lebar modul berselang-seling yang diawali START B dan diakhiri STOP', () => {
     const widths = encodeCode128('A');

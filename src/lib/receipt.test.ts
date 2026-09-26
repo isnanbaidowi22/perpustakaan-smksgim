@@ -11,10 +11,12 @@ describe('parseReceiptWidth', () => {
 });
 
 describe('receiptPageHeightMm', () => {
-  it('menambah tinggi untuk setiap buku, catatan kaki, dan catatan transaksi', () => {
-    expect(receiptPageHeightMm(1, false, false)).toBe(122);
-    expect(receiptPageHeightMm(3, false, false)).toBe(146);
-    expect(receiptPageHeightMm(3, true, true)).toBe(170);
+  it('menambah tinggi menurut panjang tiap judul, baris barcode, catatan kaki, dan catatan transaksi', () => {
+    // dua judul pendek: masing-masing 1 baris judul (5mm) + 1 baris barcode (5mm) = 10mm
+    expect(receiptPageHeightMm(['Pemrograman Web', 'Basis Data'], false, false)).toBe(110 + 20);
+    // judul 60 karakter: ceil(60/28) = 3 baris judul (15mm) + 1 baris barcode (5mm) = 20mm
+    expect(receiptPageHeightMm(['A'.repeat(60)], false, false)).toBe(110 + 5 * 3 + 5);
+    expect(receiptPageHeightMm(['Pemrograman Web', 'Basis Data', 'Jaringan Komputer'], true, true)).toBe(110 + 30 + 14 + 10);
   });
 });
 

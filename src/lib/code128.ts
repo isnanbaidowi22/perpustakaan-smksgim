@@ -24,15 +24,27 @@ export const CODE128_PATTERNS: readonly string[] = [
 ];
 
 const START_B = 104;
+const START_C = 105;
 const STOP = 106;
 const FIRST_CODE = 32;
 const LAST_CODE = 126;
+
+/** Angka genap ≥ 2 digit: subset C memasangkan dua digit per simbol (lebih pendek dan lebih tebal per modul). */
+const ALL_DIGITS_EVEN = /^(\d\d)+$/;
 
 /** Zona sepi di kiri dan kanan barcode, dalam modul (standar: minimal 10). */
 export const QUIET_ZONE_MODULES = 10;
 
 export function code128Values(text: string): number[] | null {
   if (text.length === 0) return null;
+  if (ALL_DIGITS_EVEN.test(text)) {
+    const data: number[] = [];
+    for (let i = 0; i < text.length; i += 2) {
+      data.push(Number(text.slice(i, i + 2)));
+    }
+    const checksum = data.reduce((total, value, index) => total + value * (index + 1), START_C) % 103;
+    return [START_C, ...data, checksum, STOP];
+  }
   const data: number[] = [];
   for (const char of text) {
     const code = char.codePointAt(0) ?? -1;

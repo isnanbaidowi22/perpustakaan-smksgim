@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { PrintToolbar } from '@/components/print/print-toolbar';
 import { Barcode } from '@/components/ui/barcode';
 import { buttonClass } from '@/components/ui/button-styles';
+import { transactionScanCode } from '@/domain/loan/transaction-number';
 import { formatDate } from '@/lib/format';
 import { parseReceiptWidth, receiptPageCss, receiptPageHeightMm, type ReceiptWidth } from '@/lib/receipt';
 import { formatSchoolDateTime, schoolToday } from '@/lib/school-date';
@@ -12,7 +13,11 @@ import { getLoanDetail } from '@/server/queries/loans';
 import { getLibrarySettings } from '@/server/queries/settings';
 
 const WIDTHS: ReceiptWidth[] = [58, 80];
-const WIDTH_CLASS: Record<ReceiptWidth, string> = { 58: 'w-[58mm]', 80: 'w-[80mm]' };
+/**
+ * Strip yang benar-benar dicetak printer thermal, bukan lebar kertasnya:
+ * 48 mm dari kertas 58 mm, 72 mm dari kertas 80 mm (spec I1).
+ */
+const WIDTH_CLASS: Record<ReceiptWidth, string> = { 58: 'w-[48mm]', 80: 'w-[72mm]' };
 const RULE = 'my-2 border-t border-dashed border-black';
 
 export default async function ReceiptPage({
@@ -30,7 +35,8 @@ export default async function ReceiptPage({
 
   const schoolName = settings.schoolName?.trim() || 'Perpustakaan Sekolah';
   const footer = settings.receiptFooter?.trim() || null;
-  const height = receiptPageHeightMm(loan.items.length, footer !== null, loan.notes !== null);
+  const height = receiptPageHeightMm(loan.items.map((item) => item.bookTitle), footer !== null, loan.notes !== null);
+  const scanCode = transactionScanCode(loan.transactionNumber);
 
   return (
     <>
@@ -51,7 +57,7 @@ export default async function ReceiptPage({
 
       <article
         aria-label={`Struk ${loan.transactionNumber}`}
-        className={`${WIDTH_CLASS[width]} mx-auto my-6 px-[3mm] py-[4mm] text-[11px] leading-snug print:my-0`}
+        className={`${WIDTH_CLASS[width]} mx-auto my-6 py-[4mm] text-[11px] leading-snug [break-inside:avoid] print:my-0`}
       >
         <header className="text-center">
           <p className="text-[13px] font-bold">{schoolName}</p>
@@ -80,7 +86,8 @@ export default async function ReceiptPage({
         <hr className={RULE} />
         <p>Petugas: {loan.createdByName}</p>
         <p>Dicetak: {formatSchoolDateTime(new Date())}</p>
-        <Barcode value={loan.transactionNumber} className="mt-2 h-[12mm] w-full" />
+        <Barcode value={scanCode} moduleMm={0.375} className="mx-auto mt-2 block h-[12mm]" />
+        <p className="text-center font-mono text-[9px]">{scanCode}</p>
         {footer && <p className="mt-2 text-center">{footer}</p>}
       </article>
     </>

@@ -1,5 +1,6 @@
 import { and, asc, desc, eq, ilike, inArray, isNull, lt, ne, or, sql } from 'drizzle-orm';
 import { diffDays, type IsoDate } from '@/domain/shared/date';
+import { normalizeTransactionNumber } from '@/domain/loan/transaction-number';
 import type { HistoryStatus } from '@/lib/circulation-labels';
 import { offsetOf, PAGE_SIZE } from '@/lib/pagination';
 import type { LoanStatus, ReturnCondition } from '@/domain/shared/types';
@@ -172,6 +173,7 @@ export async function findLoansForReturn(
   const keyword = query.trim();
   if (!keyword) return [];
   const upper = keyword.toUpperCase();
+  const transactionMatch = normalizeTransactionNumber(keyword) ?? upper;
   const openItems = openItemCounts(executor);
   const byBarcode = executor
     .select({ loanId: loanItems.loanId })
@@ -195,7 +197,7 @@ export async function findLoansForReturn(
     .innerJoin(students, eq(students.id, loans.studentId))
     .innerJoin(openItems, eq(openItems.loanId, loans.id))
     .where(or(
-      eq(loans.transactionNumber, upper),
+      eq(loans.transactionNumber, transactionMatch),
       eq(students.nis, keyword),
       ilike(students.name, containsPattern(keyword)),
       inArray(loans.id, byBarcode),
@@ -270,7 +272,7 @@ export async function listLoans(
   const where = and(
     keyword
       ? or(
-          eq(loans.transactionNumber, keyword.toUpperCase()),
+          eq(loans.transactionNumber, normalizeTransactionNumber(keyword) ?? keyword.toUpperCase()),
           eq(students.nis, keyword),
           ilike(students.name, containsPattern(keyword)),
         )

@@ -13,6 +13,14 @@ describe('Barcode', () => {
     expect(html.match(/<rect /g)).toHaveLength(1 + 13);
   });
 
+  it('memakai lebar modul tetap bila moduleMm diberikan, tinggi tetap dari className', () => {
+    const html = renderToStaticMarkup(<Barcode value="202609250001" className="h-[12mm]" moduleMm={0.375} />);
+
+    // 121 modul × 0,375 mm = 45,375mm
+    expect(html).toContain('style="width:45.375mm"');
+    expect(html).toContain('class="h-[12mm]"');
+  });
+
   it('menampilkan teks dan peringatan bila barcode tidak dapat dikodekan', () => {
     const html = renderToStaticMarkup(<Barcode value="BUKU-É1" />);
 

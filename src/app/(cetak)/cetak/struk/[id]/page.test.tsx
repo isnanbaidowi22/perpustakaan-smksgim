@@ -92,18 +92,20 @@ describe('ReceiptPage', () => {
     expect(html).toContain('Petugas: Siti Petugas');
     expect(html).toContain('Dicetak: 09/03/2090 10.15');
     expect(html).toContain('Terima kasih. Simpan struk ini.');
-    expect(html).toContain('aria-label="Barcode PJM-20900302-0001"');
+    expect(html).toContain('aria-label="Barcode 209003020001"');
+    expect(html).toContain('209003020001');
   });
 
-  it('memakai kertas 58 mm secara bawaan dan 80 mm bila diminta', async () => {
+  it('memakai kertas 58 mm secara bawaan dan 80 mm bila diminta, dibatasi pada strip yang dapat dicetak', async () => {
     const narrow = await render();
-    expect(narrow).toContain('@page { size: 58mm 148mm; margin: 0; }');
-    expect(narrow).toContain('w-[58mm]');
+    // 2 judul 1 baris (Pemrograman Web, Basis Data) = 110 + 20 + footer 14 = 144
+    expect(narrow).toContain('@page { size: 58mm 144mm; margin: 0; }');
+    expect(narrow).toContain('w-[48mm]');
     expect(narrow).toContain('href="/cetak/struk/l1?lebar=80"');
 
     const wide = await render({ lebar: '80' });
-    expect(wide).toContain('@page { size: 80mm 148mm; margin: 0; }');
-    expect(wide).toContain('w-[80mm]');
+    expect(wide).toContain('@page { size: 80mm 144mm; margin: 0; }');
+    expect(wide).toContain('w-[72mm]');
     expect(wide).toContain('href="/cetak/struk/l1"');
   });
 
@@ -113,7 +115,8 @@ describe('ReceiptPage', () => {
     const html = await render();
 
     expect(html).toContain('Perpustakaan Sekolah');
-    expect(html).toContain('@page { size: 58mm 134mm; margin: 0; }');
+    // tanpa footer: 110 + 20 = 130
+    expect(html).toContain('@page { size: 58mm 130mm; margin: 0; }');
   });
 
   it('mencetak catatan transaksi bila ada', async () => {

@@ -6,17 +6,25 @@ export function parseReceiptWidth(value: string): ReceiptWidth {
 }
 
 const BASE_HEIGHT_MM = 110;
-const PER_ITEM_MM = 12;
+/** Lebar taksiran judul dalam karakter per baris pada struk 52 mm, 11px. */
+const TITLE_CHARS_PER_LINE = 28;
+const LINE_MM = 5;
 const FOOTER_MM = 14;
 const NOTES_MM = 10;
 
 /**
  * Tinggi halaman struk. CSS `@page` tidak mengenal tinggi "otomatis",
- * jadi tingginya diperkirakan dari isi struk. Sisa kertas kosong di bawah
- * struk lebih baik daripada struk yang terpotong ke halaman kedua.
+ * jadi tingginya diperkirakan dari isi struk: setiap judul memakai
+ * `ceil(panjang / 28)` baris (minimal 1) ditambah satu baris untuk barcodenya.
+ * Sisa kertas kosong di bawah struk lebih baik daripada struk yang
+ * terpotong ke halaman kedua.
  */
-export function receiptPageHeightMm(itemCount: number, hasFooter: boolean, hasNotes: boolean): number {
-  return BASE_HEIGHT_MM + itemCount * PER_ITEM_MM + (hasFooter ? FOOTER_MM : 0) + (hasNotes ? NOTES_MM : 0);
+export function receiptPageHeightMm(titles: string[], hasFooter: boolean, hasNotes: boolean): number {
+  const itemsHeight = titles.reduce((total, title) => {
+    const titleLines = Math.max(1, Math.ceil(title.length / TITLE_CHARS_PER_LINE));
+    return total + (titleLines + 1) * LINE_MM;
+  }, 0);
+  return BASE_HEIGHT_MM + itemsHeight + (hasFooter ? FOOTER_MM : 0) + (hasNotes ? NOTES_MM : 0);
 }
 
 export function receiptPageCss(width: ReceiptWidth, heightMm: number): string {
