@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import type { Actor, RecordStatus } from '@/domain/shared/types';
 import { writeAudit } from '@/server/audit';
 import type { AuthAdmin } from '@/server/auth/auth-admin';
@@ -13,6 +13,7 @@ import { fail, ok, type ServiceResult } from './result';
 
 const NOT_FOUND = 'Pengguna tidak ditemukan. Muat ulang halaman daftar pengguna.';
 const SELF_STATUS = 'Anda tidak dapat menonaktifkan akun Anda sendiri. Minta admin lain melakukannya bila perlu.';
+const ACTOR_DEACTIVATED = 'Akun Anda sudah dinonaktifkan oleh admin lain. Masuk ulang dengan akun aktif.';
 
 function duplicate(username: string): ServiceResult {
   return fail(`Username ${username} sudah dipakai. Pilih username lain.`, 'username');
@@ -103,6 +104,11 @@ export async function updateUser(
 /**
  * Profil nonaktif ditolak `getCurrentProfile()` di setiap request, jadi
  * sesinya yang masih hidup langsung tidak berguna tanpa perlu dicabut.
+ *
+ * Dua admin dapat saling menonaktifkan hampir bersamaan: masing-masing lolos
+ * `getCurrentProfile()` sebelum transaksi yang lain selesai. Mengunci kedua
+ * baris (urutan tetap agar tidak deadlock) lalu memeriksa ulang status aktor
+ * sendiri mencegah keduanya nonaktif tanpa admin yang tersisa.
  */
 export async function setUserStatus(
   id: string,
@@ -113,6 +119,21 @@ export async function setUserStatus(
   if (!isUuid(id)) return fail(NOT_FOUND);
   if (id === actor.id) return fail(SELF_STATUS);
   return executor.transaction(async (tx) => {
+    const ids = [id, actor.id].sort();
+    const rows = await tx
+      .select({ id: profiles.id, status: profiles.status })
+      .from(profiles)
+      .where(inArray(profiles.id, ids))
+      .orderBy(profiles.id)
+      .for('update');
+
+    if (!rows.some((row) => row.id === id)) return fail(NOT_FOUND);
+
+    if (status === 'inactive') {
+      const actorRow = rows.find((row) => row.id === actor.id);
+      if (actorRow && actorRow.status !== 'active') return fail(ACTOR_DEACTIVATED);
+    }
+
     const [updated] = await tx
       .update(profiles)
       .set({ status, updatedAt: new Date() })

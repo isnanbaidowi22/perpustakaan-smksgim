@@ -29,7 +29,7 @@ describe('createUser', () => {
       expect(auth.created).toEqual([{ id: result.id, email: usernameToEmail('uji_petugas'), password: 'rahasia-uji-1' }]);
       expect(auth.deleted).toEqual([]);
       expect(await getUser(result.id, tx)).toEqual({
-        id: result.id, username: 'uji_petugas', fullName: 'UJI Petugas Baru', role: 'admin', status: 'active',
+        id: result.id, username: 'uji_petugas', fullName: 'UJI Petugas Baru', status: 'active',
       });
       const [audit] = await auditOf(tx, result.id, 'user.create');
       expect(audit?.metadata).toEqual({ username: 'uji_petugas', fullName: 'UJI Petugas Baru', role: 'admin' });
@@ -157,6 +157,22 @@ describe('setUserStatus', () => {
         message: 'Anda tidak dapat menonaktifkan akun Anda sendiri. Minta admin lain melakukannya bila perlu.',
       });
       expect((await getUser(actor.id, tx))?.status).toBe('active');
+    });
+  });
+
+  it('menolak menonaktifkan orang lain bila akun aktor sendiri sudah dinonaktifkan admin lain', async () => {
+    await withRollback(async (tx) => {
+      const actorA = await testActor(tx);
+      const createdB = await createUser(input, actorA, fakeAuthAdmin(tx), tx);
+      if (!createdB.ok) throw new Error(createdB.message);
+
+      await tx.update(profiles).set({ status: 'inactive' }).where(eq(profiles.id, actorA.id));
+
+      expect(await setUserStatus(createdB.id, 'inactive', actorA, tx)).toEqual({
+        ok: false,
+        message: 'Akun Anda sudah dinonaktifkan oleh admin lain. Masuk ulang dengan akun aktif.',
+      });
+      expect((await getUser(createdB.id, tx))?.status).toBe('active');
     });
   });
 });
