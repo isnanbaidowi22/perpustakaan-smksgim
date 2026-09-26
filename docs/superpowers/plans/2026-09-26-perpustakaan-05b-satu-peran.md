@@ -677,7 +677,7 @@ EOF
 
 **Files:** tidak ada berkas kode; pencentangan rencana di Step 5.
 
-- [ ] **Step 1: Periksa keadaan sebelum migrasi (baca-saja)**
+- [x] **Step 1: Periksa keadaan sebelum migrasi (baca-saja)**
 
 Buat `tmp-peran.ts` dengan impor statis, jalankan dengan `npx tsx --env-file=.env.local tmp-peran.ts`, lalu hapus berkasnya. Kueri:
 
@@ -687,7 +687,7 @@ select role, count(*) from profiles group by role
 
 Catat hasilnya di laporan.
 
-- [ ] **Step 2: Terapkan migrasi**
+- [x] **Step 2: Terapkan migrasi**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm run db:migrate
@@ -695,7 +695,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm run db:migrate
 
 Harapan: migrasi `0002_satu_peran` diterapkan tanpa galat.
 
-- [ ] **Step 3: Verifikasi database (baca-saja)**
+- [x] **Step 3: Verifikasi database (baca-saja)**
 
 Jalankan ulang kueri Step 1. Harapan: hanya `admin`. Periksa juga constraint-nya:
 
@@ -705,7 +705,7 @@ select pg_get_constraintdef(oid) from pg_constraint where conname = 'profiles_ro
 
 Harapan: `CHECK ((role = 'admin'::text))`. Hapus berkas sementaranya.
 
-- [ ] **Step 4: Pemeriksaan otomatis dan peramban**
+- [x] **Step 4: Pemeriksaan otomatis dan peramban**
 
 Jalankan `npm test`, `npm run test:integration`, `npm run lint`, dan `npm run build`. Harapan: seluruhnya lulus.
 
@@ -717,7 +717,7 @@ Uji di peramban lewat skill `/browse` (bukan `mcp__claude-in-chrome__*`), dengan
 
 Hentikan server dev setelah selesai.
 
-- [ ] **Step 5: Tandai rencana selesai**
+- [x] **Step 5: Tandai rencana selesai**
 
 Ubah seluruh `- [ ]` di berkas ini menjadi `- [x]`, lalu commit:
 
