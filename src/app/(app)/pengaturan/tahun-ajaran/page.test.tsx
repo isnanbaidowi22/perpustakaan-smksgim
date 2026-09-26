@@ -41,4 +41,12 @@ describe('AcademicYearsPage', () => {
     mockList.mockResolvedValueOnce([]);
     expect(await render()).toContain('Belum ada tahun ajaran.');
   });
+
+  it('memeriksa sesi lebih dulu sebelum membaca daftar tahun ajaran', async () => {
+    mockRequireProfile.mockRejectedValueOnce(new Error('NEXT_REDIRECT'));
+
+    await expect(render()).rejects.toThrow('NEXT_REDIRECT');
+
+    expect(mockList).not.toHaveBeenCalled();
+  });
 });

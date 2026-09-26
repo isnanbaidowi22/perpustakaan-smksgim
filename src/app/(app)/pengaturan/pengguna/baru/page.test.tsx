@@ -22,4 +22,10 @@ describe('NewUserPage', () => {
     expect(html.split('type="password"').length - 1).toBe(2);
     expect(html).not.toContain('name="role"');
   });
+
+  it('memeriksa sesi lebih dulu sebelum menampilkan formulir', async () => {
+    mockRequireProfile.mockRejectedValueOnce(new Error('NEXT_REDIRECT'));
+
+    await expect(NewUserPage()).rejects.toThrow('NEXT_REDIRECT');
+  });
 });

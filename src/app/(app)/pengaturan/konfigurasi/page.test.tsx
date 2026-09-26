@@ -40,4 +40,12 @@ describe('SettingsPage', () => {
       expect(html).toContain(`<input type="hidden" name="${name}" value="off"/>`);
     }
   });
+
+  it('memeriksa sesi lebih dulu sebelum membaca konfigurasi', async () => {
+    mockRequireProfile.mockRejectedValueOnce(new Error('NEXT_REDIRECT'));
+
+    await expect(SettingsPage()).rejects.toThrow('NEXT_REDIRECT');
+
+    expect(mockGet).not.toHaveBeenCalled();
+  });
 });

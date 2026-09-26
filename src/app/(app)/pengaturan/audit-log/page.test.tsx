@@ -62,6 +62,14 @@ describe('AuditLogPage', () => {
     expect(await render()).toContain('Belum ada catatan yang cocok.');
   });
 
+  it('memeriksa sesi lebih dulu sebelum membaca catatan audit', async () => {
+    mockRequireProfile.mockRejectedValueOnce(new Error('NEXT_REDIRECT'));
+
+    await expect(render()).rejects.toThrow('NEXT_REDIRECT');
+
+    expect(mockList).not.toHaveBeenCalled();
+  });
+
   it('menyamarkan kolom rahasia di isi lengkap', async () => {
     mockList.mockResolvedValueOnce({
       rows: [{ ...row, action: 'user.reset_password', entity: 'profiles', metadata: { username: 'budi', password: 'rahasia123' } }],

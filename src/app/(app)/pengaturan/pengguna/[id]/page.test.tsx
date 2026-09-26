@@ -28,7 +28,7 @@ beforeEach(() => {
 describe('EditUserPage', () => {
   it('mengisi nama, dan menyediakan form kata sandi terpisah yang kosong', async () => {
     mockGet.mockResolvedValueOnce({
-      id: 'u2', username: 'petugas', fullName: 'Petugas Perpustakaan', role: 'admin', status: 'active',
+      id: 'u2', username: 'petugas', fullName: 'Petugas Perpustakaan', status: 'active',
     });
 
     const html = renderToStaticMarkup(await render('u2'));
@@ -44,5 +44,13 @@ describe('EditUserPage', () => {
   it('menampilkan halaman tidak ditemukan untuk id yang tidak ada', async () => {
     mockGet.mockResolvedValueOnce(null);
     await expect(render('x')).rejects.toThrow('NEXT_NOT_FOUND');
+  });
+
+  it('memeriksa sesi lebih dulu sebelum membaca data pengguna', async () => {
+    mockRequireProfile.mockRejectedValueOnce(new Error('NEXT_REDIRECT'));
+
+    await expect(render('u2')).rejects.toThrow('NEXT_REDIRECT');
+
+    expect(mockGet).not.toHaveBeenCalled();
   });
 });

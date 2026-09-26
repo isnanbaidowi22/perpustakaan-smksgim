@@ -38,4 +38,12 @@ describe('EditAcademicYearPage', () => {
     mockGet.mockResolvedValueOnce(null);
     await expect(EditAcademicYearPage({ params: Promise.resolve({ id: 'x' }) })).rejects.toThrow('NEXT_NOT_FOUND');
   });
+
+  it('memeriksa sesi lebih dulu sebelum membaca data tahun ajaran', async () => {
+    mockRequireProfile.mockRejectedValueOnce(new Error('NEXT_REDIRECT'));
+
+    await expect(EditAcademicYearPage({ params: Promise.resolve({ id: 'y1' }) })).rejects.toThrow('NEXT_REDIRECT');
+
+    expect(mockGet).not.toHaveBeenCalled();
+  });
 });

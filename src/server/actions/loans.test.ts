@@ -49,6 +49,13 @@ describe('Server Action baca meja peminjaman', () => {
     expect(mockSearch).toHaveBeenCalledWith('ahmad');
   });
 
+  it('melempar redirect tanpa membaca kartu siswa bila pengunjung belum masuk', async () => {
+    mockRequireActor.mockRejectedValueOnce(new Error('NEXT_REDIRECT'));
+
+    await expect(getBorrowerCardAction(studentId)).rejects.toThrow('NEXT_REDIRECT');
+    expect(mockCard).not.toHaveBeenCalled();
+  });
+
   it('memuat kartu siswa dengan tanggal sekolah, atau menjelaskan bila tidak ditemukan', async () => {
     mockCard.mockResolvedValueOnce({ activeCount: 1 });
     expect(await getBorrowerCardAction(studentId)).toEqual({ ok: true, data: { activeCount: 1 } });
@@ -58,6 +65,13 @@ describe('Server Action baca meja peminjaman', () => {
     expect(await getBorrowerCardAction(studentId)).toEqual({
       ok: false, message: 'Siswa tidak ditemukan. Cari ulang dengan NIS atau nama.',
     });
+  });
+
+  it('melempar redirect tanpa membaca barcode bila pengunjung belum masuk', async () => {
+    mockRequireActor.mockRejectedValueOnce(new Error('NEXT_REDIRECT'));
+
+    await expect(lookupCopyAction(' xx-9 ')).rejects.toThrow('NEXT_REDIRECT');
+    expect(mockFindCopy).not.toHaveBeenCalled();
   });
 
   it('menjelaskan barcode yang tidak terdaftar dan barcode kosong', async () => {

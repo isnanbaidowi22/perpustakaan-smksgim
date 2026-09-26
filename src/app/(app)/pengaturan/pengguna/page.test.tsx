@@ -24,9 +24,9 @@ beforeEach(() => {
 describe('UsersPage', () => {
   it('tidak menampilkan kolom peran dan tidak menawarkan menonaktifkan akun sendiri', async () => {
     mockList.mockResolvedValueOnce([
-      { id: 'u1', username: 'admin', fullName: 'Administrator', role: 'admin', status: 'active' },
-      { id: 'u2', username: 'petugas', fullName: 'Petugas Perpustakaan', role: 'admin', status: 'active' },
-      { id: 'u3', username: 'lama', fullName: 'Petugas Lama', role: 'admin', status: 'inactive' },
+      { id: 'u1', username: 'admin', fullName: 'Administrator', status: 'active' },
+      { id: 'u2', username: 'petugas', fullName: 'Petugas Perpustakaan', status: 'active' },
+      { id: 'u3', username: 'lama', fullName: 'Petugas Lama', status: 'inactive' },
     ]);
 
     const html = await render({ pesan: 'Pengguna berhasil dibuat.' });
@@ -38,5 +38,13 @@ describe('UsersPage', () => {
     expect(html).toContain('href="/pengaturan/pengguna/u2"');
     expect(html).toContain('Pengguna berhasil dibuat.');
     expect(html).not.toContain('>Peran<');
+  });
+
+  it('memeriksa sesi lebih dulu sebelum membaca daftar pengguna', async () => {
+    mockRequireProfile.mockRejectedValueOnce(new Error('NEXT_REDIRECT'));
+
+    await expect(render()).rejects.toThrow('NEXT_REDIRECT');
+
+    expect(mockList).not.toHaveBeenCalled();
   });
 });

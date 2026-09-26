@@ -37,4 +37,12 @@ describe('NewAcademicYearPage', () => {
     expect(html).toMatch(/type="checkbox"[^>]*checked=""/);
     expect(html).toContain('Belum ada tahun ajaran aktif');
   });
+
+  it('memeriksa sesi lebih dulu sebelum membaca tahun ajaran aktif', async () => {
+    mockRequireProfile.mockRejectedValueOnce(new Error('NEXT_REDIRECT'));
+
+    await expect(NewAcademicYearPage()).rejects.toThrow('NEXT_REDIRECT');
+
+    expect(mockGetActive).not.toHaveBeenCalled();
+  });
 });
