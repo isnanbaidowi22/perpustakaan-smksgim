@@ -30,7 +30,7 @@ beforeEach(() => {
   mockRequireProfile.mockResolvedValue({ id: 'u1', role: 'admin', fullName: 'Admin', status: 'active' });
   mockClassOptions.mockResolvedValue([{ value: 'XI RPL 1', label: 'XI RPL 1' }]);
   mockSettings.mockResolvedValue({ schoolName: 'SMK Negeri 1 Contoh', receiptFooter: null, finePerDay: 1000 });
-  mockOverdueReport.mockResolvedValue({ rows: [row], summary: { students: 1, copies: 1, estimatedFines: 11000 }, truncated: false });
+  mockOverdueReport.mockResolvedValue({ rows: [row], summary: { students: 1, loans: 1, copies: 1, estimatedFines: 11000 }, truncated: false });
 });
 
 describe('OverdueReportPage', () => {
@@ -47,10 +47,11 @@ describe('OverdueReportPage', () => {
     expect(html).toContain('11 hari');
     expect(html).toContain('Rp11.000');
     expect(html).toContain('tarif Rp1.000 per hari');
+    expect(html).toContain('Transaksi terlambat');
   });
 
   it('menampilkan pesan bila tidak ada yang terlambat', async () => {
-    mockOverdueReport.mockResolvedValueOnce({ rows: [], summary: { students: 0, copies: 0, estimatedFines: 0 }, truncated: false });
+    mockOverdueReport.mockResolvedValueOnce({ rows: [], summary: { students: 0, loans: 0, copies: 0, estimatedFines: 0 }, truncated: false });
     expect(await render()).toContain('Tidak ada buku yang terlambat dikembalikan.');
   });
 

@@ -128,7 +128,7 @@ describe('returnReport', () => {
         studentNis: 'UJI-S1', studentClass: 'XI UJI 1', bookTitle: 'UJI-Buku Sirkulasi', daysLate: 2,
       });
       expect(report.rows[0].returnedAt).toBeInstanceOf(Date);
-      expect(report.summary).toEqual({ copies: 2, good: 1, damaged: 1, lost: 0, lateFines: 4000, replacementFees: 50000 });
+      expect(report.summary).toEqual({ copies: 2, damaged: 1, lost: 0, lateFines: 4000, replacementFees: 50000 });
     });
   });
 
@@ -176,7 +176,7 @@ describe('overdueReport', () => {
           dueDate: '2090-03-02', daysLate: 4, estimatedFine: 4000,
         },
       ]);
-      expect(report.summary).toEqual({ students: 1, copies: 2, estimatedFines: 15000 });
+      expect(report.summary).toEqual({ students: 1, loans: 2, copies: 2, estimatedFines: 15000 });
     });
   });
 
@@ -189,7 +189,7 @@ describe('overdueReport', () => {
 
       expect(report.truncated).toBe(true);
       expect(report.rows).toHaveLength(1);
-      expect(report.summary).toEqual({ students: 1, copies: 2, estimatedFines: 11000 });
+      expect(report.summary).toEqual({ students: 1, loans: 1, copies: 2, estimatedFines: 11000 });
     });
   });
 });

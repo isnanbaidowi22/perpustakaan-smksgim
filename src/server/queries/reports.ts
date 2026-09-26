@@ -132,7 +132,6 @@ export interface ReturnReportRow {
 
 export interface ReturnReportSummary {
   copies: number;
-  good: number;
   damaged: number;
   lost: number;
   lateFines: number;
@@ -183,7 +182,6 @@ export async function returnReport(
   const [summary] = await executor
     .select({
       copies: sql<number>`count(*)::int`,
-      good: sql<number>`(count(*) filter (where ${loanItems.returnCondition} = 'BAIK'))::int`,
       damaged: sql<number>`(count(*) filter (where ${loanItems.returnCondition} = 'RUSAK'))::int`,
       lost: sql<number>`(count(*) filter (where ${loanItems.returnCondition} = 'HILANG'))::int`,
       lateFines: sql<string>`coalesce(sum(${loanItems.lateFine}), 0)`,
@@ -203,7 +201,6 @@ export async function returnReport(
     })),
     summary: {
       copies: Number(summary?.copies ?? 0),
-      good: Number(summary?.good ?? 0),
       damaged: Number(summary?.damaged ?? 0),
       lost: Number(summary?.lost ?? 0),
       lateFines: Number(summary?.lateFines ?? 0),
@@ -229,6 +226,7 @@ export interface OverdueReportRow {
 
 export interface OverdueReportSummary {
   students: number;
+  loans: number;
   copies: number;
   estimatedFines: number;
 }
@@ -276,6 +274,7 @@ export async function overdueReport(
   const [summary] = await executor
     .select({
       students: sql<number>`count(distinct ${loans.studentId})::int`,
+      loans: sql<number>`count(distinct ${loans.id})::int`,
       copies: sql<number>`count(*)::int`,
       totalDays: sql<number>`coalesce(sum(${today}::date - ${loans.dueDate}), 0)::int`,
     })
@@ -290,6 +289,7 @@ export async function overdueReport(
     }),
     summary: {
       students: Number(summary?.students ?? 0),
+      loans: Number(summary?.loans ?? 0),
       copies: Number(summary?.copies ?? 0),
       estimatedFines: Number(summary?.totalDays ?? 0) * finePerDay,
     },

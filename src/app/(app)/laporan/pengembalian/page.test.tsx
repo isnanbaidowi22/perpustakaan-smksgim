@@ -32,7 +32,7 @@ beforeEach(() => {
   mockSettings.mockResolvedValue({ schoolName: 'SMK Negeri 1 Contoh', receiptFooter: null });
   mockReturnReport.mockResolvedValue({
     rows: [row],
-    summary: { copies: 1, good: 0, damaged: 1, lost: 0, lateFines: 2000, replacementFees: 50000 },
+    summary: { copies: 1, damaged: 1, lost: 0, lateFines: 2000, replacementFees: 50000 },
     truncated: false,
   });
 });
@@ -57,7 +57,7 @@ describe('ReturnReportPage', () => {
 
   it('menampilkan pesan kosong dan pemberitahuan pemotongan', async () => {
     mockReturnReport.mockResolvedValueOnce({
-      rows: [], summary: { copies: 0, good: 0, damaged: 0, lost: 0, lateFines: 0, replacementFees: 0 }, truncated: true,
+      rows: [], summary: { copies: 0, damaged: 0, lost: 0, lateFines: 0, replacementFees: 0 }, truncated: true,
     });
 
     const html = await render();
