@@ -1,7 +1,8 @@
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
-import { students } from '@/server/db/schema';
-import { listReportClassOptions, loanReport } from '@/server/queries/reports';
+import type { Transaction } from '@/server/db/executor';
+import { loanItems, students } from '@/server/db/schema';
+import { listReportClassOptions, loanReport, returnReport } from '@/server/queries/reports';
 import { circulationFixture, seedLoan } from './circulation-fixture';
 import { withRollback } from './helpers';
 
@@ -79,6 +80,70 @@ describe('loanReport', () => {
       expect(report.truncated).toBe(true);
       expect(report.rows).toHaveLength(1);
       expect(report.summary.loans).toBe(2);
+    });
+  });
+});
+
+describe('returnReport', () => {
+  /** Mengatur waktu kembali dan hasil pengembalian satu eksemplar yang sudah ditandai kembali oleh seedLoan. */
+  async function setReturn(
+    tx: Transaction,
+    loanId: string,
+    copyId: string,
+    values: { at: string; condition: 'BAIK' | 'RUSAK' | 'HILANG'; daysLate?: number; lateFine?: number; replacementFee?: number },
+  ) {
+    await tx.update(loanItems).set({
+      returnedAt: new Date(values.at),
+      returnCondition: values.condition,
+      daysLate: values.daysLate ?? 0,
+      lateFine: String(values.lateFine ?? 0),
+      replacementFee: String(values.replacementFee ?? 0),
+    }).where(and(eq(loanItems.loanId, loanId), eq(loanItems.bookCopyId, copyId)));
+  }
+
+  it('mendaftar eksemplar yang kembali pada periode menurut tanggal WIB, dengan denda dan ringkasan kondisi', async () => {
+    await withRollback(async (tx) => {
+      const fx = await circulationFixture(tx, { copies: 3 });
+      const loan = await seedLoan(tx, fx, {
+        student: 0, copies: [0, 1, 2], loanDate: '2090-02-25', dueDate: '2090-02-28', returned: [0, 1, 2],
+      });
+      // 02/03 00.30 WIB — masuk
+      await setReturn(tx, loan.id, fx.copies[0].id, { at: '2090-03-01T17:30:00Z', condition: 'RUSAK', daysLate: 2, lateFine: 2000, replacementFee: 50000 });
+      // 02/03 09.00 WIB — masuk
+      await setReturn(tx, loan.id, fx.copies[1].id, { at: '2090-03-02T02:00:00Z', condition: 'BAIK', daysLate: 2, lateFine: 2000 });
+      // 01/03 23.59 WIB — tidak masuk
+      await setReturn(tx, loan.id, fx.copies[2].id, { at: '2090-03-01T16:59:00Z', condition: 'HILANG', replacementFee: 50000 });
+
+      const report = await returnReport({ from: '2090-03-02', to: '2090-03-02', className: '' }, tx);
+
+      expect(report.truncated).toBe(false);
+      expect(report.rows.map((row) => [row.barcode, row.condition, row.lateFine, row.replacementFee])).toEqual([
+        ['UJI-SRK-01', 'RUSAK', 2000, 50000],
+        ['UJI-SRK-02', 'BAIK', 2000, 0],
+      ]);
+      expect(report.rows[0]).toMatchObject({
+        loanId: loan.id, transactionNumber: loan.transactionNumber, studentName: 'UJI Siswa Satu',
+        studentNis: 'UJI-S1', studentClass: 'XI UJI 1', bookTitle: 'UJI-Buku Sirkulasi', daysLate: 2,
+      });
+      expect(report.rows[0].returnedAt).toBeInstanceOf(Date);
+      expect(report.summary).toEqual({ copies: 2, good: 1, damaged: 1, lost: 0, lateFines: 4000, replacementFees: 50000 });
+    });
+  });
+
+  it('menyaring per kelas saat meminjam dan memotong baris di batas', async () => {
+    await withRollback(async (tx) => {
+      const fx = await circulationFixture(tx, { copies: 3 });
+      const mine = await seedLoan(tx, fx, { student: 0, copies: [0, 1], loanDate: '2090-02-25', dueDate: '2090-02-28', returned: [0, 1] });
+      const other = await seedLoan(tx, fx, { student: 1, copies: [2], loanDate: '2090-02-25', dueDate: '2090-02-28', returned: [2] });
+      await setReturn(tx, mine.id, fx.copies[0].id, { at: '2090-03-02T02:00:00Z', condition: 'BAIK' });
+      await setReturn(tx, mine.id, fx.copies[1].id, { at: '2090-03-02T03:00:00Z', condition: 'BAIK' });
+      await setReturn(tx, other.id, fx.copies[2].id, { at: '2090-03-02T04:00:00Z', condition: 'BAIK' });
+
+      const report = await returnReport({ from: '2090-03-02', to: '2090-03-02', className: 'XI UJI 1' }, tx, 1);
+
+      expect(report.truncated).toBe(true);
+      expect(report.rows).toHaveLength(1);
+      expect(report.summary.copies).toBe(2);
     });
   });
 });

@@ -1,11 +1,14 @@
-import { and, asc, between, eq, sql } from 'drizzle-orm';
+import { and, asc, between, eq, isNotNull, sql } from 'drizzle-orm';
 import { diffDays, type IsoDate } from '@/domain/shared/date';
-import type { LoanStatus } from '@/domain/shared/types';
+import type { LoanStatus, ReturnCondition } from '@/domain/shared/types';
 import { REPORT_ROW_LIMIT } from '@/lib/report-period';
 import type { Option } from '@/lib/options';
+import { SCHOOL_TIME_ZONE } from '@/lib/school-date';
 import { db } from '@/server/db/client';
 import type { Executor } from '@/server/db/executor';
-import { loanItems, loans, students } from '@/server/db/schema';
+import {
+  bookCopies, books, loanItems, loans, students,
+} from '@/server/db/schema';
 import { loanItemCounts } from './loan-aggregates';
 
 /**
@@ -102,6 +105,105 @@ export async function loanReport(
       loans: Number(summary?.loans ?? 0),
       copies: Number(summary?.copies ?? 0),
       students: Number(summary?.students ?? 0),
+    },
+    truncated: rows.length > limit,
+  };
+}
+
+export interface ReturnReportRow {
+  id: string;
+  returnedAt: Date;
+  loanId: string;
+  transactionNumber: string;
+  studentName: string;
+  studentNis: string;
+  studentClass: string;
+  barcode: string;
+  bookTitle: string;
+  condition: ReturnCondition | null;
+  daysLate: number;
+  lateFine: number;
+  replacementFee: number;
+}
+
+export interface ReturnReportSummary {
+  copies: number;
+  good: number;
+  damaged: number;
+  lost: number;
+  lateFines: number;
+  replacementFees: number;
+}
+
+/**
+ * Eksemplar yang kembali pada periode, menurut tanggal WIB dari `returned_at`
+ * (timestamptz), bukan tanggal UTC-nya: buku yang kembali pukul 00.30 WIB
+ * masuk hari itu, bukan kemarin.
+ */
+export async function returnReport(
+  filter: ReportFilter,
+  executor: Executor = db,
+  limit: number = REPORT_ROW_LIMIT,
+): Promise<{ rows: ReturnReportRow[]; summary: ReturnReportSummary; truncated: boolean }> {
+  const where = and(
+    isNotNull(loanItems.returnedAt),
+    sql`(${loanItems.returnedAt} at time zone ${SCHOOL_TIME_ZONE})::date between ${filter.from}::date and ${filter.to}::date`,
+    filter.className ? eq(loans.studentClass, filter.className) : undefined,
+  );
+
+  const rows = await executor
+    .select({
+      id: loanItems.id,
+      returnedAt: loanItems.returnedAt,
+      loanId: loans.id,
+      transactionNumber: loans.transactionNumber,
+      studentName: students.name,
+      studentNis: students.nis,
+      studentClass: loans.studentClass,
+      barcode: bookCopies.barcode,
+      bookTitle: books.title,
+      condition: loanItems.returnCondition,
+      daysLate: loanItems.daysLate,
+      lateFine: loanItems.lateFine,
+      replacementFee: loanItems.replacementFee,
+    })
+    .from(loanItems)
+    .innerJoin(loans, eq(loans.id, loanItems.loanId))
+    .innerJoin(students, eq(students.id, loans.studentId))
+    .innerJoin(bookCopies, eq(bookCopies.id, loanItems.bookCopyId))
+    .innerJoin(books, eq(books.id, bookCopies.bookId))
+    .where(where)
+    .orderBy(asc(loanItems.returnedAt), asc(bookCopies.barcode))
+    .limit(limit + 1);
+
+  const [summary] = await executor
+    .select({
+      copies: sql<number>`count(*)::int`,
+      good: sql<number>`(count(*) filter (where ${loanItems.returnCondition} = 'BAIK'))::int`,
+      damaged: sql<number>`(count(*) filter (where ${loanItems.returnCondition} = 'RUSAK'))::int`,
+      lost: sql<number>`(count(*) filter (where ${loanItems.returnCondition} = 'HILANG'))::int`,
+      lateFines: sql<string>`coalesce(sum(${loanItems.lateFine}), 0)`,
+      replacementFees: sql<string>`coalesce(sum(${loanItems.replacementFee}), 0)`,
+    })
+    .from(loanItems)
+    .innerJoin(loans, eq(loans.id, loanItems.loanId))
+    .where(where);
+
+  return {
+    rows: rows.slice(0, limit).map((row) => ({
+      ...row,
+      // Filter `isNotNull` menjamin nilainya ada.
+      returnedAt: row.returnedAt as Date,
+      lateFine: Number(row.lateFine),
+      replacementFee: Number(row.replacementFee),
+    })),
+    summary: {
+      copies: Number(summary?.copies ?? 0),
+      good: Number(summary?.good ?? 0),
+      damaged: Number(summary?.damaged ?? 0),
+      lost: Number(summary?.lost ?? 0),
+      lateFines: Number(summary?.lateFines ?? 0),
+      replacementFees: Number(summary?.replacementFees ?? 0),
     },
     truncated: rows.length > limit,
   };
