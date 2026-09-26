@@ -1,6 +1,6 @@
 # Perpustakaan — Rencana 06: Laporan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Empat laporan di menu Laporan — Peminjaman, Pengembalian, Keterlambatan, dan Koleksi Buku — dapat dilihat di layar, disaring, dan dicetak rapi lewat peramban.
 
@@ -98,7 +98,7 @@ Menyiapkan bagian yang dipakai keempat laporan: pembacaan periode dari URL, kera
   - `<ReportHeader schoolName title description period />`, `<ReportFilters from? to? className? classOptions? />`, `<SummaryGrid items />`, `<ReportNotice message />`
   - `listReportClassOptions(executor?): Promise<Option[]>`
 
-- [ ] **Step 1: Tulis uji tanggal dan periode yang gagal**
+- [x] **Step 1: Tulis uji tanggal dan periode yang gagal**
 
 Buat `src/lib/iso-date.test.ts`:
 
@@ -184,7 +184,7 @@ describe('formatPeriod dan batas baris', () => {
 });
 ```
 
-- [ ] **Step 2: Jalankan uji dan pastikan gagal**
+- [x] **Step 2: Jalankan uji dan pastikan gagal**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/lib/iso-date.test.ts src/lib/report-period.test.ts
@@ -192,7 +192,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/lib/iso-date.test.ts src/lib/
 
 Harapan: FAIL dengan "Failed to resolve import".
 
-- [ ] **Step 3: Tulis modul tanggal dan periode**
+- [x] **Step 3: Tulis modul tanggal dan periode**
 
 Buat `src/lib/iso-date.ts`:
 
@@ -288,7 +288,7 @@ export function formatPeriod(period: ReportPeriod): string {
 
 Catatan: `2025-01-01` sampai `2026-01-01` adalah 366 hari termasuk kedua ujungnya (`diffDays` = 365), jadi masih diterima.
 
-- [ ] **Step 4: Jalankan uji dan pastikan lulus**
+- [x] **Step 4: Jalankan uji dan pastikan lulus**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/lib/iso-date.test.ts src/lib/report-period.test.ts src/lib/audit-labels.test.ts
@@ -296,7 +296,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/lib/iso-date.test.ts src/lib/
 
 Harapan: PASS, termasuk uji `parseDateFilter` yang sudah ada.
 
-- [ ] **Step 5: Tulis uji kerangka cetak yang gagal**
+- [x] **Step 5: Tulis uji kerangka cetak yang gagal**
 
 Di `src/components/layout/app-shell.test.tsx`, ganti harapan `'id="navigasi-utama" class="hidden lg:flex"'` dengan `'id="navigasi-utama" class="hidden lg:flex print:hidden"'`. Tambahkan uji:
 
@@ -331,7 +331,7 @@ Di `src/components/ui/list-parts.test.tsx`, di dalam `describe('ScrollTable')`, 
   });
 ```
 
-- [ ] **Step 6: Jalankan uji dan pastikan gagal**
+- [x] **Step 6: Jalankan uji dan pastikan gagal**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/components/layout src/components/ui/list-parts.test.tsx
@@ -339,7 +339,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/components/layout src/compone
 
 Harapan: FAIL pada ketiga uji baru dan harapan `navigasi-utama` yang diubah.
 
-- [ ] **Step 7: Tambahkan varian cetak**
+- [x] **Step 7: Tambahkan varian cetak**
 
 Di `src/components/layout/app-shell.tsx`:
 - div tombol Menu: tambahkan ` print:hidden` di akhir kelasnya → `"flex items-center border-b border-[var(--color-ink-100)] bg-white px-4 py-2 lg:hidden print:hidden"`
@@ -358,7 +358,7 @@ Di `src/components/ui/scroll-table.tsx`:
 
 Di `src/components/layout/sidebar.tsx`, ganti komentar di atas grup Laporan menjadi `// PRD bab 11: laporan terlihat oleh setiap akun.`.
 
-- [ ] **Step 8: Jalankan uji dan pastikan lulus**
+- [x] **Step 8: Jalankan uji dan pastikan lulus**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/components/layout src/components/ui/list-parts.test.tsx
@@ -366,7 +366,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/components/layout src/compone
 
 Harapan: PASS.
 
-- [ ] **Step 9: Tulis uji komponen laporan yang gagal**
+- [x] **Step 9: Tulis uji komponen laporan yang gagal**
 
 Buat `src/components/reports/report-parts.test.tsx`:
 
@@ -437,7 +437,7 @@ describe('SummaryGrid dan ReportNotice', () => {
 });
 ```
 
-- [ ] **Step 10: Jalankan uji dan pastikan gagal**
+- [x] **Step 10: Jalankan uji dan pastikan gagal**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/components/reports
@@ -445,7 +445,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/components/reports
 
 Harapan: FAIL dengan "Failed to resolve import './report-parts'".
 
-- [ ] **Step 11: Tulis komponen laporan**
+- [x] **Step 11: Tulis komponen laporan**
 
 Buat `src/components/reports/print-button.tsx`:
 
@@ -561,7 +561,7 @@ export function ReportNotice({ message }: { message: string | null }) {
 
 Pastikan `<div className="mb-4 hidden text-center print:block">` langsung diikuti `<p>` nama sekolah tanpa spasi di antaranya, seperti di atas, agar regex uji cocok. Kalau Prettier/ESLint memindahkannya ke baris baru, React tetap tidak menyisipkan teks spasi di antara elemen JSX yang dipisah baris baru.
 
-- [ ] **Step 12: Jalankan uji dan pastikan lulus**
+- [x] **Step 12: Jalankan uji dan pastikan lulus**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/components/reports
@@ -569,7 +569,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- src/components/reports
 
 Harapan: PASS.
 
-- [ ] **Step 13: Tulis uji integrasi daftar kelas yang gagal**
+- [x] **Step 13: Tulis uji integrasi daftar kelas yang gagal**
 
 Buat `tests/integration/reports.test.ts`:
 
@@ -599,7 +599,7 @@ describe('listReportClassOptions', () => {
 });
 ```
 
-- [ ] **Step 14: Jalankan uji dan pastikan gagal**
+- [x] **Step 14: Jalankan uji dan pastikan gagal**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm run test:integration -- tests/integration/reports.test.ts
@@ -607,7 +607,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm run test:integration -- tests/integration
 
 Harapan: FAIL dengan "Failed to resolve import '@/server/queries/reports'".
 
-- [ ] **Step 15: Tulis query daftar kelas**
+- [x] **Step 15: Tulis query daftar kelas**
 
 Buat `src/server/queries/reports.ts`:
 
@@ -632,7 +632,7 @@ export async function listReportClassOptions(executor: Executor = db): Promise<O
 }
 ```
 
-- [ ] **Step 16: Jalankan uji dan pastikan lulus, lalu commit**
+- [x] **Step 16: Jalankan uji dan pastikan lulus, lalu commit**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm run test:integration -- tests/integration/reports.test.ts && npm test && npm run lint && npx tsc --noEmit
@@ -672,7 +672,7 @@ EOF
   - `loanReport(filter: ReportFilter, today: IsoDate, executor?, limit?): Promise<{ rows: LoanReportRow[]; summary: LoanReportSummary; truncated: boolean }>`
   - Rute `/laporan/peminjaman`
 
-- [ ] **Step 1: Tulis uji integrasi yang gagal**
+- [x] **Step 1: Tulis uji integrasi yang gagal**
 
 Tambahkan di `tests/integration/reports.test.ts` (sesuaikan impor: `eq` dari `drizzle-orm`, `students` dari `@/server/db/schema`, `loanReport` dari `@/server/queries/reports`):
 
@@ -737,7 +737,7 @@ describe('loanReport', () => {
 });
 ```
 
-- [ ] **Step 2: Jalankan uji dan pastikan gagal**
+- [x] **Step 2: Jalankan uji dan pastikan gagal**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm run test:integration -- tests/integration/reports.test.ts
@@ -745,7 +745,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm run test:integration -- tests/integration
 
 Harapan: FAIL, `loanReport` belum diekspor.
 
-- [ ] **Step 3: Tabel turunan jumlah buku, dipakai bersama**
+- [x] **Step 3: Tabel turunan jumlah buku, dipakai bersama**
 
 Tambahkan di akhir `src/server/queries/loan-aggregates.ts`:
 
@@ -766,7 +766,7 @@ export function loanItemCounts(executor: Executor) {
 
 Di `src/server/queries/loans.ts`, fungsi `listLoans`: ganti definisi lokal `const itemCounts = executor.select({...}).from(loanItems).groupBy(loanItems.loanId).as('item_counts');` dengan `const itemCounts = loanItemCounts(executor);`, dan tambahkan `loanItemCounts` ke impor dari `./loan-aggregates`. Hapus impor yang tidak terpakai lagi, bila ada. Ini refaktor; jalankan `npm run test:integration -- tests/integration/loan-queries.test.ts` sebelum dan sesudahnya. Harapan: PASS keduanya.
 
-- [ ] **Step 4: Tulis `loanReport`**
+- [x] **Step 4: Tulis `loanReport`**
 
 Tambahkan ke `src/server/queries/reports.ts` (gabungkan impornya):
 
@@ -865,7 +865,7 @@ export async function loanReport(
 }
 ```
 
-- [ ] **Step 5: Jalankan uji dan pastikan lulus**
+- [x] **Step 5: Jalankan uji dan pastikan lulus**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm run test:integration -- tests/integration/reports.test.ts tests/integration/loan-queries.test.ts
@@ -873,7 +873,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm run test:integration -- tests/integration
 
 Harapan: PASS.
 
-- [ ] **Step 6: Tulis uji halaman yang gagal**
+- [x] **Step 6: Tulis uji halaman yang gagal**
 
 Buat `src/app/(app)/laporan/peminjaman/page.test.tsx`:
 
@@ -962,7 +962,7 @@ describe('LoanReportPage', () => {
 });
 ```
 
-- [ ] **Step 7: Jalankan uji dan pastikan gagal**
+- [x] **Step 7: Jalankan uji dan pastikan gagal**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- laporan/peminjaman
@@ -970,7 +970,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- laporan/peminjaman
 
 Harapan: FAIL dengan "Failed to resolve import './page'".
 
-- [ ] **Step 8: Tulis halaman laporan peminjaman**
+- [x] **Step 8: Tulis halaman laporan peminjaman**
 
 Buat `src/app/(app)/laporan/peminjaman/page.tsx`:
 
@@ -1073,7 +1073,7 @@ export default async function LoanReportPage({ searchParams }: { searchParams: S
 }
 ```
 
-- [ ] **Step 9: Jalankan uji dan pastikan lulus, lalu commit**
+- [x] **Step 9: Jalankan uji dan pastikan lulus, lalu commit**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- laporan/peminjaman && npm test && npm run test:integration -- tests/integration/reports.test.ts tests/integration/loan-queries.test.ts && npm run lint && npx tsc --noEmit
@@ -1108,7 +1108,7 @@ EOF
   - `returnReport(filter: ReportFilter, executor?, limit?): Promise<{ rows: ReturnReportRow[]; summary: ReturnReportSummary; truncated: boolean }>`
   - Rute `/laporan/pengembalian`
 
-- [ ] **Step 1: Tulis uji integrasi yang gagal**
+- [x] **Step 1: Tulis uji integrasi yang gagal**
 
 Tambahkan di `tests/integration/reports.test.ts` (impor `and` dari `drizzle-orm`, `loanItems` dari skema, `returnReport` dari query):
 
@@ -1180,7 +1180,7 @@ describe('returnReport', () => {
 
 Tambahkan juga impor `import type { Transaction } from '@/server/db/executor';`.
 
-- [ ] **Step 2: Jalankan uji dan pastikan gagal**
+- [x] **Step 2: Jalankan uji dan pastikan gagal**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm run test:integration -- tests/integration/reports.test.ts
@@ -1188,7 +1188,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm run test:integration -- tests/integration
 
 Harapan: FAIL, `returnReport` belum diekspor.
 
-- [ ] **Step 3: Tulis `returnReport`**
+- [x] **Step 3: Tulis `returnReport`**
 
 Tambahkan ke `src/server/queries/reports.ts` (gabungkan impor: `isNotNull` dari `drizzle-orm`; `ReturnCondition` dari tipe domain; `SCHOOL_TIME_ZONE` dari `@/lib/school-date`; `bookCopies`, `books` dari skema):
 
@@ -1293,7 +1293,7 @@ export async function returnReport(
 }
 ```
 
-- [ ] **Step 4: Jalankan uji dan pastikan lulus**
+- [x] **Step 4: Jalankan uji dan pastikan lulus**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm run test:integration -- tests/integration/reports.test.ts
@@ -1301,7 +1301,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm run test:integration -- tests/integration
 
 Harapan: PASS.
 
-- [ ] **Step 5: Tulis uji halaman yang gagal**
+- [x] **Step 5: Tulis uji halaman yang gagal**
 
 Buat `src/app/(app)/laporan/pengembalian/page.test.tsx`:
 
@@ -1384,7 +1384,7 @@ describe('ReturnReportPage', () => {
 
 Kartu "Rusak / hilang" menampilkan `rusak / hilang`: ringkasan `damaged: 1, lost: 0` menjadi `1 / 0`.
 
-- [ ] **Step 6: Jalankan uji dan pastikan gagal**
+- [x] **Step 6: Jalankan uji dan pastikan gagal**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- laporan/pengembalian
@@ -1392,7 +1392,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- laporan/pengembalian
 
 Harapan: FAIL dengan "Failed to resolve import './page'".
 
-- [ ] **Step 7: Tulis halaman laporan pengembalian**
+- [x] **Step 7: Tulis halaman laporan pengembalian**
 
 Buat `src/app/(app)/laporan/pengembalian/page.tsx`:
 
@@ -1498,7 +1498,7 @@ export default async function ReturnReportPage({ searchParams }: { searchParams:
 }
 ```
 
-- [ ] **Step 8: Jalankan uji dan pastikan lulus, lalu commit**
+- [x] **Step 8: Jalankan uji dan pastikan lulus, lalu commit**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- laporan/pengembalian && npm test && npm run test:integration -- tests/integration/reports.test.ts && npm run lint && npx tsc --noEmit
@@ -1536,7 +1536,7 @@ Keterlambatan selalu "per hari ini": eksemplar yang belum kembali dari pinjaman 
 
 Seluruh pinjaman terbuka sungguhan di database cloud jatuh tempo sebelum 2090, jadi relatif terhadap hari uji 2090 semuanya terlambat. Uji integrasi karenanya **selalu** menyaring kelas uji (`XI UJI 1`/`XI UJI 2`).
 
-- [ ] **Step 1: Tulis uji integrasi yang gagal**
+- [x] **Step 1: Tulis uji integrasi yang gagal**
 
 Tambahkan di `tests/integration/reports.test.ts` (impor `overdueReport`):
 
@@ -1588,7 +1588,7 @@ describe('overdueReport', () => {
 
 Perhitungan: 23/02 → 06/03/2090 = 11 hari (2090 bukan tahun kabisat); 02/03 → 06/03 = 4 hari. Uji kedua: dua eksemplar × 11 hari × Rp500 = Rp11.000.
 
-- [ ] **Step 2: Jalankan uji dan pastikan gagal**
+- [x] **Step 2: Jalankan uji dan pastikan gagal**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm run test:integration -- tests/integration/reports.test.ts
@@ -1596,7 +1596,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm run test:integration -- tests/integration
 
 Harapan: FAIL, `overdueReport` belum diekspor.
 
-- [ ] **Step 3: Tulis `overdueReport`**
+- [x] **Step 3: Tulis `overdueReport`**
 
 Tambahkan ke `src/server/queries/reports.ts` (gabungkan impor: `isNull`, `lt`, `ne` dari `drizzle-orm`):
 
@@ -1686,7 +1686,7 @@ export async function overdueReport(
 }
 ```
 
-- [ ] **Step 4: Jalankan uji dan pastikan lulus**
+- [x] **Step 4: Jalankan uji dan pastikan lulus**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm run test:integration -- tests/integration/reports.test.ts
@@ -1694,7 +1694,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm run test:integration -- tests/integration
 
 Harapan: PASS.
 
-- [ ] **Step 5: Tulis uji halaman yang gagal**
+- [x] **Step 5: Tulis uji halaman yang gagal**
 
 Buat `src/app/(app)/laporan/keterlambatan/page.test.tsx`:
 
@@ -1763,7 +1763,7 @@ describe('OverdueReportPage', () => {
 });
 ```
 
-- [ ] **Step 6: Jalankan uji dan pastikan gagal**
+- [x] **Step 6: Jalankan uji dan pastikan gagal**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- laporan/keterlambatan
@@ -1771,7 +1771,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- laporan/keterlambatan
 
 Harapan: FAIL dengan "Failed to resolve import './page'".
 
-- [ ] **Step 7: Tulis halaman keterlambatan**
+- [x] **Step 7: Tulis halaman keterlambatan**
 
 Buat `src/app/(app)/laporan/keterlambatan/page.tsx`:
 
@@ -1867,7 +1867,7 @@ export default async function OverdueReportPage({ searchParams }: { searchParams
 
 Uji halaman mengharapkan `'tarif Rp1.000 per hari'`: teks itu muncul di paragraf "Per …, tarif Rp1.000 per hari." dan di deskripsi.
 
-- [ ] **Step 8: Jalankan uji dan pastikan lulus, lalu commit**
+- [x] **Step 8: Jalankan uji dan pastikan lulus, lalu commit**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- laporan && npm test && npm run test:integration -- tests/integration/reports.test.ts && npm run lint && npx tsc --noEmit
@@ -1903,7 +1903,7 @@ Per judul aktif: jumlah eksemplar per status. Total tidak menghitung eksemplar `
   - `collectionReport(filter: { q: string; categoryId: string }, executor?, limit?): Promise<{ rows: CollectionReportRow[]; summary: CollectionReportSummary; truncated: boolean }>`
   - Rute `/laporan/koleksi`
 
-- [ ] **Step 1: Tulis uji integrasi yang gagal**
+- [x] **Step 1: Tulis uji integrasi yang gagal**
 
 Tambahkan di `tests/integration/reports.test.ts` (impor `bookCopies`, `books` dari skema dan `collectionReport` dari query):
 
@@ -1949,7 +1949,7 @@ describe('collectionReport', () => {
 
 Judul baru tanpa eksemplar tetap terdaftar dengan angka 0. Urutannya abjad: "UJI-Buku Kedua" sebelum "UJI-Buku Sirkulasi".
 
-- [ ] **Step 2: Jalankan uji dan pastikan gagal**
+- [x] **Step 2: Jalankan uji dan pastikan gagal**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm run test:integration -- tests/integration/reports.test.ts
@@ -1957,7 +1957,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm run test:integration -- tests/integration
 
 Harapan: FAIL, `collectionReport` belum diekspor.
 
-- [ ] **Step 3: Tulis `collectionReport`**
+- [x] **Step 3: Tulis `collectionReport`**
 
 Tambahkan ke `src/server/queries/reports.ts` (gabungkan impor: `ilike`, `or` dari `drizzle-orm`; `categories`, `racks` dari skema; `containsPattern` dari `./like`; `isUuid` dari `@/server/validation/common`):
 
@@ -2065,7 +2065,7 @@ export async function collectionReport(
 Catatan untuk pelaksana:
 - `countStatus` membangun `sql` yang merujuk dua tabel dalam kueri JOIN, sehingga kolomnya ditulis lengkap dengan nama tabel. Tidak ada subquery berkorelasi.
 
-- [ ] **Step 4: Jalankan uji dan pastikan lulus**
+- [x] **Step 4: Jalankan uji dan pastikan lulus**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm run test:integration -- tests/integration/reports.test.ts
@@ -2073,7 +2073,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm run test:integration -- tests/integration
 
 Harapan: PASS.
 
-- [ ] **Step 5: Tulis uji halaman yang gagal**
+- [x] **Step 5: Tulis uji halaman yang gagal**
 
 Buat `src/app/(app)/laporan/koleksi/page.test.tsx`:
 
@@ -2148,7 +2148,7 @@ describe('CollectionReportPage', () => {
 });
 ```
 
-- [ ] **Step 6: Jalankan uji dan pastikan gagal**
+- [x] **Step 6: Jalankan uji dan pastikan gagal**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- laporan/koleksi
@@ -2156,7 +2156,7 @@ export PATH="/d/nvm/nodejs:$PATH"; npm test -- laporan/koleksi
 
 Harapan: FAIL dengan "Failed to resolve import './page'".
 
-- [ ] **Step 7: Tulis halaman laporan koleksi**
+- [x] **Step 7: Tulis halaman laporan koleksi**
 
 Buat `src/app/(app)/laporan/koleksi/page.tsx`:
 
@@ -2278,7 +2278,7 @@ export default async function CollectionReportPage({ searchParams }: { searchPar
 
 `TRUNCATED_MESSAGE` menyebut "pilih satu kelas". Laporan koleksi tidak punya filter kelas, tetapi punya kata kunci dan kategori. Kalimat itu tetap dipakai apa adanya agar satu sumber pesan terjaga. Pemotongan di laporan koleksi baru terjadi bila ada lebih dari 1.000 judul aktif.
 
-- [ ] **Step 8: Jalankan uji dan pastikan lulus, lalu commit**
+- [x] **Step 8: Jalankan uji dan pastikan lulus, lalu commit**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"; npm test -- laporan/koleksi && npm test && npm run test:integration -- tests/integration/reports.test.ts && npm run lint && npx tsc --noEmit && npm run build
@@ -2303,7 +2303,7 @@ Tidak ada kode baru. Laporan hanya membaca, jadi pemeriksaan ini **tidak menulis
 
 **Files:** tidak ada, selain pencentangan rencana di Step 5.
 
-- [ ] **Step 1: Pemeriksaan otomatis**
+- [x] **Step 1: Pemeriksaan otomatis**
 
 ```bash
 export PATH="/d/nvm/nodejs:$PATH"
@@ -2316,7 +2316,7 @@ npm run build
 
 Harapan: seluruhnya lulus. `npm run build` mencantumkan `/laporan/peminjaman`, `/laporan/pengembalian`, `/laporan/keterlambatan`, `/laporan/koleksi`.
 
-- [ ] **Step 2: Pastikan uji tidak meninggalkan jejak**
+- [x] **Step 2: Pastikan uji tidak meninggalkan jejak**
 
 Pakai berkas sementara berimpor statis (`tmp-sisa.ts`), jalankan dengan `npx tsx --env-file=.env.local`, lalu hapus. Hitung baris uji yang tertinggal:
 - `loans` dengan `transaction_number like 'UJI-%'`;
@@ -2327,7 +2327,7 @@ Pakai berkas sementara berimpor statis (`tmp-sisa.ts`), jalankan dengan `npx tsx
 
 Harapan: 0.
 
-- [ ] **Step 3: Uji di peramban (hanya membaca)**
+- [x] **Step 3: Uji di peramban (hanya membaca)**
 
 Pakai server dev yang sudah berjalan, atau jalankan `npm run dev`. Gunakan skill `/browse` dari gstack, bukan `mcp__claude-in-chrome__*`. Masuk sebagai `admin`/`perpus123`.
 
@@ -2340,13 +2340,13 @@ Pakai server dev yang sudah berjalan, atau jalankan `npm run dev`. Gunakan skill
 7. Pratinjau cetak: jalankan `$B js "document.querySelector('style') && [...document.querySelectorAll('style')].map(s => s.textContent).find(t => t.includes('@page'))"` dan pastikan hasilnya `@page { size: A4 landscape; margin: 12mm; }`. Emulasikan media cetak bila `$B` mendukungnya, lalu ambil tangkapan layar. Sidebar, topbar, form filter, dan tombol "Cetak Laporan" tidak tampil; kop (nama sekolah, judul, periode, waktu cetak) tampil.
 8. Lebar tablet (`$B viewport 768x1024`): kisi ringkasan dua kolom, tabel digulir di dalam kotaknya, dan halaman tidak melebar.
 
-- [ ] **Step 4: Catat hasilnya**
+- [x] **Step 4: Catat hasilnya**
 
 Laporkan setiap langkah dengan LULUS/GAGAL beserta buktinya, jalur tangkapan layar, dan angka yang dicocokkan. Cetak ke printer sungguhan dilakukan pemilik produk; catat bahwa itu belum dilakukan.
 
-- [ ] **Step 5: Tandai rencana selesai**
+- [x] **Step 5: Tandai rencana selesai**
 
-Ubah seluruh `- [ ]` di berkas rencana ini menjadi `- [x]`, lalu commit:
+Ubah seluruh `- [x]` di berkas rencana ini menjadi `- [x]`, lalu commit:
 
 ```bash
 git add docs/superpowers/plans/2026-09-26-perpustakaan-06-laporan.md
