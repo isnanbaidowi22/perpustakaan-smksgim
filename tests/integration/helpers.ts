@@ -1,6 +1,6 @@
 import { expect } from 'vitest';
-import { and, eq, sql, TransactionRollbackError } from 'drizzle-orm';
-import type { Actor, UserRole } from '@/domain/shared/types';
+import { eq, sql, TransactionRollbackError } from 'drizzle-orm';
+import type { Actor } from '@/domain/shared/types';
 import type { AuthAdmin, AuthAdminResult } from '@/server/auth/auth-admin';
 import { db } from '@/server/db/client';
 import type { Transaction } from '@/server/db/executor';
@@ -32,15 +32,15 @@ export async function withRollback(fn: (tx: Transaction) => Promise<void>): Prom
  * (audit_logs.user_id, loans.created_by). Profil tidak dapat dibuat di dalam
  * uji karena `profiles.id` mereferensikan `auth.users` milik Supabase.
  */
-export async function testActor(tx: Transaction, role: UserRole = 'admin'): Promise<Actor> {
+export async function testActor(tx: Transaction): Promise<Actor> {
   const [profile] = await tx
     .select({ id: profiles.id, role: profiles.role })
     .from(profiles)
-    .where(and(eq(profiles.role, role), eq(profiles.status, 'active')))
+    .where(eq(profiles.status, 'active'))
     .limit(1);
 
   if (!profile) {
-    throw new Error(`Tidak ada profil ${role} aktif. Jalankan "npm run db:seed" sebelum uji integrasi.`);
+    throw new Error('Tidak ada profil aktif. Jalankan "npm run db:seed" sebelum uji integrasi.');
   }
   return profile;
 }

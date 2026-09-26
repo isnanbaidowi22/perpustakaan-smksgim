@@ -12,19 +12,19 @@ const COMMON = [
   '/transaksi/peminjaman',
   '/transaksi/pengembalian',
   '/transaksi/riwayat',
-  // PRD bab 11 dan 5.1: laporan terlihat oleh admin dan petugas.
+  // PRD bab 11 dan 5.1: laporan terlihat oleh setiap akun.
   '/laporan/peminjaman',
   '/laporan/pengembalian',
   '/laporan/keterlambatan',
   '/laporan/koleksi',
 ];
 
-const ADMIN_ONLY = ['/pengaturan/tahun-ajaran', '/pengaturan/pengguna', '/pengaturan/konfigurasi', '/pengaturan/audit-log'];
+const PENGATURAN = ['/pengaturan/tahun-ajaran', '/pengaturan/pengguna', '/pengaturan/konfigurasi', '/pengaturan/audit-log'];
 
 describe('Sidebar', () => {
   it('menampilkan seluruh menu, termasuk Pengaturan, untuk setiap akun', () => {
     const html = renderToStaticMarkup(<Sidebar />);
-    for (const href of [...COMMON, ...ADMIN_ONLY]) {
+    for (const href of [...COMMON, ...PENGATURAN]) {
       expect(html).toContain(`href="${href}"`);
     }
     expect(html).toContain('Pengaturan');

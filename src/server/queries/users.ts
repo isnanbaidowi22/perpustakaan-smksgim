@@ -1,5 +1,5 @@
 import { asc, eq } from 'drizzle-orm';
-import type { RecordStatus, UserRole } from '@/domain/shared/types';
+import type { RecordStatus } from '@/domain/shared/types';
 import { db } from '@/server/db/client';
 import type { Executor } from '@/server/db/executor';
 import { profiles } from '@/server/db/schema';
@@ -9,7 +9,6 @@ export interface User {
   id: string;
   username: string;
   fullName: string;
-  role: UserRole;
   status: RecordStatus;
 }
 
@@ -17,7 +16,6 @@ const userColumns = {
   id: profiles.id,
   username: profiles.username,
   fullName: profiles.fullName,
-  role: profiles.role,
   status: profiles.status,
 };
 
