@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { createContext, useActionState, useContext, type ReactNode } from 'react';
 import { IDLE, type FormState } from '@/lib/form-state';
 import { buttonClass } from './button-styles';
+import { CARD } from './card-styles';
+import { Notice } from './notice';
 
 export type FormAction = (state: FormState, formData: FormData) => Promise<FormState>;
 
@@ -38,28 +40,11 @@ export function ActionForm({
 
   return (
     <FormStateContext value={state}>
-      <form
-        action={formAction}
-        className="max-w-2xl space-y-4 rounded-lg border border-[var(--color-ink-100)] bg-white p-6"
-      >
-        {state.status === 'error' && (
-          <p
-            role="alert"
-            className="rounded-md bg-[var(--color-status-terlambat)]/10 px-3 py-2 text-sm text-[var(--color-status-terlambat)]"
-          >
-            {state.message}
-          </p>
-        )}
-        {state.status === 'success' && (
-          <p
-            role="status"
-            className="rounded-md bg-[var(--color-status-tersedia)]/10 px-3 py-2 text-sm text-[var(--color-status-tersedia)]"
-          >
-            {state.message}
-          </p>
-        )}
+      <form action={formAction} className={`max-w-2xl space-y-5 p-6 ${CARD}`}>
+        {state.status === 'error' && <Notice tone="danger" role="alert">{state.message}</Notice>}
+        {state.status === 'success' && <Notice tone="success" role="status">{state.message}</Notice>}
         {children}
-        <div className="flex items-center gap-3 pt-2">
+        <div className="flex items-center gap-2.5 border-t border-[var(--color-divider)] pt-5">
           <button type="submit" disabled={pending} className={buttonClass('primary')}>
             {pending ? 'Menyimpan…' : submitLabel}
           </button>

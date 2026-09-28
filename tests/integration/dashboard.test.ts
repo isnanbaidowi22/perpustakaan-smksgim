@@ -61,6 +61,8 @@ describe('getDashboardStats', () => {
       const stats = await getDashboardStats(TODAY, tx);
 
       expect(stats.copiesReturnedToday).toBe(2);
+      // Dua buku itu datang dari satu transaksi.
+      expect(stats.loansReturnedToday).toBe(1);
     });
   });
 });

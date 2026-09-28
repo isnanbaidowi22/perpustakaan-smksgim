@@ -431,13 +431,13 @@ Sejak revisi 26 September 2026 hanya ada satu peran, `admin`. Setiap akun aktif 
 
 ### 8.1 Fondasi Visual
 
-Palet navy/slate dengan aksen teal, dibangun sebagai token CSS sehingga dapat diarahkan ke warna sekolah tanpa menyentuh komponen.
+Palet netral abu kehijauan dengan aksen teal (`#0f766e`), kartu putih bersudut 14px di atas latar `#f4f5f2`, dan ikon garis Lucide, dibangun sebagai token CSS sehingga dapat diarahkan ke warna sekolah tanpa menyentuh komponen. *(Revisi 28 September 2026: pemilik produk memilih desain "Opsi A · Rail Ringkas", menggantikan palet navy/slate.)*
 
 Tipografi: **Plus Jakarta Sans** untuk seluruh antarmuka — judul, teks, dan kode seperti barcode, NIS, dan nomor transaksi — dengan **angka tabular diaktifkan** pada seluruh tabel, kode, dan nominal. Kolom tanggal dan denda yang tidak sejajar secara vertikal jauh lebih lambat dipindai mata. *(Revisi 25 September 2026: pemilik produk mengganti Inter dan Source Serif 4 dengan satu keluarga font.)*
 
 Warna status konsisten di seluruh aplikasi: Tersedia hijau · Dipinjam biru · Terlambat merah · Rusak oranye · Hilang abu gelap. **Setiap badge status menyertakan ikon**, tidak mengandalkan warna saja, agar tetap terbaca oleh petugas dengan buta warna.
 
-Tata letak: sidebar kiri permanen mengikuti navigasi PRD Section 11; top bar menampilkan tahun ajaran aktif secara permanen — petugas harus selalu tahu ke tahun mana transaksinya masuk.
+Tata letak: sidebar kiri permanen mengikuti navigasi PRD Section 11, dengan ikon per menu dan tombol "Ciutkan menu" yang meringkasnya menjadi rail ikon (pilihan diingat lewat cookie `menu`); top bar menampilkan tahun ajaran aktif secara permanen — petugas harus selalu tahu ke tahun mana transaksinya masuk.
 
 Target aksesibilitas: kontras WCAG AA, cincin fokus terlihat pada seluruh elemen interaktif, seluruh alur transaksi dapat diselesaikan tanpa tetikus.
 
@@ -479,6 +479,8 @@ Hasil menampilkan detail transaksi dengan kotak centang dan pilihan kondisi per 
 ### 8.4 Dashboard
 
 Tujuh widget sesuai PRD Section 12.1: Total Buku, Buku Tersedia, Sedang Dipinjam, Terlambat, Peminjaman Hari Ini, Pengembalian Hari Ini, dan tabel Transaksi Terbaru. Ditambah satu daftar yang tidak ada di PRD tetapi berguna secara operasional: **jatuh tempo hari ini**, agar petugas dapat mengantisipasi.
+
+*(Revisi 28 September 2026, desain "Rail Ringkas":)* widget itu dikelompokkan menjadi empat kartu. **Koleksi**: total eksemplar, tersedia, sedang dipinjam, dan bilah persen eksemplar yang ada di rak. **Aktivitas hari ini**: peminjaman dan pengembalian hari ini, masing-masing jumlah transaksi dan jumlah bukunya. **Perlu perhatian**: jumlah transaksi terlambat dan pinjaman jatuh tempo hari ini, beserta daftarnya; bila keduanya nol tampil "Semua pinjaman tepat waktu". **Transaksi Terbaru**: delapan transaksi terakhir.
 
 ### 8.5 Cetak
 

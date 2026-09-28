@@ -1,4 +1,5 @@
 import type { CopyStatus } from '@/domain/shared/types';
+import { BADGE, BADGE_ICON, BADGE_TONES } from './badge-styles';
 
 const LABELS: Record<CopyStatus, string> = {
   TERSEDIA: 'Tersedia',
@@ -17,11 +18,11 @@ const ICONS: Record<CopyStatus, string> = {
 };
 
 const COLORS: Record<CopyStatus, string> = {
-  TERSEDIA: 'text-[var(--color-status-tersedia)] bg-[var(--color-status-tersedia)]/10',
-  DIPINJAM: 'text-[var(--color-status-dipinjam)] bg-[var(--color-status-dipinjam)]/10',
-  RUSAK: 'text-[var(--color-status-rusak)] bg-[var(--color-status-rusak)]/10',
-  HILANG: 'text-[var(--color-status-hilang)] bg-[var(--color-status-hilang)]/10',
-  NONAKTIF: 'text-[var(--color-ink-500)] bg-[var(--color-ink-100)]',
+  TERSEDIA: BADGE_TONES.tersedia,
+  DIPINJAM: BADGE_TONES.dipinjam,
+  RUSAK: BADGE_TONES.rusak,
+  HILANG: BADGE_TONES.hilang,
+  NONAKTIF: BADGE_TONES.nonaktif,
 };
 
 export function statusLabel(status: CopyStatus): string {
@@ -34,10 +35,8 @@ export function statusIcon(status: CopyStatus): string {
 
 export function StatusBadge({ status }: { status: CopyStatus }) {
   return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-sm font-medium ${COLORS[status]}`}
-    >
-      <span aria-hidden="true">{ICONS[status]}</span>
+    <span className={`${BADGE} ${COLORS[status]}`}>
+      <span aria-hidden="true" className={BADGE_ICON}>{ICONS[status]}</span>
       {LABELS[status]}
     </span>
   );

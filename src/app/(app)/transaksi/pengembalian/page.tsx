@@ -92,7 +92,7 @@ export default async function ReturnPage({ searchParams }: { searchParams: Searc
       {loan && loan.status !== 'SELESAI' && (
         <section aria-labelledby="pinjaman-heading">
           <div className="mb-3 flex flex-wrap items-center gap-3">
-            <h2 id="pinjaman-heading" className="page-title text-lg font-semibold">
+            <h2 id="pinjaman-heading" className="page-title text-lg font-bold text-[var(--color-ink-900)]">
               <span className="font-mono">{loan.transactionNumber}</span> · {loan.studentName}
             </h2>
             <span className="text-sm text-[var(--color-ink-500)]">

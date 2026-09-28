@@ -13,7 +13,7 @@ import { firstValue, type SearchParams } from '@/lib/search-params';
 import { requireProfile } from '@/server/auth/guard';
 import { listAuditLogs, type AuditRow } from '@/server/queries/audit-logs';
 
-const CONTROL = 'rounded-md border border-[var(--color-ink-300)] bg-white px-3 py-2 text-sm';
+import { CONTROL } from '@/components/ui/form-styles';
 
 function Subject({ row }: { row: AuditRow }) {
   const { subject } = summarizeAudit(row.action, row.metadata);

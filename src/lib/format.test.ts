@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatDate, formatRupiah } from './format';
+import { formatDate, formatLongDate, formatRupiah, initials } from './format';
 
 describe('formatRupiah', () => {
   it('memakai titik pemisah ribuan tanpa spasi setelah Rp', () => {
@@ -22,5 +22,26 @@ describe('formatDate', () => {
 
   it('menampilkan tanda pisah untuk tanggal kosong', () => {
     expect(formatDate(null)).toBe('—');
+  });
+});
+
+describe('formatLongDate', () => {
+  it('menuliskan hari dan nama bulan dalam bahasa Indonesia', () => {
+    expect(formatLongDate('2026-09-28')).toBe('Senin, 28 September 2026');
+    expect(formatLongDate('2090-03-02')).toBe('Kamis, 2 Maret 2090');
+  });
+});
+
+describe('initials', () => {
+  it('mengambil huruf awal kata pertama dan terakhir', () => {
+    expect(initials('Siti Nur Petugas')).toBe('SP');
+  });
+
+  it('mengambil dua huruf pertama bila namanya satu kata', () => {
+    expect(initials('Administrator')).toBe('AD');
+  });
+
+  it('tidak kosong untuk nama kosong', () => {
+    expect(initials('  ')).toBe('?');
   });
 });

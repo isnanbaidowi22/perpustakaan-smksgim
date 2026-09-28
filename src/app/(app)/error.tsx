@@ -18,12 +18,12 @@ export default function ErrorPage({
 }) {
   return (
     <main className="flex min-h-[60vh] flex-col items-center justify-center gap-3 p-4 text-center">
-      <h1 className="page-title text-2xl font-semibold">Halaman ini gagal dimuat</h1>
+      <h1 className="page-title text-2xl font-bold tracking-tight text-[var(--color-ink-900)]">Halaman ini gagal dimuat</h1>
       <p className="max-w-sm text-sm text-[var(--color-ink-500)]">
         Terjadi masalah saat memuat halaman ini. Coba lagi, atau kembali ke dashboard bila masalah berlanjut.
       </p>
       {error.digest && (
-        <p className="text-xs text-[var(--color-ink-300)]">Kode rujukan: {error.digest}</p>
+        <p className="text-xs text-[var(--color-ink-500)]">Kode rujukan: {error.digest}</p>
       )}
       <div className="flex gap-2">
         <button type="button" onClick={() => retry()} className={buttonClass('primary')}>Coba lagi</button>

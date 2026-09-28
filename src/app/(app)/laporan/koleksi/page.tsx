@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ReportHeader, ReportNotice, SummaryGrid } from '@/components/reports/report-parts';
 import { buttonClass } from '@/components/ui/button-styles';
+import { CONTROL, LABEL } from '@/components/ui/form-styles';
 import { ScrollTable } from '@/components/ui/scroll-table';
 import { TD, TH } from '@/components/ui/table-styles';
 import { formatDate } from '@/lib/format';
@@ -12,7 +13,6 @@ import { listCategoryOptions } from '@/server/queries/categories';
 import { collectionReport } from '@/server/queries/reports';
 import { getLibrarySettings } from '@/server/queries/settings';
 
-const CONTROL = 'rounded-md border border-[var(--color-ink-300)] bg-white px-3 py-2 text-sm';
 const NUMBER = `${TD} tabular text-right`;
 
 function count(value: number): string {
@@ -46,11 +46,11 @@ export default async function CollectionReportPage({ searchParams }: { searchPar
       />
       <form className="mb-4 flex flex-wrap items-end gap-2 print:hidden">
         <label className="text-sm">
-          <span className="mb-1 block text-[var(--color-ink-700)]">Judul atau penulis</span>
+          <span className={LABEL}>Judul atau penulis</span>
           <input type="search" name="q" defaultValue={q} className={`${CONTROL} min-w-64`} />
         </label>
         <label className="text-sm">
-          <span className="mb-1 block text-[var(--color-ink-700)]">Kategori</span>
+          <span className={LABEL}>Kategori</span>
           <select name="kategori" defaultValue={categoryId} className={CONTROL}>
             <option value="">Semua kategori</option>
             {categoryOptions.map((option) => (

@@ -1,6 +1,7 @@
 import { PrintToolbar } from '@/components/print/print-toolbar';
 import { Barcode } from '@/components/ui/barcode';
 import { buttonClass } from '@/components/ui/button-styles';
+import { CONTROL, LABEL } from '@/components/ui/form-styles';
 import { encodeCode128 } from '@/lib/code128';
 import { chunkSheets, LABEL_SHEET, LABELS_PER_SHEET, MAX_LABELS, parseLabelRequest } from '@/lib/label-request';
 import { firstValue, type SearchParams } from '@/lib/search-params';
@@ -8,9 +9,8 @@ import { requireProfile } from '@/server/auth/guard';
 import { findLabelCopies, type LabelCopy } from '@/server/queries/labels';
 import { getLibrarySettings } from '@/server/queries/settings';
 
-const CONTROL = 'rounded-md border border-[var(--color-ink-300)] bg-white px-3 py-2 text-sm';
-const ALERT = 'mt-3 rounded-md bg-[var(--color-status-terlambat)]/10 px-3 py-2 text-sm text-[var(--color-status-terlambat)]';
-const WARN = 'mt-3 rounded-md bg-[var(--color-status-rusak)]/10 px-3 py-2 text-sm text-[var(--color-status-rusak)]';
+const ALERT = 'mt-3 rounded-lg bg-[var(--color-status-terlambat)]/8 px-4 py-3 text-sm text-[var(--color-status-terlambat)]';
+const WARN = 'mt-3 rounded-lg bg-[var(--color-status-rusak)]/10 px-4 py-3 text-sm text-[var(--color-status-rusak)]';
 
 function sheetsOf(count: number): number {
   return Math.ceil(count / LABELS_PER_SHEET);
@@ -55,19 +55,19 @@ export default async function LabelPage({ searchParams }: { searchParams: Search
         autoFocus={copies.length > 0}
       />
 
-      <div className="max-w-3xl px-4 py-5 print:hidden">
-        <h1 className="page-title text-2xl font-semibold">Cetak Label Barcode</h1>
-        <p className="mt-1 text-sm text-[var(--color-ink-500)]">
+      <div className="max-w-3xl px-4 py-6 sm:px-8 print:hidden">
+        <h1 className="page-title text-[28px] font-bold leading-tight tracking-tight text-[var(--color-ink-900)]">Cetak Label Barcode</h1>
+        <p className="mt-1.5 text-[15px] text-[var(--color-ink-500)]">
           Pilih rentang barcode, atau buka Master Data → Buku → pilih judul → Cetak Label untuk seluruh eksemplar satu judul.
           Lembar label A4 berisi {LABELS_PER_SHEET} label. Lembar label A4 3 × 7, 63,5 × 38,1 mm (tipe L7160 atau yang setara).
         </p>
         <form className="mt-4 flex flex-wrap items-end gap-2">
           <label className="text-sm">
-            <span className="mb-1 block text-[var(--color-ink-700)]">Dari barcode</span>
+            <span className={LABEL}>Dari barcode</span>
             <input name="dari" defaultValue={dari} autoFocus={copies.length === 0} autoComplete="off" className={CONTROL} />
           </label>
           <label className="text-sm">
-            <span className="mb-1 block text-[var(--color-ink-700)]">Sampai barcode</span>
+            <span className={LABEL}>Sampai barcode</span>
             <input name="sampai" defaultValue={sampai} autoComplete="off" className={CONTROL} />
           </label>
           <button type="submit" className={buttonClass('secondary')}>Tampilkan</button>

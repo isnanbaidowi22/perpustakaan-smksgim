@@ -12,7 +12,7 @@ export function PrintToolbar({
   backHref, backLabel, autoFocus = true, children,
 }: { backHref: string; backLabel: string; autoFocus?: boolean; children?: ReactNode }) {
   return (
-    <div className="flex flex-wrap items-center gap-2 border-b border-[var(--color-ink-100)] bg-[var(--color-ink-50)] px-4 py-3 print:hidden">
+    <div className="flex flex-wrap items-center gap-2.5 border-b border-[var(--color-ink-100)] bg-white px-4 py-3 sm:px-8 print:hidden">
       <button type="button" autoFocus={autoFocus} onClick={() => window.print()} className={buttonClass('primary')}>
         Cetak
       </button>

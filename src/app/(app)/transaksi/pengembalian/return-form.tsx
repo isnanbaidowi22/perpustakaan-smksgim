@@ -2,6 +2,8 @@
 
 import { useState, useTransition, type FormEvent } from 'react';
 import { buttonClass } from '@/components/ui/button-styles';
+import { CARD } from '@/components/ui/card-styles';
+import { CONTROL } from '@/components/ui/form-styles';
 import type { ReturnCondition } from '@/domain/shared/types';
 import { RETURN_CONDITION_OPTIONS } from '@/lib/circulation-labels';
 import { formatRupiah } from '@/lib/format';
@@ -10,7 +12,6 @@ import {
   initialRows, previewReturn, toReturnInput, type ReturnableItem, type ReturnRowState,
 } from './return-preview';
 
-const CONTROL = 'rounded-md border border-[var(--color-ink-300)] bg-white px-2 py-1.5 text-sm';
 
 export function ReturnForm({
   loan,
@@ -55,7 +56,7 @@ export function ReturnForm({
           const row = rows[item.id];
           const line = lineOf.get(item.id);
           return (
-            <fieldset key={item.id} className="rounded-lg border border-[var(--color-ink-100)] bg-white p-3">
+            <fieldset key={item.id} className={`${CARD} p-4`}>
               <legend className="sr-only">{item.barcode} {item.bookTitle}</legend>
               <div className="flex flex-wrap items-center gap-3">
                 <input
@@ -84,7 +85,7 @@ export function ReturnForm({
               {row.selected && row.condition !== 'BAIK' && (
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
                   <div>
-                    <label htmlFor={`ganti-${item.id}`} className="mb-1 block text-xs font-medium">Biaya ganti (Rp)</label>
+                    <label htmlFor={`ganti-${item.id}`} className="mb-1.5 block text-xs font-medium text-[var(--color-ink-900)]">Biaya ganti (Rp)</label>
                     <input
                       id={`ganti-${item.id}`}
                       inputMode="numeric"
@@ -95,7 +96,7 @@ export function ReturnForm({
                     <p className="mt-1 text-xs text-[var(--color-ink-500)]">Harga katalog {formatRupiah(item.bookPrice)}.</p>
                   </div>
                   <div>
-                    <label htmlFor={`catatan-${item.id}`} className="mb-1 block text-xs font-medium">Catatan kondisi</label>
+                    <label htmlFor={`catatan-${item.id}`} className="mb-1.5 block text-xs font-medium text-[var(--color-ink-900)]">Catatan kondisi</label>
                     <input
                       id={`catatan-${item.id}`}
                       value={row.note}
@@ -118,9 +119,9 @@ export function ReturnForm({
         })}
       </div>
 
-      <aside className="h-fit rounded-lg border border-[var(--color-ink-100)] bg-white p-4" aria-live="polite">
-        <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-ink-500)]">Denda pengembalian ini</p>
-        <p className="tabular mt-1 text-2xl font-semibold">{formatRupiah(preview.total)}</p>
+      <aside className={`h-fit p-6 ${CARD}`} aria-live="polite">
+        <p className="text-[13px] font-medium text-[var(--color-ink-500)]">Denda pengembalian ini</p>
+        <p className="tabular mt-1 text-3xl font-bold tracking-tight text-[var(--color-ink-900)]">{formatRupiah(preview.total)}</p>
         <p className="mt-1 text-xs text-[var(--color-ink-500)]">{preview.lines.length} buku dikembalikan</p>
         {preview.warnings.map((warning) => (
           <p key={warning} className="mt-2 text-xs text-[var(--color-status-rusak)]">{warning}</p>

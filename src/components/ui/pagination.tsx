@@ -1,3 +1,4 @@
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { pageCount } from '@/lib/pagination';
 import { withQuery } from '@/lib/search-params';
@@ -17,12 +18,12 @@ export function Pagination({
       <div className="flex gap-2">
         {page > 1 && (
           <Link href={withQuery(path, { ...query, hal: page - 1 })} className={buttonClass('secondary', 'sm')}>
-            ← Sebelumnya
+            <ChevronLeft aria-hidden="true" /> Sebelumnya
           </Link>
         )}
         {page < pages && (
           <Link href={withQuery(path, { ...query, hal: page + 1 })} className={buttonClass('secondary', 'sm')}>
-            Berikutnya →
+            Berikutnya <ChevronRight aria-hidden="true" />
           </Link>
         )}
       </div>

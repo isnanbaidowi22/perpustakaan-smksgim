@@ -1,9 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 
-const { mockRequireProfile, mockLimit } = vi.hoisted(() => ({
+const { mockRequireProfile, mockLimit, mockCookie } = vi.hoisted(() => ({
   mockRequireProfile: vi.fn(),
   mockLimit: vi.fn(),
+  mockCookie: vi.fn(),
 }));
 
 vi.mock('@/server/auth/guard', () => ({
@@ -22,6 +23,8 @@ vi.mock('@/server/db/client', () => ({
   schema: { academicYears: {} },
 }));
 vi.mock('@/server/actions/auth', () => ({ signOut: vi.fn() }));
+vi.mock('@/server/queries/settings', () => ({ getLibrarySettings: async () => ({ schoolName: 'SMK GIM' }) }));
+vi.mock('next/headers', () => ({ cookies: async () => ({ get: mockCookie }) }));
 vi.mock('next/navigation', () => ({ usePathname: () => '/dashboard' }));
 
 import AppLayout from './layout';
@@ -56,5 +59,25 @@ describe('AppLayout', () => {
 
     expect(html).toContain('href="/pengaturan/pengguna"');
     expect(html).toContain('href="/pengaturan/audit-log"');
+  });
+
+  it('menampilkan nama sekolah dari konfigurasi di kepala menu', async () => {
+    mockRequireProfile.mockResolvedValueOnce({ fullName: 'Admin', role: 'admin' });
+    mockLimit.mockResolvedValueOnce([]);
+
+    const html = renderToStaticMarkup(await AppLayout({ children: <div>isi</div> }));
+
+    expect(html).toContain('SMK GIM');
+  });
+
+  it('membuka menu dalam mode ringkas bila cookie menu berkata demikian', async () => {
+    mockRequireProfile.mockResolvedValueOnce({ fullName: 'Admin', role: 'admin' });
+    mockLimit.mockResolvedValueOnce([]);
+    mockCookie.mockReturnValueOnce({ value: 'ringkas' });
+
+    const html = renderToStaticMarkup(await AppLayout({ children: <div>isi</div> }));
+
+    expect(mockCookie).toHaveBeenCalledWith('menu');
+    expect(html).toContain('Luaskan menu');
   });
 });

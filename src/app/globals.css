@@ -1,25 +1,35 @@
 @import "tailwindcss";
 
 @theme {
-  /* Navy dan slate — tenang, institusional */
-  --color-ink-900: oklch(0.21 0.04 258);
-  --color-ink-700: oklch(0.34 0.04 258);
-  --color-ink-500: oklch(0.52 0.03 258);
-  --color-ink-300: oklch(0.72 0.02 258);
-  --color-ink-100: oklch(0.93 0.01 258);
-  --color-ink-50:  oklch(0.97 0.005 258);
+  /* Netral abu kehijauan — desain "Rail Ringkas" (revisi 28 September 2026).
+     900 teks utama · 700 teks isi · 500 teks redup · 400 label grup menu ·
+     300 garis kontrol form · 100 garis kartu · 50 isian lembut. */
+  --color-ink-900: #17201d;
+  --color-ink-700: #3d4843;
+  --color-ink-500: #5b6661;
+  --color-ink-400: #6b7570;
+  --color-ink-300: #cfd5d0;
+  --color-ink-100: #e4e6e1;
+  --color-ink-50:  #f7f8f6;
+  /* Garis pemisah di dalam kartu (baris tabel, kolom angka). */
+  --color-divider: #eef0ec;
+  /* Latar belakang area konten. */
+  --color-canvas: #f4f5f2;
 
-  /* Teal — aksi utama */
-  --color-accent-600: oklch(0.55 0.11 185);
-  --color-accent-500: oklch(0.63 0.12 185);
-  --color-accent-100: oklch(0.94 0.03 185);
+  /* Teal — aksi utama, menu aktif, tautan */
+  --color-accent-700: #0b5a54;
+  --color-accent-600: #0f766e;
+  --color-accent-100: #e6f2ef;
 
   /* Warna status, konsisten di seluruh aplikasi */
-  --color-status-tersedia: oklch(0.58 0.14 152);
-  --color-status-dipinjam: oklch(0.55 0.13 250);
-  --color-status-terlambat: oklch(0.58 0.19 25);
-  --color-status-rusak: oklch(0.65 0.15 62);
-  --color-status-hilang: oklch(0.44 0.02 258);
+  --color-status-tersedia: #0f766e;
+  --color-status-dipinjam: #2c5ea8;
+  --color-status-terlambat: #b42318;
+  --color-status-rusak: #b45309;
+  --color-status-hilang: #4b5550;
+
+  /* Sudut kartu dan panel */
+  --radius-card: 14px;
 
   /* Seluruh aplikasi memakai satu keluarga font: Plus Jakarta Sans.
      var(--font-jakarta) datang dari next/font di layout.tsx (mode variable).
@@ -37,7 +47,7 @@
 }
 
 body {
-  background: var(--color-ink-50);
+  background: var(--color-canvas);
   color: var(--color-ink-900);
   font-family: var(--font-sans);
 }
@@ -49,10 +59,13 @@ table, .tabular, .font-mono {
 }
 
 /* Cincin fokus terlihat di seluruh elemen interaktif — alur transaksi
-   harus dapat diselesaikan tanpa tetikus. */
-:focus-visible {
-  outline: 2px solid var(--color-accent-600);
-  outline-offset: 2px;
+   harus dapat diselesaikan tanpa tetikus. Diletakkan di layer base agar
+   kotak isian dapat menggantinya dengan cincin sendiri (form-styles.ts). */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--color-accent-600);
+    outline-offset: 2px;
+  }
 }
 
 /* Halaman cetak: latar abu-abu aplikasi tidak ikut tercetak. */

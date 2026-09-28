@@ -1,44 +1,55 @@
 'use client';
 
+import { Book } from 'lucide-react';
 import { useActionState } from 'react';
+import { buttonClass } from '@/components/ui/button-styles';
+import { CARD } from '@/components/ui/card-styles';
+import { CONTROL, LABEL } from '@/components/ui/form-styles';
+import { Notice } from '@/components/ui/notice';
 import { signIn } from '@/server/actions/auth';
 
 export default function LoginPage() {
   const [state, action, pending] = useActionState(signIn, null);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[var(--color-ink-50)] p-4">
-      <form action={action} className="w-full max-w-sm rounded-xl bg-white p-8 shadow-sm">
-        <h1 className="page-title mb-1 text-xl font-semibold">Perpustakaan Sekolah</h1>
-        <p className="mb-6 text-sm text-[var(--color-ink-500)]">
-          Masuk untuk mengelola peminjaman buku.
-        </p>
+    <main className="flex min-h-screen items-center justify-center bg-[var(--color-canvas)] p-4">
+      <div className="w-full max-w-sm">
+        <div className="mb-6 flex items-center justify-center gap-3">
+          <span className="grid size-10 place-items-center rounded-xl bg-[var(--color-accent-600)] text-white">
+            <Book aria-hidden="true" className="size-5" strokeWidth={2} />
+          </span>
+          <span className="text-lg font-bold text-[var(--color-ink-900)]">Perpustakaan Sekolah</span>
+        </div>
 
-        <label htmlFor="username" className="mb-1 block text-sm font-medium">Username</label>
-        <input
-          id="username" name="username" required autoFocus autoComplete="username"
-          className="mb-4 w-full rounded-md border border-[var(--color-ink-300)] px-3 py-2"
-        />
+        <form action={action} className={`${CARD} space-y-4 p-7`}>
+          <div>
+            <h1 className="page-title text-2xl font-bold tracking-tight text-[var(--color-ink-900)]">Masuk</h1>
+            <p className="mt-1 text-sm text-[var(--color-ink-500)]">Masuk untuk mengelola peminjaman buku.</p>
+          </div>
 
-        <label htmlFor="password" className="mb-1 block text-sm font-medium">Kata Sandi</label>
-        <input
-          id="password" name="password" type="password" required autoComplete="current-password"
-          className="mb-4 w-full rounded-md border border-[var(--color-ink-300)] px-3 py-2"
-        />
+          <div>
+            <label htmlFor="username" className={LABEL}>Username</label>
+            <input
+              id="username" name="username" required autoFocus autoComplete="username"
+              className={`${CONTROL} w-full`}
+            />
+          </div>
 
-        {state?.error && (
-          <p role="alert" className="mb-4 rounded-md bg-[var(--color-status-terlambat)]/10 px-3 py-2 text-sm text-[var(--color-status-terlambat)]">
-            {state.error}
-          </p>
-        )}
+          <div>
+            <label htmlFor="password" className={LABEL}>Kata Sandi</label>
+            <input
+              id="password" name="password" type="password" required autoComplete="current-password"
+              className={`${CONTROL} w-full`}
+            />
+          </div>
 
-        <button
-          type="submit" disabled={pending}
-          className="w-full rounded-md bg-[var(--color-accent-600)] py-2 font-medium text-white disabled:opacity-60"
-        >
-          {pending ? 'Memproses…' : 'Masuk'}
-        </button>
-      </form>
+          {state?.error && <Notice tone="danger" role="alert">{state.error}</Notice>}
+
+          <button type="submit" disabled={pending} className={`${buttonClass('primary')} w-full`}>
+            {pending ? 'Memproses…' : 'Masuk'}
+          </button>
+        </form>
+      </div>
     </main>
   );
 }

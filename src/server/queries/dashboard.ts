@@ -23,6 +23,8 @@ export interface DashboardStats {
   copiesLentToday: number;
   /** Menurut tanggal WIB dari `returned_at`, bukan tanggal UTC-nya. */
   copiesReturnedToday: number;
+  /** Transaksi yang menerima setidaknya satu buku kembali hari ini (tanggal WIB). */
+  loansReturnedToday: number;
 }
 
 export interface DueTodayRow {
@@ -69,7 +71,10 @@ export async function getDashboardStats(today: IsoDate, executor: Executor = db)
       .innerJoin(loanItems, eq(loanItems.loanId, loans.id))
       .where(eq(loans.loanDate, today)),
     executor
-      .select({ copies: sql<number>`count(*)::int` })
+      .select({
+        copies: sql<number>`count(*)::int`,
+        loans: sql<number>`count(distinct ${loanItems.loanId})::int`,
+      })
       .from(loanItems)
       .where(sql`(${loanItems.returnedAt} at time zone ${SCHOOL_TIME_ZONE})::date = ${today}::date`),
   ]);
@@ -85,6 +90,7 @@ export async function getDashboardStats(today: IsoDate, executor: Executor = db)
     loansToday: Number(lentToday?.loans ?? 0),
     copiesLentToday: Number(lentToday?.copies ?? 0),
     copiesReturnedToday: Number(returnedToday?.copies ?? 0),
+    loansReturnedToday: Number(returnedToday?.loans ?? 0),
   };
 }
 

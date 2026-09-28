@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ActionForm } from '@/components/ui/action-form';
 import { buttonClass } from '@/components/ui/button-styles';
+import { CARD } from '@/components/ui/card-styles';
 import { TextField } from '@/components/ui/fields';
 import { Flash } from '@/components/ui/flash';
 import { LoanStatusBadge } from '@/components/ui/loan-status-badge';
@@ -16,7 +17,8 @@ import { payFineAction } from '@/server/actions/fines';
 import { requireProfile } from '@/server/auth/guard';
 import { getLoanDetail } from '@/server/queries/loans';
 
-const SECTION = 'page-title mb-3 mt-8 text-lg font-semibold';
+const SECTION = 'page-title mb-3 mt-8 text-lg font-bold text-[var(--color-ink-900)]';
+const FACTS = `grid gap-4 p-5 text-sm sm:grid-cols-3 ${CARD}`;
 
 function money(amount: number): string {
   return amount > 0 ? formatRupiah(amount) : '—';
@@ -58,7 +60,7 @@ export default async function LoanDetailPage({
       />
       <Flash message={firstValue(query.pesan)} />
 
-      <dl className="grid gap-4 rounded-lg border border-[var(--color-ink-100)] bg-white p-4 text-sm sm:grid-cols-3">
+      <dl className={FACTS}>
         <div><dt className="text-[var(--color-ink-500)]">Tanggal pinjam</dt><dd>{formatDate(loan.loanDate)}</dd></div>
         <div><dt className="text-[var(--color-ink-500)]">Jatuh tempo</dt><dd>{formatDate(loan.dueDate)}</dd></div>
         <div>
@@ -102,7 +104,7 @@ export default async function LoanDetailPage({
       </ScrollTable>
 
       <h2 className={SECTION}>Denda</h2>
-      <dl className="grid gap-4 rounded-lg border border-[var(--color-ink-100)] bg-white p-4 text-sm sm:grid-cols-3">
+      <dl className={FACTS}>
         <div><dt className="text-[var(--color-ink-500)]">Total denda</dt><dd className="tabular">{formatRupiah(loan.totalFine)}</dd></div>
         <div><dt className="text-[var(--color-ink-500)]">Sudah dibayar</dt><dd className="tabular">{formatRupiah(loan.paidTotal)}</dd></div>
         <div>

@@ -1,5 +1,6 @@
 'use client';
 
+import { Menu as MenuIcon } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useRef, useState, useSyncExternalStore, type KeyboardEvent, type ReactNode } from 'react';
 import { buttonClass } from '@/components/ui/button-styles';
@@ -67,12 +68,16 @@ export function AppShell({
           onClick={() => setOpenOn(open ? null : pathname)}
           className={buttonClass('secondary', 'sm')}
         >
-          <span aria-hidden="true">☰</span>&nbsp;Menu
+          <MenuIcon aria-hidden="true" />Menu
         </button>
       </div>
+      {/* Mulai lg sidebar menempel setinggi layar: menu tetap terlihat
+          sementara isi halaman yang panjang digulir. */}
       <div
         id="navigasi-utama"
-        className={open ? 'fixed inset-0 z-30 flex lg:static lg:z-auto print:hidden' : 'hidden lg:flex print:hidden'}
+        className={open
+          ? 'fixed inset-0 z-30 flex lg:sticky lg:top-0 lg:z-auto lg:h-screen print:hidden'
+          : 'hidden lg:sticky lg:top-0 lg:flex lg:h-screen print:hidden'}
         onKeyDown={handlePanelKeyDown}
       >
         <div className="h-full shrink-0">{sidebar}</div>
@@ -87,7 +92,7 @@ export function AppShell({
       </div>
       <div className="flex min-w-0 flex-1 flex-col" inert={open && !isLargeViewport}>
         {topbar}
-        <main className="flex-1 p-4 lg:p-6 print:p-0">{children}</main>
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 print:p-0">{children}</main>
       </div>
     </div>
   );

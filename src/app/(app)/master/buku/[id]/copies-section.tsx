@@ -23,7 +23,7 @@ export function CopiesSection({
   return (
     <section aria-labelledby="eksemplar" className="mt-10 space-y-4">
       <div>
-        <h2 id="eksemplar" className="text-xl font-semibold">Eksemplar</h2>
+        <h2 id="eksemplar" className="text-lg font-bold text-[var(--color-ink-900)]">Eksemplar</h2>
         <p className="text-sm text-[var(--color-ink-500)]">
           {available} dari {copies.length} eksemplar tersedia untuk dipinjam.
         </p>
@@ -93,7 +93,7 @@ export function CopiesSection({
           <TextAreaField name="notes" label="Catatan" rows={2} />
         </ActionForm>
       ) : (
-        <p className="rounded-md bg-[var(--color-ink-100)] px-3 py-2 text-sm text-[var(--color-ink-700)]">
+        <p className="rounded-lg bg-[var(--color-ink-100)]/70 px-4 py-3 text-sm text-[var(--color-ink-700)]">
           Buku ini nonaktif. Aktifkan bukunya dari daftar buku untuk menambah eksemplar.
         </p>
       )}

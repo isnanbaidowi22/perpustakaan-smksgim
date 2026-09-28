@@ -1,4 +1,5 @@
 import { calculateDueDate } from '@/domain/loan/due-date';
+import { Notice } from '@/components/ui/notice';
 import { PageHeader } from '@/components/ui/page-header';
 import { schoolToday } from '@/lib/school-date';
 import { requireProfile } from '@/server/auth/guard';
@@ -18,9 +19,9 @@ export default async function LoanPage() {
         description="Pindai kartu siswa, lalu pindai barcode setiap buku. Tekan Ctrl+Enter untuk menyimpan."
       />
       {!activeYear && (
-        <p role="alert" className="mb-4 rounded-md bg-[var(--color-status-terlambat)]/10 px-3 py-2 text-sm text-[var(--color-status-terlambat)]">
+        <Notice tone="danger" role="alert" className="mb-4">
           Belum ada tahun ajaran aktif. Peminjaman tidak dapat disimpan sampai admin mengaktifkannya di Pengaturan → Tahun Ajaran.
-        </p>
+        </Notice>
       )}
       <LoanDesk
         loanDate={today}

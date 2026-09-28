@@ -1,11 +1,11 @@
 import type { ReactNode } from 'react';
 import { buttonClass } from '@/components/ui/button-styles';
+import { CARD } from '@/components/ui/card-styles';
+import { CONTROL, LABEL } from '@/components/ui/form-styles';
 import type { Option } from '@/lib/options';
 import { formatSchoolDateTime } from '@/lib/school-date';
 import { PrintButton } from './print-button';
 
-const CONTROL = 'rounded-md border border-[var(--color-ink-300)] bg-white px-3 py-2 text-sm';
-const LABEL = 'mb-1 block text-[var(--color-ink-700)]';
 
 /**
  * Judul laporan di layar, dan kop di kertas: nama sekolah, judul, periode,
@@ -19,8 +19,8 @@ export function ReportHeader({
       <style>{'@page { size: A4 landscape; margin: 12mm; }'}</style>
       <div className="mb-4 flex flex-wrap items-end justify-between gap-4 print:hidden">
         <div>
-          <h1 className="page-title text-2xl font-semibold">{title}</h1>
-          <p className="mt-1 text-sm text-[var(--color-ink-500)]">{description}</p>
+          <h1 className="page-title text-[28px] font-bold leading-tight tracking-tight text-[var(--color-ink-900)] sm:text-3xl">{title}</h1>
+          <p className="mt-1.5 text-[15px] text-[var(--color-ink-500)]">{description}</p>
         </div>
         <PrintButton />
       </div>
@@ -73,9 +73,9 @@ export function SummaryGrid({ items }: { items: { label: string; value: string }
   return (
     <dl className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 print:grid-cols-4 print:gap-2">
       {items.map((item) => (
-        <div key={item.label} className="rounded-lg border border-[var(--color-ink-100)] bg-white p-3 print:p-2">
-          <dt className="text-xs text-[var(--color-ink-500)]">{item.label}</dt>
-          <dd className="tabular text-xl font-semibold">{item.value}</dd>
+        <div key={item.label} className={`${CARD} px-5 py-4 print:rounded-lg print:p-2`}>
+          <dt className="text-[13px] text-[var(--color-ink-500)]">{item.label}</dt>
+          <dd className="tabular mt-1 text-2xl font-bold tracking-tight text-[var(--color-ink-900)] print:text-xl">{item.value}</dd>
         </div>
       ))}
     </dl>
@@ -84,7 +84,7 @@ export function SummaryGrid({ items }: { items: { label: string; value: string }
 
 export function ReportNotice({ message, printable }: { message: string | null; printable?: boolean }) {
   if (!message) return null;
-  const base = 'mb-4 rounded-md bg-[var(--color-status-rusak)]/10 px-3 py-2 text-sm text-[var(--color-status-rusak)]';
+  const base = 'mb-4 rounded-lg bg-[var(--color-status-rusak)]/10 px-4 py-3 text-sm text-[var(--color-status-rusak)]';
   return (
     <p role="alert" className={printable ? base : `${base} print:hidden`}>
       {message}

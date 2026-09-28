@@ -23,7 +23,7 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
         <ProfileFields user={user} />
       </ActionForm>
 
-      <h2 className="page-title mb-3 mt-8 text-lg font-semibold">Atur Ulang Kata Sandi</h2>
+      <h2 className="page-title mb-3 mt-8 text-lg font-bold text-[var(--color-ink-900)]">Atur Ulang Kata Sandi</h2>
       <ActionForm action={resetUserPasswordAction.bind(null, user.id)} submitLabel="Ganti Kata Sandi">
         <PasswordFields />
       </ActionForm>

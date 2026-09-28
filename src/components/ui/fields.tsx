@@ -3,9 +3,9 @@
 import type { ReactNode } from 'react';
 import type { Option } from '@/lib/options';
 import { useField } from './action-form';
+import { CONTROL as BASE_CONTROL, LABEL } from './form-styles';
 
-const CONTROL =
-  'w-full rounded-md border border-[var(--color-ink-300)] bg-white px-3 py-2 text-sm aria-[invalid=true]:border-[var(--color-status-terlambat)]';
+const CONTROL = `w-full ${BASE_CONTROL}`;
 
 interface BaseProps {
   name: string;
@@ -25,7 +25,7 @@ function FieldShell({
 }: Omit<BaseProps, 'defaultValue'> & { error?: string; children: ReactNode }) {
   return (
     <div>
-      <label htmlFor={name} className="mb-1 block text-sm font-medium">
+      <label htmlFor={name} className={LABEL}>
         {label}
         {required && <span aria-hidden="true" className="text-[var(--color-status-terlambat)]"> *</span>}
       </label>

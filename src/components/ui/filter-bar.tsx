@@ -1,8 +1,8 @@
+import { Search } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { Option } from '@/lib/options';
 import { buttonClass } from './button-styles';
-
-const CONTROL = 'rounded-md border border-[var(--color-ink-300)] bg-white px-3 py-2 text-sm';
+import { CONTROL } from './form-styles';
 
 export const STATUS_OPTIONS: Option[] = [
   { value: 'active', label: 'Aktif' },
@@ -16,15 +16,21 @@ export function FilterBar({
 }: { q: string; placeholder: string; autoFocus?: boolean; children?: ReactNode }) {
   return (
     <form role="search" className="mb-4 flex flex-wrap items-center gap-2">
-      <input
-        type="search"
-        name="q"
-        defaultValue={q}
-        placeholder={placeholder}
-        aria-label={placeholder}
-        autoFocus={autoFocus}
-        className={`${CONTROL} min-w-64 flex-1`}
-      />
+      <div className="relative min-w-64 flex-1">
+        <Search
+          aria-hidden="true"
+          className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-[var(--color-ink-400)]"
+        />
+        <input
+          type="search"
+          name="q"
+          defaultValue={q}
+          placeholder={placeholder}
+          aria-label={placeholder}
+          autoFocus={autoFocus}
+          className={`${CONTROL} w-full pl-9`}
+        />
+      </div>
       {children}
       <button type="submit" className={buttonClass('secondary')}>Cari</button>
     </form>

@@ -46,7 +46,7 @@ export default async function BookDetailPage({
       <Flash message={firstValue(query.pesan)} />
 
       <section aria-labelledby="data-buku" className="space-y-4">
-        <h2 id="data-buku" className="text-xl font-semibold">Data Buku</h2>
+        <h2 id="data-buku" className="text-lg font-bold text-[var(--color-ink-900)]">Data Buku</h2>
         <ActionForm action={updateBookAction.bind(null, book.id)} submitLabel="Simpan Perubahan">
           <BookFields book={book} categoryOptions={categoryOptions} rackOptions={rackOptions} />
         </ActionForm>

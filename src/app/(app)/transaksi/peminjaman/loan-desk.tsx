@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { useReducer, useRef, useState, useTransition, type FormEvent, type KeyboardEvent } from 'react';
 import { buttonClass } from '@/components/ui/button-styles';
+import { CARD } from '@/components/ui/card-styles';
+import { CONTROL } from '@/components/ui/form-styles';
 import { LOAN_SAVE_FAILED, type CreateLoanState } from '@/lib/circulation-results';
 import { formatDate } from '@/lib/format';
 import { describeViolation } from '@/lib/violation-message';
@@ -12,9 +14,9 @@ import {
 import type { BorrowerCard, BorrowerOption } from '@/server/queries/circulation';
 import { cardWarnings, deskReducer, INITIAL_DESK, remainingSlots } from './desk-state';
 
-const INPUT = 'w-full rounded-md border border-[var(--color-ink-300)] bg-white px-3 py-2 text-sm';
-const PANEL = 'rounded-lg border border-[var(--color-ink-100)] bg-white p-4';
-const HEADING = 'mb-3 text-xs font-semibold uppercase tracking-wide text-[var(--color-ink-500)]';
+const INPUT = `w-full ${CONTROL}`;
+const PANEL = `p-5 ${CARD}`;
+const HEADING = 'mb-3 text-base font-bold text-[var(--color-ink-900)]';
 const ALERT = 'text-sm text-[var(--color-status-terlambat)]';
 
 const TONE_CLASS = {
@@ -162,7 +164,7 @@ export function LoanDesk({ loanDate, dueDate, durationDays }: { loanDate: string
   if (outcome?.status === 'success') {
     return (
       <div role="status" className={`${PANEL} max-w-xl`}>
-        <h2 className="page-title text-xl font-semibold">Peminjaman tersimpan</h2>
+        <h2 className="page-title text-xl font-bold text-[var(--color-ink-900)]">Peminjaman tersimpan</h2>
         <p className="mt-2 text-sm">
           Nomor transaksi <strong className="font-mono">{outcome.transactionNumber}</strong>. Jatuh tempo{' '}
           <strong>{formatDate(outcome.dueDate)}</strong>.
@@ -200,7 +202,7 @@ export function LoanDesk({ loanDate, dueDate, durationDays }: { loanDate: string
               </form>
               {studentMessage && <p role="alert" className={`${ALERT} mt-2`}>{studentMessage}</p>}
               {candidates.length > 0 && (
-                <ul className="mt-2 divide-y divide-[var(--color-ink-100)] rounded-md border border-[var(--color-ink-100)]">
+                <ul className="mt-2 divide-y divide-[var(--color-divider)] overflow-hidden rounded-lg border border-[var(--color-ink-100)]">
                   {candidates.map((candidate) => (
                     <li key={candidate.id}>
                       <button
@@ -263,7 +265,7 @@ export function LoanDesk({ loanDate, dueDate, durationDays }: { loanDate: string
         <p className="text-sm">
           Pinjam: <strong>{formatDate(loanDate)}</strong> · Jatuh tempo: <strong>{formatDate(dueDate)}</strong> ({durationDays} hari)
         </p>
-        <label htmlFor="notes" className="mb-1 mt-3 block text-sm font-medium">Catatan</label>
+        <label htmlFor="notes" className="mb-1.5 mt-3 block text-sm font-medium text-[var(--color-ink-900)]">Catatan</label>
         <textarea
           id="notes"
           value={notes}
@@ -275,7 +277,7 @@ export function LoanDesk({ loanDate, dueDate, durationDays }: { loanDate: string
       </section>
 
       {outcome?.status === 'rejected' && (
-        <div role="alert" className="rounded-md bg-[var(--color-status-terlambat)]/10 p-3 text-sm text-[var(--color-status-terlambat)]">
+        <div role="alert" className="rounded-lg bg-[var(--color-status-terlambat)]/8 px-4 py-3 text-sm text-[var(--color-status-terlambat)]">
           <p className="font-semibold">Peminjaman ditolak</p>
           <ul className="mt-1 space-y-1">
             {outcome.violations.map((violation, index) => {
