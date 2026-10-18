@@ -5,18 +5,21 @@ import { useReducer, useRef, useState, useTransition, type FormEvent, type Keybo
 import { buttonClass } from '@/components/ui/button-styles';
 import { CARD } from '@/components/ui/card-styles';
 import { CONTROL } from '@/components/ui/form-styles';
-import { LOAN_SAVE_FAILED, type CreateLoanState } from '@/lib/circulation-results';
+import { LOAN_SAVE_FAILED, SUGGEST_MIN_LENGTH, type CreateLoanState } from '@/lib/circulation-results';
 import { formatDate } from '@/lib/format';
 import { describeViolation } from '@/lib/violation-message';
 import {
-  createLoanAction, getBorrowerCardAction, lookupCopyAction, searchBorrowersAction,
+  createLoanAction, getBorrowerCardAction, lookupCopyAction, pickCopyAction, searchBorrowersAction, suggestBooksAction,
 } from '@/server/actions/loans';
-import type { BorrowerCard, BorrowerOption } from '@/server/queries/circulation';
-import { cardWarnings, deskReducer, INITIAL_DESK, remainingSlots } from './desk-state';
+import type { BorrowerCard, BorrowerOption, LoanableBook } from '@/server/queries/circulation';
+import { cardWarnings, deskReducer, INITIAL_DESK, moveHighlight, remainingSlots } from './desk-state';
+import { NewStudentForm } from './new-student-form';
 
 const INPUT = `w-full ${CONTROL}`;
 const PANEL = `p-5 ${CARD}`;
 const HEADING = 'mb-3 text-base font-bold text-[var(--color-ink-900)]';
+/** Jeda setelah ketikan terakhir sebelum saran judul dicari. */
+const SUGGEST_DELAY_MS = 250;
 const ALERT = 'text-sm text-[var(--color-status-terlambat)]';
 
 const TONE_CLASS = {
@@ -32,7 +35,7 @@ function StudentCard({ card, onChange }: { card: BorrowerCard; onChange: () => v
   return (
     <div>
       <p className="font-semibold">{card.student.name}</p>
-      <p className="text-sm text-[var(--color-ink-500)]">{card.student.nis} · {card.student.className}</p>
+      <p className="text-sm text-[var(--color-ink-500)]">{card.student.className}</p>
       <p className="mt-2 text-sm">
         <span aria-hidden="true" className="tracking-widest">{dots}</span>{' '}
         Sedang dipinjam {card.activeCount} dari {card.maxActiveLoans}
@@ -44,7 +47,10 @@ function StudentCard({ card, onChange }: { card: BorrowerCard; onChange: () => v
           </li>
         ))}
       </ul>
-      <button type="button" onClick={onChange} className={`${buttonClass('secondary', 'sm')} mt-3`}>Ganti siswa</button>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <button type="button" onClick={onChange} className={buttonClass('secondary', 'sm')}>Ganti siswa</button>
+        <Link href={`/master/siswa/${card.student.id}`} className={buttonClass('secondary', 'sm')}>Ubah data siswa</Link>
+      </div>
     </div>
   );
 }
@@ -53,6 +59,16 @@ export function LoanDesk({ loanDate, dueDate, durationDays }: { loanDate: string
   const [desk, dispatch] = useReducer(deskReducer, INITIAL_DESK);
   const [candidates, setCandidates] = useState<BorrowerOption[]>([]);
   const [studentMessage, setStudentMessage] = useState<string | null>(null);
+  const [lastQuery, setLastQuery] = useState('');
+  /** Terisi (kata kunci pencarian terakhir) selama form siswa baru terbuka. */
+  const [newStudentQuery, setNewStudentQuery] = useState<string | null>(null);
+  const [bookCandidates, setBookCandidates] = useState<LoanableBook[]>([]);
+  /** Indeks saran judul yang disorot lewat ↑/↓; -1 bila tidak ada. */
+  const [highlight, setHighlight] = useState(-1);
+  const suggestTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Setiap ketikan, submit, atau pilihan menaikkan nomor ini; jawaban saran
+  // yang tiba sesudahnya sudah basi dan diabaikan.
+  const suggestSeq = useRef(0);
   const [notes, setNotes] = useState('');
   const [outcome, setOutcome] = useState<CreateLoanState | null>(null);
   const [pending, startTransition] = useTransition();
@@ -78,7 +94,12 @@ export function LoanDesk({ loanDate, dueDate, durationDays }: { loanDate: string
       setStudentMessage(result.message);
       return;
     }
-    dispatch({ type: 'selectStudent', card: result.data });
+    pickStudent(result.data);
+  }
+
+  function pickStudent(card: BorrowerCard) {
+    dispatch({ type: 'selectStudent', card });
+    setNewStudentQuery(null);
     setCandidates([]);
     setStudentMessage(null);
     // M3: siswa berganti — panel penolakan/galat dari peminjaman sebelumnya sudah basi.
@@ -96,6 +117,7 @@ export function LoanDesk({ loanDate, dueDate, durationDays }: { loanDate: string
   function searchStudent(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const query = String(new FormData(event.currentTarget).get('student') ?? '');
+    setLastQuery(query);
     const myGeneration = ++studentGeneration.current;
     startTransition(async () => {
       const result = await searchBorrowersAction(query);
@@ -109,29 +131,86 @@ export function LoanDesk({ loanDate, dueDate, durationDays }: { loanDate: string
         return;
       }
       setCandidates(result.data);
-      setStudentMessage(result.data.length === 0 ? 'Siswa tidak ditemukan. Periksa NIS atau ejaan nama.' : null);
+      setStudentMessage(result.data.length === 0 ? 'Siswa tidak ditemukan. Periksa ejaan nama, atau tambahkan sebagai siswa baru.' : null);
     });
   }
 
   function scanCopy(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = event.currentTarget;
-    const barcode = String(new FormData(form).get('barcode') ?? '');
+    const query = String(new FormData(form).get('barcode') ?? '');
     // F1: bersihkan kolom SEBELUM menunggu jawaban server. Pemindai barcode
     // menembakkan scan+Enter berturut-turut; kolom yang masih terisi saat
     // pindaian kedua tiba akan menambahkan barcode itu di belakang barcode
     // pertama, dan pindaian keduanya jadi tidak valid.
     form.reset();
     copyInput.current?.focus();
+    clearSuggestions();
     const scanGeneration = studentGeneration.current;
+    const listed = desk.copies.map((copy) => copy.id);
     startTransition(async () => {
-      const result = await lookupCopyAction(barcode);
+      const result = await lookupCopyAction(query, listed);
       // F2: siswa yang dipilih berubah selagi pindaian ini ditunggu — hasilnya sudah tidak relevan.
       if (scanGeneration !== studentGeneration.current) return;
-      dispatch(result.ok ? { type: 'addCopy', copy: result.data } : { type: 'notice', message: result.message });
+      if (!result.ok) dispatch({ type: 'notice', message: result.message });
+      else if (result.data.kind === 'copy') dispatch({ type: 'addCopy', copy: result.data.copy });
+      else setBookCandidates(result.data.books);
       // M3: daftar buku baru saja berubah (atau ditolak lagi) — panel penolakan/galat lama sudah basi.
       setOutcome(null);
     });
+  }
+
+  /** Judul dipilih dari hasil pencarian: sistem mengambilkan satu eksemplar yang tersedia. */
+  function pickBook(bookId: string) {
+    clearSuggestions();
+    if (copyInput.current) copyInput.current.value = '';
+    const scanGeneration = studentGeneration.current;
+    const listed = desk.copies.map((copy) => copy.id);
+    startTransition(async () => {
+      const result = await pickCopyAction(bookId, listed);
+      if (scanGeneration !== studentGeneration.current) return;
+      dispatch(result.ok ? { type: 'addCopy', copy: result.data } : { type: 'notice', message: result.message });
+      setOutcome(null);
+      copyInput.current?.focus();
+    });
+  }
+
+  function clearSuggestions() {
+    if (suggestTimer.current) clearTimeout(suggestTimer.current);
+    suggestSeq.current += 1;
+    setBookCandidates([]);
+    setHighlight(-1);
+  }
+
+  /**
+   * Saran judul muncul selagi petugas mengetik. Ditunda sebentar agar tidak
+   * setiap huruf memanggil server, dan agar pemindai barcode (scan+Enter
+   * dalam hitungan milidetik) sudah selesai sebelum saran sempat dicari.
+   * Sengaja di luar startTransition: tombol simpan tidak ikut berkedip "Memproses…".
+   */
+  function suggestBooks(text: string) {
+    clearSuggestions();
+    if (text.trim().length < SUGGEST_MIN_LENGTH) return;
+    const mySeq = suggestSeq.current;
+    suggestTimer.current = setTimeout(async () => {
+      const result = await suggestBooksAction(text);
+      if (mySeq !== suggestSeq.current || !result.ok) return;
+      setBookCandidates(result.data);
+    }, SUGGEST_DELAY_MS);
+  }
+
+  function onCopyKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (bookCandidates.length === 0) return;
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault();
+      setHighlight((current) => moveHighlight(bookCandidates, current, event.key === 'ArrowDown' ? 1 : -1));
+    } else if (event.key === 'Escape') {
+      event.preventDefault();
+      clearSuggestions();
+    } else if (event.key === 'Enter' && !event.ctrlKey && !event.metaKey && highlight >= 0) {
+      event.preventDefault();
+      pickBook(bookCandidates[highlight].bookId);
+    }
   }
 
   function save() {
@@ -194,11 +273,21 @@ export function LoanDesk({ loanDate, dueDate, durationDays }: { loanDate: string
           <h2 id="siswa-heading" className={HEADING}>Siswa</h2>
           {desk.student ? (
             <StudentCard card={desk.student} onChange={changeStudent} />
+          ) : newStudentQuery !== null ? (
+            <NewStudentForm
+              query={newStudentQuery}
+              onCreated={(card) => {
+                // Pencarian/pemuatan siswa lama yang masih ditunggu tidak boleh menimpa siswa baru ini.
+                studentGeneration.current += 1;
+                pickStudent(card);
+              }}
+              onCancel={() => setNewStudentQuery(null)}
+            />
           ) : (
             <>
               <form role="search" onSubmit={searchStudent}>
-                <label htmlFor="student" className="sr-only">Scan kartu, NIS, atau nama siswa</label>
-                <input id="student" name="student" autoFocus autoComplete="off" placeholder="Scan kartu / NIS / nama siswa" className={INPUT} />
+                <label htmlFor="student" className="sr-only">Nama siswa</label>
+                <input id="student" name="student" autoFocus autoComplete="off" placeholder="Ketik nama siswa" className={INPUT} />
               </form>
               {studentMessage && <p role="alert" className={`${ALERT} mt-2`}>{studentMessage}</p>}
               {candidates.length > 0 && (
@@ -212,13 +301,23 @@ export function LoanDesk({ loanDate, dueDate, durationDays }: { loanDate: string
                       >
                         {candidate.name}
                         <span className="text-[var(--color-ink-500)]">
-                          {' '}· {candidate.nis} · {candidate.className}{candidate.status === 'active' ? '' : ' · nonaktif'}
+                          {' '}· {candidate.className}{candidate.status === 'active' ? '' : ' · nonaktif'}
                         </span>
                       </button>
                     </li>
                   ))}
                 </ul>
               )}
+              <button
+                type="button"
+                onClick={() => {
+                  setStudentMessage(null);
+                  setNewStudentQuery(lastQuery);
+                }}
+                className={`${buttonClass(studentMessage ? 'primary' : 'secondary', 'sm')} mt-3`}
+              >
+                Tambah siswa baru
+              </button>
             </>
           )}
         </section>
@@ -226,12 +325,49 @@ export function LoanDesk({ loanDate, dueDate, durationDays }: { loanDate: string
         <section aria-labelledby="buku-heading" className={PANEL}>
           <h2 id="buku-heading" className={HEADING}>Buku</h2>
           <form onSubmit={scanCopy}>
-            <label htmlFor="barcode" className="sr-only">Scan barcode buku</label>
-            <input ref={copyInput} id="barcode" name="barcode" autoComplete="off" placeholder="Scan barcode buku" className={INPUT} />
+            <label htmlFor="barcode" className="sr-only">Scan barcode, atau ketik judul atau ISBN buku</label>
+            <input
+              ref={copyInput}
+              id="barcode"
+              name="barcode"
+              autoComplete="off"
+              placeholder="Scan barcode / judul / ISBN buku"
+              role="combobox"
+              aria-autocomplete="list"
+              aria-expanded={bookCandidates.length > 0}
+              aria-controls="saran-buku"
+              aria-activedescendant={highlight >= 0 ? `saran-buku-${highlight}` : undefined}
+              onChange={(event) => suggestBooks(event.target.value)}
+              onKeyDown={onCopyKeyDown}
+              className={INPUT}
+            />
           </form>
           {desk.notice && <p role="alert" className={`${ALERT} mt-2`}>{desk.notice}</p>}
+          {bookCandidates.length > 0 && (
+            <ul id="saran-buku" role="listbox" aria-label="Saran judul buku" className="mt-2 divide-y divide-[var(--color-divider)] overflow-hidden rounded-lg border border-[var(--color-ink-100)]">
+              {bookCandidates.map((book, index) => (
+                <li key={book.bookId} id={`saran-buku-${index}`} role="option" aria-selected={index === highlight} aria-disabled={book.availableCount === 0}>
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    disabled={book.availableCount === 0}
+                    // mousedown, bukan click: fokus tetap di kolom buku.
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => pickBook(book.bookId)}
+                    className={`w-full px-3 py-2 text-left text-sm hover:bg-[var(--color-ink-50)] disabled:cursor-not-allowed disabled:opacity-60 ${index === highlight ? 'bg-[var(--color-ink-50)]' : ''}`}
+                  >
+                    {book.title}
+                    <span className="text-[var(--color-ink-500)]">
+                      {' '}· {book.author}
+                      {' '}· {book.availableCount === 0 ? 'tidak ada yang tersedia' : `tersedia ${book.availableCount}`}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
           {desk.copies.length === 0 ? (
-            <p className="mt-3 text-sm text-[var(--color-ink-500)]">Belum ada buku. Pindai barcode pada eksemplar.</p>
+            <p className="mt-3 text-sm text-[var(--color-ink-500)]">Belum ada buku. Pindai barcode eksemplar, atau ketik judul atau ISBN.</p>
           ) : (
             <ol className="mt-3 space-y-2">
               {desk.copies.map((copy, index) => (

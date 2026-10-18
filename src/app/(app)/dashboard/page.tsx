@@ -172,7 +172,7 @@ function AttentionCard({ stats, dueToday }: { stats: DashboardStats; dueToday: D
                 {row.studentName}
               </Link>
               <span className="mt-0.5 block text-xs text-[var(--color-ink-500)]">
-                {row.studentNis} · {row.studentClass} · <span className="font-mono">{row.transactionNumber}</span> · {row.openCount} buku
+                {row.studentClass} · <span className="font-mono">{row.transactionNumber}</span> · {row.openCount} buku
               </span>
             </li>
           ))}

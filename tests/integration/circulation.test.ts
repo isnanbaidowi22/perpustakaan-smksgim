@@ -2,20 +2,20 @@ import { describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
 import { bookCopies, books, finePayments } from '@/server/db/schema';
 import {
-  findCopyByBarcode, getBorrowerCard, loadBorrowerLoans, searchBorrowers,
+  findCopyByBarcode, getBorrowerCard, loadBorrowerLoans, pickAvailableCopy, searchBorrowers, searchLoanableBooks,
 } from '@/server/queries/circulation';
 import { circulationFixture, seedLoan, TODAY } from './circulation-fixture';
 import { withRollback } from './helpers';
 
 describe('searchBorrowers', () => {
-  it('menaruh siswa dengan NIS yang cocok persis di urutan pertama', async () => {
+  it('menemukan siswa lewat nama lengkapnya', async () => {
     await withRollback(async (tx) => {
       const fx = await circulationFixture(tx);
 
-      const result = await searchBorrowers('UJI-S2', tx);
+      const result = await searchBorrowers('uji siswa dua', tx);
 
       expect(result[0]).toEqual({
-        id: fx.students[1].id, nis: 'UJI-S2', name: 'UJI Siswa Dua', className: 'XI UJI 2', status: 'active',
+        id: fx.students[1].id, name: 'UJI Siswa Dua', className: 'XI UJI 2', status: 'active',
       });
     });
   });
@@ -65,7 +65,7 @@ describe('getBorrowerCard', () => {
       await seedLoan(tx, fx, { student: 0, copies: [1], loanDate: '2090-01-01', dueDate: '2090-01-04', returned: [1], totalFine: 4000 });
 
       expect(await getBorrowerCard(fx.students[0].id, TODAY, tx)).toEqual({
-        student: { id: fx.students[0].id, nis: 'UJI-S1', name: 'UJI Siswa Satu', className: 'XI UJI 1', status: 'active' },
+        student: { id: fx.students[0].id, name: 'UJI Siswa Satu', className: 'XI UJI 1', status: 'active' },
         activeCount: 1,
         maxActiveLoans: 3,
         overdue: [{ transactionNumber: late.transactionNumber, daysLate: 7 }],
@@ -107,7 +107,7 @@ describe('findCopyByBarcode', () => {
       await seedLoan(tx, fx, { student: 1, copies: [0], loanDate: TODAY, dueDate: '2090-03-05' });
 
       expect((await findCopyByBarcode('UJI-SRK-01', tx))?.borrowedBy).toEqual({
-        name: 'UJI Siswa Dua', nis: 'UJI-S2', dueDate: '2090-03-05',
+        name: 'UJI Siswa Dua', className: 'XI UJI 2', dueDate: '2090-03-05',
       });
     });
   });
@@ -122,6 +122,46 @@ describe('findCopyByBarcode', () => {
       expect(copy).toMatchObject({ status: 'RUSAK', bookStatus: 'inactive' });
       expect(copy?.borrowedBy).toBeUndefined();
       expect(await findCopyByBarcode('UJI-TIDAK-ADA', tx)).toBeNull();
+    });
+  });
+});
+
+describe('searchLoanableBooks', () => {
+  it('mencari sebagian judul dan menghitung eksemplar yang tersedia saja', async () => {
+    await withRollback(async (tx) => {
+      const fx = await circulationFixture(tx, { copies: 3 });
+      await tx.update(bookCopies).set({ status: 'RUSAK' }).where(eq(bookCopies.id, fx.copies[0].id));
+
+      const result = await searchLoanableBooks('buku sirkulasi', tx);
+
+      expect(result).toEqual([
+        { bookId: fx.bookId, title: fx.bookTitle, author: 'UJI-Penulis', isbn: null, availableCount: 2 },
+      ]);
+    });
+  });
+
+  it('menemukan buku lewat ISBN dan melewatkan buku nonaktif', async () => {
+    await withRollback(async (tx) => {
+      const fx = await circulationFixture(tx);
+      await tx.update(books).set({ isbn: '978-UJI-0001' }).where(eq(books.id, fx.bookId));
+      expect((await searchLoanableBooks('978-UJI-0001', tx)).map((row) => row.bookId)).toEqual([fx.bookId]);
+
+      await tx.update(books).set({ status: 'inactive' }).where(eq(books.id, fx.bookId));
+      expect(await searchLoanableBooks('978-UJI-0001', tx)).toEqual([]);
+    });
+  });
+});
+
+describe('pickAvailableCopy', () => {
+  it('mengambil eksemplar tersedia pertama yang belum ada di daftar meja', async () => {
+    await withRollback(async (tx) => {
+      const fx = await circulationFixture(tx, { copies: 3 });
+      await tx.update(bookCopies).set({ status: 'DIPINJAM' }).where(eq(bookCopies.id, fx.copies[0].id));
+
+      const picked = await pickAvailableCopy(fx.bookId, [fx.copies[1].id], tx);
+
+      expect(picked).toMatchObject({ id: fx.copies[2].id, barcode: fx.copies[2].barcode, status: 'TERSEDIA', rackCode: 'UJI-R1' });
+      expect(await pickAvailableCopy(fx.bookId, [fx.copies[1].id, fx.copies[2].id], tx)).toBeNull();
     });
   });
 });

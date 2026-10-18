@@ -57,6 +57,17 @@ export function initialRows(items: ReturnableItem[], query?: string): Record<str
   ]));
 }
 
+/**
+ * Buku hilang diganti seharga katalognya. Biaya buku rusak tergantung
+ * kerusakannya, jadi kolomnya dikosongkan dan petugas wajib mengisinya
+ * sendiri (penyimpanan tertahan sampai terisi).
+ */
+export function conditionPatch(item: ReturnableItem, condition: ReturnCondition): Partial<ReturnRowState> {
+  if (condition === 'HILANG') return { condition, replacementFee: String(item.bookPrice) };
+  if (condition === 'RUSAK') return { condition, replacementFee: '' };
+  return { condition };
+}
+
 /** '30.000' → 30000; kosong → null; selain angka → NaN. */
 export function parseRupiahInput(raw: string): number | null {
   // Label kolomnya "Biaya ganti (Rp)", jadi petugas wajar mengetik "Rp60.000".

@@ -24,7 +24,7 @@ describe('HistoryPage', () => {
     mockListLoans.mockResolvedValueOnce({
       rows: [{
         id: 'l1', transactionNumber: 'PJM-20900302-0001', loanDate: '2090-03-02', dueDate: '2090-03-05',
-        status: 'SEBAGIAN_KEMBALI', studentName: 'Ahmad Fauzi', studentNis: '202600123', studentClass: 'XI RPL 1',
+        status: 'SEBAGIAN_KEMBALI', studentName: 'Ahmad Fauzi', studentClass: 'XI RPL 1',
         itemCount: 2, openCount: 1, totalFine: 4000, unpaidFine: 1500, daysOverdue: 4,
       }],
       total: 1,

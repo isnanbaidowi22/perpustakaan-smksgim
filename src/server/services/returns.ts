@@ -13,7 +13,7 @@ import { isUuid } from '@/server/validation/common';
 import type { ReturnInput } from '@/server/validation/return';
 import { fail, ok, type ServiceResult } from './result';
 
-const NOT_FOUND = 'Transaksi tidak ditemukan. Cari ulang dengan nomor transaksi, NIS, atau barcode buku.';
+const NOT_FOUND = 'Transaksi tidak ditemukan. Cari ulang dengan nomor transaksi, nama siswa, atau barcode buku.';
 const STALE = 'Salah satu buku sudah dikembalikan atau bukan bagian dari transaksi ini. Muat ulang halaman lalu pilih lagi.';
 
 /**

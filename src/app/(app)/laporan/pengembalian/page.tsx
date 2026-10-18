@@ -34,7 +34,7 @@ export default async function ReturnReportPage({ searchParams }: { searchParams:
       <ReportHeader
         schoolName={settings.schoolName?.trim() || 'Perpustakaan Sekolah'}
         title="Laporan Pengembalian"
-        description="Eksemplar yang kembali menurut tanggal kembali (WIB), dengan kondisi, denda telat, dan biaya ganti."
+        description="Eksemplar yang kembali menurut tanggal kembali (WIB), dengan kondisi, denda, dan biaya ganti."
         period={`Periode ${formatPeriod(period)}${className ? ` · Kelas ${className}` : ''}`}
       />
       <ReportFilters from={period.from} to={period.to} className={className} classOptions={classOptions} />
@@ -47,7 +47,7 @@ export default async function ReturnReportPage({ searchParams }: { searchParams:
         items={[
           { label: 'Buku kembali', value: summary.copies.toLocaleString('id-ID') },
           { label: 'Rusak / hilang', value: `${summary.damaged.toLocaleString('id-ID')} / ${summary.lost.toLocaleString('id-ID')}` },
-          { label: 'Denda telat', value: formatRupiah(summary.lateFines) },
+          { label: 'Denda', value: formatRupiah(summary.lateFines) },
           { label: 'Biaya ganti', value: formatRupiah(summary.replacementFees) },
         ]}
       />
@@ -62,7 +62,7 @@ export default async function ReturnReportPage({ searchParams }: { searchParams:
             <th className={TH}>Buku</th>
             <th className={TH}>Kondisi</th>
             <th className={TH}>Telat</th>
-            <th className={TH}>Denda Telat</th>
+            <th className={TH}>Denda</th>
             <th className={TH}>Biaya Ganti</th>
           </tr>
         </thead>
@@ -82,7 +82,6 @@ export default async function ReturnReportPage({ searchParams }: { searchParams:
               </td>
               <td className={TD}>
                 {row.studentName}
-                <span className="block font-mono text-xs text-[var(--color-ink-500)]">{row.studentNis}</span>
               </td>
               <td className={TD}>{row.studentClass}</td>
               <td className={TD}>

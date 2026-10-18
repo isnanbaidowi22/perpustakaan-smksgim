@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, ilike, inArray, isNull, ne, or, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, ilike, inArray, isNull, ne, notInArray, or, sql } from 'drizzle-orm';
 import { diffDays, type IsoDate } from '@/domain/shared/date';
 import type {
   BorrowerSnapshot, CopySnapshot, OpenLoanSnapshot, RecordStatus, StudentSnapshot,
@@ -13,7 +13,6 @@ import { getLibrarySettings } from './settings';
 
 export interface BorrowerOption {
   id: string;
-  nis: string;
   name: string;
   className: string;
   status: RecordStatus;
@@ -22,8 +21,8 @@ export interface BorrowerOption {
 const BORROWER_LIMIT = 8;
 
 /**
- * Pencarian siswa di meja peminjaman. NIS yang cocok persis (hasil scan kartu)
- * selalu di urutan pertama, sehingga scan langsung memilih siswa itu.
+ * Pencarian siswa di meja peminjaman menurut nama. Nama yang cocok persis
+ * selalu di urutan pertama.
  * Siswa nonaktif ikut tampil agar kartu dapat menjelaskan mengapa ia ditolak.
  */
 export async function searchBorrowers(query: string, executor: Executor = db): Promise<BorrowerOption[]> {
@@ -33,14 +32,13 @@ export async function searchBorrowers(query: string, executor: Executor = db): P
   return executor
     .select({
       id: students.id,
-      nis: students.nis,
       name: students.name,
       className: students.className,
       status: students.status,
     })
     .from(students)
-    .where(or(eq(students.nis, keyword), ilike(students.nis, pattern), ilike(students.name, pattern)))
-    .orderBy(desc(sql`${students.nis} = ${keyword}`), asc(students.name))
+    .where(ilike(students.name, pattern))
+    .orderBy(desc(sql`lower(${students.name}) = lower(${keyword})`), asc(students.name))
     .limit(BORROWER_LIMIT);
 }
 
@@ -100,7 +98,6 @@ export async function getBorrowerCard(
   const [student] = await executor
     .select({
       id: students.id,
-      nis: students.nis,
       name: students.name,
       className: students.className,
       status: students.status,
@@ -133,7 +130,7 @@ export async function borrowersOf(copyIds: string[], executor: Executor = db): P
     .select({
       copyId: loanItems.bookCopyId,
       name: students.name,
-      nis: students.nis,
+      className: students.className,
       dueDate: loans.dueDate,
     })
     .from(loanItems)
@@ -148,20 +145,22 @@ export interface CopyLookup extends CopySnapshot {
   rackCode: string | null;
 }
 
+const COPY_FIELDS = {
+  id: bookCopies.id,
+  barcode: bookCopies.barcode,
+  status: bookCopies.status,
+  bookId: books.id,
+  bookTitle: books.title,
+  bookStatus: books.status,
+  rackCode: racks.code,
+};
+
 /** Barcode disimpan dalam huruf besar (validasi eksemplar Rencana 02). */
 export async function findCopyByBarcode(barcode: string, executor: Executor = db): Promise<CopyLookup | null> {
   const normalized = barcode.trim().toUpperCase();
   if (!normalized) return null;
   const [copy] = await executor
-    .select({
-      id: bookCopies.id,
-      barcode: bookCopies.barcode,
-      status: bookCopies.status,
-      bookId: books.id,
-      bookTitle: books.title,
-      bookStatus: books.status,
-      rackCode: racks.code,
-    })
+    .select(COPY_FIELDS)
     .from(bookCopies)
     .innerJoin(books, eq(books.id, bookCopies.bookId))
     .leftJoin(racks, eq(racks.id, books.rackId))
@@ -171,4 +170,62 @@ export async function findCopyByBarcode(barcode: string, executor: Executor = db
 
   const borrower = copy.status === 'DIPINJAM' ? (await borrowersOf([copy.id], executor)).get(copy.id) : undefined;
   return borrower ? { ...copy, borrowedBy: borrower } : copy;
+}
+
+export interface LoanableBook {
+  bookId: string;
+  title: string;
+  author: string;
+  isbn: string | null;
+  availableCount: number;
+}
+
+const BOOK_LIMIT = 8;
+
+/**
+ * Pencarian judul di meja peminjaman, untuk buku yang barcodenya tidak
+ * terbaca. Hanya buku aktif; ISBN yang cocok persis selalu di urutan pertama.
+ */
+export async function searchLoanableBooks(query: string, executor: Executor = db): Promise<LoanableBook[]> {
+  const keyword = query.trim();
+  if (!keyword) return [];
+  const pattern = containsPattern(keyword);
+  const rows = await executor
+    .select({
+      bookId: books.id,
+      title: books.title,
+      author: books.author,
+      isbn: books.isbn,
+      availableCount: sql<number>`count(${bookCopies.id}) filter (where ${bookCopies.status} = 'TERSEDIA')`.mapWith(Number),
+    })
+    .from(books)
+    .leftJoin(bookCopies, eq(bookCopies.bookId, books.id))
+    .where(and(eq(books.status, 'active'), or(ilike(books.title, pattern), ilike(books.isbn, pattern))))
+    .groupBy(books.id)
+    .orderBy(desc(sql`${books.isbn} = ${keyword}`), asc(books.title))
+    .limit(BOOK_LIMIT);
+  return rows;
+}
+
+/** Eksemplar TERSEDIA pertama dari sebuah judul yang belum ada di daftar meja. */
+export async function pickAvailableCopy(
+  bookId: string,
+  excludeCopyIds: string[],
+  executor: Executor = db,
+): Promise<CopyLookup | null> {
+  if (!isUuid(bookId)) return null;
+  const excluded = excludeCopyIds.filter(isUuid);
+  const [copy] = await executor
+    .select(COPY_FIELDS)
+    .from(bookCopies)
+    .innerJoin(books, eq(books.id, bookCopies.bookId))
+    .leftJoin(racks, eq(racks.id, books.rackId))
+    .where(and(
+      eq(bookCopies.bookId, bookId),
+      eq(bookCopies.status, 'TERSEDIA'),
+      excluded.length > 0 ? notInArray(bookCopies.id, excluded) : undefined,
+    ))
+    .orderBy(asc(bookCopies.barcode))
+    .limit(1);
+  return copy ?? null;
 }

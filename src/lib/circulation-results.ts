@@ -1,4 +1,5 @@
 import type { Violation } from '@/domain/shared/violations';
+import type { FormState } from './form-state';
 
 /**
  * Hasil Server Action baca di meja sirkulasi. Galat dikembalikan, tidak
@@ -21,3 +22,9 @@ export const LOAN_SAVE_FAILED =
 
 export const RETURN_SAVE_FAILED =
   'Pengembalian belum tersimpan karena gangguan koneksi ke database. Buka ulang transaksi ini untuk memeriksa sebelum menyimpan ulang.';
+
+/** Hasil mendaftarkan siswa baru dari meja peminjaman: kartunya, atau state form berisi galat per kolom. */
+export type CreateBorrowerResult<Card> = { ok: true; data: Card } | { ok: false; state: FormState };
+
+/** Saran judul di meja peminjaman baru dicari setelah sekian karakter diketik. */
+export const SUGGEST_MIN_LENGTH = 3;

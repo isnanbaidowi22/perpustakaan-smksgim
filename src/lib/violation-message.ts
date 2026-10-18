@@ -61,8 +61,8 @@ export function describeViolation(violation: Violation): ViolationMessage {
       const state = violation.status === 'TERSEDIA' ? 'tidak tersedia' : UNAVAILABLE[violation.status];
       const title = `Eksemplar ${violation.barcode} ${state}`;
       if (violation.borrowedBy) {
-        const { name, nis, dueDate } = violation.borrowedBy;
-        return { title, detail: `${name} (NIS ${nis}), jatuh tempo ${formatDate(dueDate)}. Pilih eksemplar lain.` };
+        const { name, className, dueDate } = violation.borrowedBy;
+        return { title, detail: `${name} (${className}), jatuh tempo ${formatDate(dueDate)}. Pilih eksemplar lain.` };
       }
       return { title, detail: `"${violation.bookTitle}" tidak dapat dipinjam. Pilih eksemplar lain.` };
     }

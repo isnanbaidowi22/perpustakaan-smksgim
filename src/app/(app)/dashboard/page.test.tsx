@@ -38,7 +38,6 @@ function loanRow(index: number): LoanRow {
     dueDate: '2090-03-05',
     status: 'AKTIF',
     studentName: `Siswa ${index}`,
-    studentNis: `N${index}`,
     studentClass: 'XI RPL 1',
     itemCount: 1,
     openCount: 1,
@@ -115,7 +114,7 @@ describe('DashboardPage', () => {
   it('mendaftar pinjaman yang jatuh tempo hari ini dengan tautan ke transaksinya', async () => {
     mockDueToday.mockResolvedValueOnce([{
       id: 'd1', transactionNumber: 'PJM-20900227-0004', studentName: 'Ahmad Fauzi',
-      studentNis: '202600123', studentClass: 'XI RPL 1', openCount: 2,
+      studentClass: 'XI RPL 1', openCount: 2,
     }]);
 
     const html = await render();

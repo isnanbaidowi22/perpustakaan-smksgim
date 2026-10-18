@@ -9,7 +9,7 @@ import { Notice } from './notice';
 
 export type FormAction = (state: FormState, formData: FormData) => Promise<FormState>;
 
-const FormStateContext = createContext<FormState>(IDLE);
+export const FormStateContext = createContext<FormState>(IDLE);
 
 /**
  * Nilai dan galat sebuah kolom menurut state terakhir form.

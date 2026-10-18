@@ -44,12 +44,12 @@ describe('loanReport', () => {
       expect(report.rows).toEqual([
         {
           id: first.id, transactionNumber: first.transactionNumber, loanDate: '2090-03-01', dueDate: '2090-03-04',
-          status: 'SEBAGIAN_KEMBALI', studentName: 'UJI Siswa Satu', studentNis: 'UJI-S1', studentClass: 'XI UJI 1',
+          status: 'SEBAGIAN_KEMBALI', studentName: 'UJI Siswa Satu', studentClass: 'XI UJI 1',
           itemCount: 2, openCount: 1, daysOverdue: 2,
         },
         {
           id: second.id, transactionNumber: second.transactionNumber, loanDate: '2090-03-02', dueDate: '2090-03-05',
-          status: 'AKTIF', studentName: 'UJI Siswa Dua', studentNis: 'UJI-S2', studentClass: 'XI UJI 2',
+          status: 'AKTIF', studentName: 'UJI Siswa Dua', studentClass: 'XI UJI 2',
           itemCount: 1, openCount: 1, daysOverdue: 1,
         },
       ]);
@@ -125,7 +125,7 @@ describe('returnReport', () => {
       ]);
       expect(report.rows[0]).toMatchObject({
         loanId: loan.id, transactionNumber: loan.transactionNumber, studentName: 'UJI Siswa Satu',
-        studentNis: 'UJI-S1', studentClass: 'XI UJI 1', bookTitle: 'UJI-Buku Sirkulasi', daysLate: 2,
+        studentClass: 'XI UJI 1', bookTitle: 'UJI-Buku Sirkulasi', daysLate: 2,
       });
       expect(report.rows[0].returnedAt).toBeInstanceOf(Date);
       expect(report.summary).toEqual({ copies: 2, damaged: 1, lost: 0, lateFines: 4000, replacementFees: 50000 });
@@ -167,12 +167,12 @@ describe('overdueReport', () => {
       expect(report.rows).toEqual([
         {
           id: expect.any(String), loanId: old.id, transactionNumber: old.transactionNumber, studentName: 'UJI Siswa Satu',
-          studentNis: 'UJI-S1', studentClass: 'XI UJI 1', barcode: 'UJI-SRK-01', bookTitle: 'UJI-Buku Sirkulasi',
+          studentClass: 'XI UJI 1', barcode: 'UJI-SRK-01', bookTitle: 'UJI-Buku Sirkulasi',
           dueDate: '2090-02-23', daysLate: 11, estimatedFine: 11000,
         },
         {
           id: expect.any(String), loanId: recent.id, transactionNumber: recent.transactionNumber, studentName: 'UJI Siswa Satu',
-          studentNis: 'UJI-S1', studentClass: 'XI UJI 1', barcode: 'UJI-SRK-03', bookTitle: 'UJI-Buku Sirkulasi',
+          studentClass: 'XI UJI 1', barcode: 'UJI-SRK-03', bookTitle: 'UJI-Buku Sirkulasi',
           dueDate: '2090-03-02', daysLate: 4, estimatedFine: 4000,
         },
       ]);

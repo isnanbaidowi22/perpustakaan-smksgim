@@ -7,6 +7,9 @@ vi.mock('@/server/actions/loans', () => ({
   searchBorrowersAction: vi.fn(),
   getBorrowerCardAction: vi.fn(),
   lookupCopyAction: vi.fn(),
+  pickCopyAction: vi.fn(),
+  suggestBooksAction: vi.fn(),
+  createBorrowerAction: vi.fn(),
   createLoanAction: vi.fn(),
 }));
 vi.mock('@/server/queries/settings', () => ({

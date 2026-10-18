@@ -13,7 +13,6 @@ const settings: LibrarySettings = {
 
 const student: StudentSnapshot = {
   id: 'stu-1',
-  nis: '202600123',
   name: 'Ahmad Fauzi',
   className: 'XI RPL 1',
   status: 'active',
@@ -166,7 +165,7 @@ describe('validateLoanRequest — ketersediaan eksemplar', () => {
     const result = validateLoanRequest(request({
       requestedCopies: [copy({
         status: 'DIPINJAM',
-        borrowedBy: { name: 'Siti Aminah', nis: '202600456', dueDate: '2026-09-24' },
+        borrowedBy: { name: 'Siti Aminah', className: 'XI RPL 2', dueDate: '2026-09-24' },
       })],
     }));
     expect(result).toEqual({
@@ -176,7 +175,7 @@ describe('validateLoanRequest — ketersediaan eksemplar', () => {
         barcode: 'BK-000123',
         bookTitle: 'Pemrograman Web',
         status: 'DIPINJAM',
-        borrowedBy: { name: 'Siti Aminah', nis: '202600456', dueDate: '2026-09-24' },
+        borrowedBy: { name: 'Siti Aminah', className: 'XI RPL 2', dueDate: '2026-09-24' },
       }],
     });
   });

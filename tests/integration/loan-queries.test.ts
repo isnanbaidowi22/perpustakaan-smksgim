@@ -33,7 +33,6 @@ describe('getLoanDetail', () => {
         notes: 'UJI catatan',
         studentId: fx.students[0].id,
         studentName: 'UJI Siswa Satu',
-        studentNis: 'UJI-S1',
         studentClass: 'XI UJI 1',
         academicYearName: 'UJI-2089/2090',
         totalFine: 3000,
@@ -62,7 +61,7 @@ describe('getLoanDetail', () => {
 });
 
 describe('findLoansForReturn', () => {
-  it('menemukan pinjaman terbuka lewat nomor transaksi, NIS, nama, atau barcode', async () => {
+  it('menemukan pinjaman terbuka lewat nomor transaksi, nama, atau barcode', async () => {
     await withRollback(async (tx) => {
       const fx = await circulationFixture(tx);
       const created = await createLoan({
@@ -74,14 +73,13 @@ describe('findLoansForReturn', () => {
         id: created.id,
         transactionNumber: 'PJM-20900302-0001',
         studentName: 'UJI Siswa Satu',
-        studentNis: 'UJI-S1',
         studentClass: 'XI UJI 1',
         loanDate: TODAY,
         dueDate: '2090-03-05',
         openCount: 2,
         daysOverdue: 2,
       };
-      for (const query of ['pjm-20900302-0001', 'UJI-S1', 'siswa satu', 'uji-srk-02']) {
+      for (const query of ['pjm-20900302-0001', 'siswa satu', 'uji-srk-02']) {
         expect(await findLoansForReturn(query, '2090-03-07', tx)).toEqual([expected]);
       }
     });
@@ -112,7 +110,7 @@ describe('findLoansForReturn', () => {
         loanId: created.id, items: [{ loanItemId: detail!.items[0].id, condition: 'BAIK', replacementFee: null, note: null }],
       }, fx.actor, TODAY, tx);
 
-      expect(await findLoansForReturn('UJI-S1', TODAY, tx)).toEqual([]);
+      expect(await findLoansForReturn('siswa satu', TODAY, tx)).toEqual([]);
       expect(await findLoansForReturn('   ', TODAY, tx)).toEqual([]);
     });
   });
@@ -175,7 +173,6 @@ describe('listLoans', () => {
         dueDate: '2090-02-23',
         status: 'SEBAGIAN_KEMBALI',
         studentName: 'UJI Siswa Satu',
-        studentNis: 'UJI-S1',
         studentClass: 'XI UJI 1',
         itemCount: 2,
         openCount: 1,

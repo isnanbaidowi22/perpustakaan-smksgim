@@ -99,10 +99,10 @@ async function sharedCopyId(): Promise<string> {
 }
 
 /** Siswa yang hanya terlihat oleh transaksi `tx` sendiri. */
-async function privateStudent(tx: Transaction, nis: string): Promise<string> {
+async function privateStudent(tx: Transaction, label: string): Promise<string> {
   const [student] = await tx
     .insert(students)
-    .values({ nis, name: `UJI Siswa ${nis}`, className: 'XI UJI' })
+    .values({ name: `UJI Siswa ${label}`, className: 'XI UJI' })
     .returning({ id: students.id });
   return student.id;
 }

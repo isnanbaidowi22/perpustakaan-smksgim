@@ -1,8 +1,8 @@
 'use client';
 
 import {
-  ArrowDownLeft, ArrowUpRight, Barcode, Book, Calendar, ChevronsLeft, ChevronsRight, CircleAlert, Clock,
-  FileChartColumn, LayoutDashboard, LibraryBig, Rows3, ScrollText, SlidersVertical, Tag, UserRoundPlus, Users,
+  ArrowDownLeft, ArrowUpRight, Book, Calendar, ChevronsLeft, ChevronsRight, CircleAlert, Clock,
+  FileChartColumn, LayoutDashboard, LibraryBig, Rows3, ScrollText, SlidersVertical, Tag, UserRoundPlus,
   type LucideIcon,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -22,9 +22,7 @@ const NAV: NavSection[] = [
     items: [
       { href: '/master/buku', label: 'Buku', icon: Book },
       { href: '/master/kategori', label: 'Kategori', icon: Tag },
-      { href: '/master/siswa', label: 'Siswa', icon: Users },
       { href: '/master/rak', label: 'Rak', icon: Rows3 },
-      { href: '/cetak/label-barcode', label: 'Label Barcode', icon: Barcode },
     ],
   },
   {

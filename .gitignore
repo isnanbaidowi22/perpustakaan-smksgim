@@ -9,6 +9,7 @@ next-env.d.ts
 # Lingkungan
 .env
 .env*.local
+.env.local.*
 
 # Supabase lokal
 /supabase/.branches/

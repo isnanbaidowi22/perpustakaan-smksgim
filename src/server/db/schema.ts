@@ -89,7 +89,11 @@ export const bookCopies = pgTable('book_copies', {
 
 export const students = pgTable('students', {
   id: uuid('id').primaryKey().defaultRandom(),
-  nis: text('nis').notNull().unique(),
+  /**
+   * Tidak dipakai lagi sejak revisi 28 September 2026 (siswa dicatat tanpa NIS
+   * dari meja peminjaman). Kolom dibiarkan agar NIS siswa lama tidak terhapus.
+   */
+  nis: text('nis').unique(),
   name: text('name').notNull(),
   className: text('class_name').notNull(),
   major: text('major'),

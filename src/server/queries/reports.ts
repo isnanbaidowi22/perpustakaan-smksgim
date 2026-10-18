@@ -42,7 +42,6 @@ export interface LoanReportRow {
   dueDate: string;
   status: LoanStatus;
   studentName: string;
-  studentNis: string;
   studentClass: string;
   itemCount: number;
   openCount: number;
@@ -76,7 +75,6 @@ export async function loanReport(
       dueDate: loans.dueDate,
       status: loans.status,
       studentName: students.name,
-      studentNis: students.nis,
       studentClass: loans.studentClass,
       itemCount: counts.itemCount,
       openCount: counts.openCount,
@@ -120,7 +118,6 @@ export interface ReturnReportRow {
   loanId: string;
   transactionNumber: string;
   studentName: string;
-  studentNis: string;
   studentClass: string;
   barcode: string;
   bookTitle: string;
@@ -161,7 +158,6 @@ export async function returnReport(
       loanId: loans.id,
       transactionNumber: loans.transactionNumber,
       studentName: students.name,
-      studentNis: students.nis,
       studentClass: loans.studentClass,
       barcode: bookCopies.barcode,
       bookTitle: books.title,
@@ -215,7 +211,6 @@ export interface OverdueReportRow {
   loanId: string;
   transactionNumber: string;
   studentName: string;
-  studentNis: string;
   studentClass: string;
   barcode: string;
   bookTitle: string;
@@ -256,7 +251,6 @@ export async function overdueReport(
       loanId: loans.id,
       transactionNumber: loans.transactionNumber,
       studentName: students.name,
-      studentNis: students.nis,
       studentClass: loans.studentClass,
       barcode: bookCopies.barcode,
       bookTitle: books.title,

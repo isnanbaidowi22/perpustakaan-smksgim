@@ -40,7 +40,6 @@ describe('createLoan — jalur normal', () => {
         .where(and(eq(auditLogs.entityId, result.id), eq(auditLogs.action, 'loan.create')));
       expect(audit?.metadata).toEqual({
         transactionNumber: 'PJM-20900302-0001',
-        studentNis: 'UJI-S1',
         barcodes: ['UJI-SRK-01', 'UJI-SRK-02'],
         dueDate: '2090-03-05',
       });
@@ -74,7 +73,7 @@ describe('createLoan — penolakan', () => {
           barcode: 'UJI-SRK-01',
           bookTitle: 'UJI-Buku Sirkulasi',
           status: 'DIPINJAM',
-          borrowedBy: { name: 'UJI Siswa Satu', nis: 'UJI-S1', dueDate: '2090-03-05' },
+          borrowedBy: { name: 'UJI Siswa Satu', className: 'XI UJI 1', dueDate: '2090-03-05' },
         }],
       });
       const [{ count }] = await tx
@@ -168,7 +167,7 @@ describe('createLoan — penolakan', () => {
       const fx = await circulationFixture(tx);
 
       expect(await createLoan({ studentId: crypto.randomUUID(), copyIds: [fx.copies[0].id], notes: null }, fx.actor, TODAY, tx))
-        .toEqual({ ok: false, message: 'Siswa tidak ditemukan. Cari ulang siswa dengan NIS atau nama.' });
+        .toEqual({ ok: false, message: 'Siswa tidak ditemukan. Cari ulang siswa dengan nama.' });
       expect(await createLoan({ studentId: fx.students[0].id, copyIds: [crypto.randomUUID()], notes: null }, fx.actor, TODAY, tx))
         .toEqual({ ok: false, message: 'Salah satu eksemplar tidak ditemukan. Pindai ulang barcode bukunya.' });
     });

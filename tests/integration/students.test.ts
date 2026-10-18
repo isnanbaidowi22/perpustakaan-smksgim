@@ -2,18 +2,16 @@ import { describe, expect, it } from 'vitest';
 import { and, eq, sql } from 'drizzle-orm';
 import type { StudentInput } from '@/server/validation/student';
 import { academicYears, auditLogs } from '@/server/db/schema';
-import { getStudent, listClassNames, listStudents } from '@/server/queries/students';
-import { createStudent, setStudentStatus, updateStudent } from '@/server/services/students';
+import { getStudent } from '@/server/queries/students';
+import { createStudent, updateStudent } from '@/server/services/students';
 import type { Transaction } from '@/server/db/executor';
 import { testActor, withRollback } from './helpers';
 
 const input: StudentInput = {
-  nis: 'UJI-0001',
   name: 'UJI Ahmad Fauzi',
   className: 'UJI-XI RPL 1',
   major: 'RPL',
   gender: 'L',
-  phone: null,
   academicYearId: null,
 };
 
@@ -27,7 +25,7 @@ async function activeTestYear(tx: Transaction): Promise<string> {
 }
 
 describe('createStudent', () => {
-  it('memakai tahun ajaran aktif bila tidak dipilih, dan menulis audit log', async () => {
+  it('mencatat siswa tanpa NIS, memakai tahun ajaran aktif, dan menulis audit log', async () => {
     await withRollback(async (tx) => {
       const actor = await testActor(tx);
       const yearId = await activeTestYear(tx);
@@ -35,7 +33,9 @@ describe('createStudent', () => {
       const result = await createStudent(input, actor, tx);
 
       if (!result.ok) throw new Error(result.message);
-      expect(await getStudent(result.id, tx)).toMatchObject({ nis: 'UJI-0001', academicYearId: yearId, status: 'active' });
+      expect(await getStudent(result.id, tx)).toMatchObject({
+        name: 'UJI Ahmad Fauzi', academicYearId: yearId, status: 'active',
+      });
       const audit = await tx
         .select()
         .from(auditLogs)
@@ -44,25 +44,17 @@ describe('createStudent', () => {
     });
   });
 
-  it('menolak NIS ganda dengan menyebut nama pemiliknya', async () => {
+  it('membolehkan dua siswa bernama sama (tidak ada lagi kunci NIS)', async () => {
     await withRollback(async (tx) => {
       const actor = await testActor(tx);
-      await createStudent(input, actor, tx);
-
-      const result = await createStudent({ ...input, name: 'UJI Orang Lain' }, actor, tx);
-
-      expect(result).toEqual({
-        ok: false,
-        field: 'nis',
-        message:
-          'NIS UJI-0001 sudah terdaftar atas nama UJI Ahmad Fauzi. Periksa kembali NIS, atau cari siswa tersebut di daftar.',
-      });
+      expect((await createStudent(input, actor, tx)).ok).toBe(true);
+      expect((await createStudent(input, actor, tx)).ok).toBe(true);
     });
   });
 });
 
-describe('updateStudent dan setStudentStatus', () => {
-  it('memindahkan kelas lalu menonaktifkan siswa', async () => {
+describe('updateStudent', () => {
+  it('memindahkan kelas dan mencatat perubahannya', async () => {
     await withRollback(async (tx) => {
       const actor = await testActor(tx);
       const created = await createStudent(input, actor, tx);
@@ -78,12 +70,9 @@ describe('updateStudent dan setStudentStatus', () => {
         .where(and(eq(auditLogs.entityId, created.id), eq(auditLogs.action, 'student.update')));
       expect(audit).toHaveLength(1);
       expect(audit[0]?.metadata).toEqual({
-        before: { nis: input.nis, name: input.name, className: input.className },
-        after: { nis: input.nis, name: input.name, className: 'UJI-XII RPL 1' },
+        before: { name: input.name, className: input.className },
+        after: { name: input.name, className: 'UJI-XII RPL 1' },
       });
-
-      expect((await setStudentStatus(created.id, 'inactive', actor, tx)).ok).toBe(true);
-      expect((await getStudent(created.id, tx))?.status).toBe('inactive');
     });
   });
 
@@ -92,34 +81,8 @@ describe('updateStudent dan setStudentStatus', () => {
       const actor = await testActor(tx);
       expect(await updateStudent(crypto.randomUUID(), input, actor, tx)).toEqual({
         ok: false,
-        message: 'Siswa tidak ditemukan. Muat ulang halaman daftar siswa.',
+        message: 'Siswa tidak ditemukan. Cari ulang siswa di halaman Peminjaman.',
       });
-    });
-  });
-});
-
-describe('listStudents dan listClassNames', () => {
-  it('mencari berdasarkan NIS atau nama, dan memfilter kelas', async () => {
-    await withRollback(async (tx) => {
-      const actor = await testActor(tx);
-      await activeTestYear(tx);
-      await createStudent(input, actor, tx);
-      await createStudent({ ...input, nis: 'UJI-0002', name: 'UJI Siti Aminah', className: 'UJI-X TKJ 2' }, actor, tx);
-
-      const byNis = await listStudents({ q: 'uji-0001', className: '', status: 'active', page: 1 }, tx);
-      expect(byNis.rows.map((row) => row.name)).toEqual(['UJI Ahmad Fauzi']);
-      expect(byNis.rows[0]?.academicYearName).toBe('UJI-2090/2091');
-
-      // "UJI Siti", bukan "Siti Aminah": data seed juga punya siswa bernama Siti Aminah.
-      const byName = await listStudents({ q: 'uji siti', className: '', status: 'active', page: 1 }, tx);
-      expect(byName.rows.map((row) => row.nis)).toEqual(['UJI-0002']);
-
-      const byClass = await listStudents({ q: 'UJI', className: 'UJI-X TKJ 2', status: 'active', page: 1 }, tx);
-      expect(byClass.total).toBe(1);
-
-      const classes = await listClassNames(tx);
-      expect(classes).toContain('UJI-XI RPL 1');
-      expect(classes).toContain('UJI-X TKJ 2');
     });
   });
 });

@@ -36,7 +36,7 @@ export default async function HistoryPage({ searchParams }: { searchParams: Sear
         actions={<Link href="/transaksi/peminjaman" className={buttonClass('primary')}>Peminjaman Baru</Link>}
       />
       <Flash message={firstValue(params.pesan)} />
-      <FilterBar q={q} placeholder="Cari no. transaksi, NIS, atau nama siswa">
+      <FilterBar q={q} placeholder="Cari no. transaksi atau nama siswa">
         <FilterSelect name="status" label="Filter status" value={status} options={HISTORY_STATUS_OPTIONS} />
       </FilterBar>
 
@@ -67,7 +67,7 @@ export default async function HistoryPage({ searchParams }: { searchParams: Sear
               </td>
               <td className={TD}>
                 {row.studentName}
-                <span className="block text-xs text-[var(--color-ink-500)]">{row.studentNis} · {row.studentClass}</span>
+                <span className="block text-xs text-[var(--color-ink-500)]">{row.studentClass}</span>
               </td>
               <td className={TD}>{formatDate(row.loanDate)}</td>
               <td className={TD}>{formatDate(row.dueDate)}</td>

@@ -31,9 +31,9 @@ export default async function ReturnPage({ searchParams }: { searchParams: Searc
     <>
       <PageHeader
         title="Pengembalian"
-        description="Cari dengan nomor transaksi, NIS, nama siswa, atau pindai barcode salah satu bukunya."
+        description="Cari dengan nomor transaksi, nama siswa, atau pindai barcode salah satu bukunya."
       />
-      <FilterBar q={q} placeholder="No. transaksi, NIS, nama siswa, atau barcode buku" autoFocus={!loan} />
+      <FilterBar q={q} placeholder="No. transaksi, nama siswa, atau barcode buku" autoFocus={!loan} />
 
       {q && candidates.length === 0 && !loan && (
         <p className="mb-4 text-sm text-[var(--color-ink-500)]">
@@ -61,7 +61,7 @@ export default async function ReturnPage({ searchParams }: { searchParams: Searc
                   <td className={`${TD} font-mono`}>{candidate.transactionNumber}</td>
                   <td className={TD}>
                     {candidate.studentName}
-                    <span className="block text-xs text-[var(--color-ink-500)]">{candidate.studentNis} · {candidate.studentClass}</span>
+                    <span className="block text-xs text-[var(--color-ink-500)]">{candidate.studentClass}</span>
                   </td>
                   <td className={TD}>
                     {formatDate(candidate.dueDate)}
@@ -96,7 +96,7 @@ export default async function ReturnPage({ searchParams }: { searchParams: Searc
               <span className="font-mono">{loan.transactionNumber}</span> · {loan.studentName}
             </h2>
             <span className="text-sm text-[var(--color-ink-500)]">
-              NIS {loan.studentNis} · jatuh tempo {formatDate(loan.dueDate)}
+              {loan.studentClass} · jatuh tempo {formatDate(loan.dueDate)}
             </span>
             <LoanStatusBadge status={loan.status} daysOverdue={loan.daysOverdue} />
           </div>

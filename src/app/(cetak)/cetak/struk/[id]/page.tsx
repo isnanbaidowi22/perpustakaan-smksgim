@@ -67,7 +67,6 @@ export default async function ReceiptPage({
         <dl className="grid grid-cols-[auto_1fr] gap-x-2">
           <dt>No.</dt><dd className="font-mono">{loan.transactionNumber}</dd>
           <dt>Siswa</dt><dd>{loan.studentName}</dd>
-          <dt>NIS</dt><dd className="font-mono">{loan.studentNis}</dd>
           <dt>Kelas</dt><dd>{loan.studentClass}</dd>
           <dt>Pinjam</dt><dd>{formatDate(loan.loanDate)}</dd>
           <dt>Kembali</dt><dd className="font-bold">{formatDate(loan.dueDate)}</dd>

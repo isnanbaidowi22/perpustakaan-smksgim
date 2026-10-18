@@ -94,12 +94,14 @@ async function seed() {
   );
   await db.insert(schema.bookCopies).values(copies).onConflictDoNothing();
 
-  await db.insert(schema.students).values([
-    { nis: '202600123', name: 'Ahmad Fauzi', className: 'XI RPL 1', major: 'RPL',
-      gender: 'L', academicYearId: year?.id },
-    { nis: '202600456', name: 'Siti Aminah', className: 'XI RPL 1', major: 'RPL',
-      gender: 'P', academicYearId: year?.id },
-  ]).onConflictDoNothing();
+  // Siswa tidak punya kunci unik (tanpa NIS), jadi seed ulang dicegah dengan memeriksa tabelnya.
+  const [anyStudent] = await db.select({ id: schema.students.id }).from(schema.students).limit(1);
+  if (!anyStudent) {
+    await db.insert(schema.students).values([
+      { name: 'Ahmad Fauzi', className: 'XI RPL 1', major: 'RPL', gender: 'L', academicYearId: year?.id },
+      { name: 'Siti Aminah', className: 'XI RPL 1', major: 'RPL', gender: 'P', academicYearId: year?.id },
+    ]);
+  }
 
   await seedUsers();
 

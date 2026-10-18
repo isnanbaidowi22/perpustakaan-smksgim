@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import type { BorrowerCard, CopyLookup } from '@/server/queries/circulation';
-import { cardWarnings, deskReducer, INITIAL_DESK, remainingSlots, type DeskState } from './desk-state';
+import { cardWarnings, deskReducer, INITIAL_DESK, moveHighlight, remainingSlots, type DeskState } from './desk-state';
 
 function card(overrides: Partial<BorrowerCard> = {}): BorrowerCard {
   return {
-    student: { id: 's1', nis: '202600123', name: 'Ahmad Fauzi', className: 'XI RPL 1', status: 'active' },
+    student: { id: 's1', name: 'Ahmad Fauzi', className: 'XI RPL 1', status: 'active' },
     activeCount: 0,
     maxActiveLoans: 3,
     overdue: [],
@@ -52,11 +52,11 @@ describe('deskReducer — menambah eksemplar', () => {
   it('menolak eksemplar yang sedang dipinjam siswa lain dan menyebut peminjamnya', () => {
     const state = deskReducer(withStudent(), {
       type: 'addCopy',
-      copy: copy({ status: 'DIPINJAM', borrowedBy: { name: 'Siti Aminah', nis: '202600456', dueDate: '2026-09-24' } }),
+      copy: copy({ status: 'DIPINJAM', borrowedBy: { name: 'Siti Aminah', className: 'XI RPL 2', dueDate: '2026-09-24' } }),
     });
 
     expect(state.copies).toEqual([]);
-    expect(state.notice).toBe('Eksemplar BK-000123 sedang dipinjam — Siti Aminah (NIS 202600456), jatuh tempo 24/09/2026. Pilih eksemplar lain.');
+    expect(state.notice).toBe('Eksemplar BK-000123 sedang dipinjam — Siti Aminah (XI RPL 2), jatuh tempo 24/09/2026. Pilih eksemplar lain.');
   });
 
   it('menolak eksemplar rusak dan eksemplar milik buku nonaktif', () => {
@@ -103,7 +103,7 @@ describe('deskReducer — mengganti siswa dengan buku sudah di daftar', () => {
     const filled = deskReducer(withStudent(), { type: 'addCopy', copy: copy() });
     const switched = deskReducer(filled, {
       type: 'selectStudent',
-      card: card({ student: { id: 's2', nis: '202600789', name: 'Budi Santoso', className: 'XI RPL 2', status: 'active' } }),
+      card: card({ student: { id: 's2', name: 'Budi Santoso', className: 'XI RPL 2', status: 'active' } }),
     });
 
     expect(switched.notice).toBe('1 buku di daftar akan dipinjamkan ke Budi Santoso.');
@@ -114,7 +114,7 @@ describe('deskReducer — mengganti siswa dengan buku sudah di daftar', () => {
     const switched = deskReducer(filled, {
       type: 'selectStudent',
       card: card({
-        student: { id: 's2', nis: '202600789', name: 'Budi Santoso', className: 'XI RPL 2', status: 'active' },
+        student: { id: 's2', name: 'Budi Santoso', className: 'XI RPL 2', status: 'active' },
         activeCount: 3,
         maxActiveLoans: 3,
       }),
@@ -131,7 +131,7 @@ describe('cardWarnings', () => {
 
   it('menandai hal yang akan menolak peminjaman sebagai blokir dan sisanya sebagai peringatan', () => {
     expect(cardWarnings(card({
-      student: { id: 's1', nis: '202600123', name: 'Ahmad Fauzi', className: 'XI RPL 1', status: 'inactive' },
+      student: { id: 's1', name: 'Ahmad Fauzi', className: 'XI RPL 1', status: 'inactive' },
       activeCount: 3,
       overdue: [{ transactionNumber: 'PJM-20260917-0003', daysLate: 4 }],
       unpaidFine: 4000,
@@ -153,5 +153,22 @@ describe('cardWarnings', () => {
       { tone: 'warn', text: 'PJM-20260917-0003 terlambat 4 hari.' },
       { tone: 'block', text: 'Tunggakan denda Rp4.000. Lunasi dahulu sebelum meminjam.' },
     ]);
+  });
+});
+
+describe('moveHighlight', () => {
+  const books = [{ availableCount: 1 }, { availableCount: 0 }, { availableCount: 2 }];
+
+  it('turun dan naik sambil melompati judul tanpa eksemplar tersedia, memutar di ujung', () => {
+    expect(moveHighlight(books, -1, 1)).toBe(0);
+    expect(moveHighlight(books, 0, 1)).toBe(2);
+    expect(moveHighlight(books, 2, 1)).toBe(0);
+    expect(moveHighlight(books, -1, -1)).toBe(2);
+    expect(moveHighlight(books, 2, -1)).toBe(0);
+  });
+
+  it('mengembalikan -1 bila tidak ada judul yang dapat dipilih', () => {
+    expect(moveHighlight([{ availableCount: 0 }], -1, 1)).toBe(-1);
+    expect(moveHighlight([], -1, 1)).toBe(-1);
   });
 });

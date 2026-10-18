@@ -15,7 +15,6 @@ export const TODAY: IsoDate = '2090-03-02';
 
 export interface FixtureStudent {
   id: string;
-  nis: string;
   name: string;
   className: string;
 }
@@ -84,14 +83,14 @@ export async function circulationFixture(
     .orderBy(asc(bookCopies.barcode));
 
   await tx.insert(students).values([
-    { nis: 'UJI-S1', name: 'UJI Siswa Satu', className: 'XI UJI 1', academicYearId: year.id },
-    { nis: 'UJI-S2', name: 'UJI Siswa Dua', className: 'XI UJI 2', academicYearId: year.id },
+    { name: 'UJI Siswa Satu', className: 'XI UJI 1', academicYearId: year.id },
+    { name: 'UJI Siswa Dua', className: 'XI UJI 2', academicYearId: year.id },
   ]);
   const studentRows = await tx
-    .select({ id: students.id, nis: students.nis, name: students.name, className: students.className })
+    .select({ id: students.id, name: students.name, className: students.className })
     .from(students)
-    .where(inArray(students.nis, ['UJI-S1', 'UJI-S2']))
-    .orderBy(asc(students.nis));
+    .where(inArray(students.name, ['UJI Siswa Satu', 'UJI Siswa Dua']))
+    .orderBy(asc(students.className));
 
   return { actor, yearId: year.id, bookId: book.id, bookTitle, copies, students: studentRows };
 }

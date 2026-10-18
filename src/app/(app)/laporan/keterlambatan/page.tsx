@@ -61,7 +61,6 @@ export default async function OverdueReportPage({ searchParams }: { searchParams
             <tr key={row.id}>
               <td className={TD}>
                 {row.studentName}
-                <span className="block font-mono text-xs text-[var(--color-ink-500)]">{row.studentNis}</span>
               </td>
               <td className={TD}>{row.studentClass}</td>
               <td className={TD}>

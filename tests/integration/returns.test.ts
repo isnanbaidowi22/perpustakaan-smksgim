@@ -179,7 +179,7 @@ describe('processReturn', () => {
         ok: false, message: `Transaksi ${loan.transactionNumber} sudah selesai; seluruh bukunya sudah kembali.`,
       });
       expect(await processReturn({ loanId: crypto.randomUUID(), items: [item(loan.items[0].id)] }, fx.actor, TODAY, tx)).toEqual({
-        ok: false, message: 'Transaksi tidak ditemukan. Cari ulang dengan nomor transaksi, NIS, atau barcode buku.',
+        ok: false, message: 'Transaksi tidak ditemukan. Cari ulang dengan nomor transaksi, nama siswa, atau barcode buku.',
       });
       expect(await processReturn({ loanId: loan.id, items: [] }, fx.actor, TODAY, tx)).toEqual({
         ok: false, message: 'Centang minimal satu buku yang dikembalikan.',

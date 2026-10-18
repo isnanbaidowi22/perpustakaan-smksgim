@@ -9,7 +9,7 @@ import { RETURN_CONDITION_OPTIONS } from '@/lib/circulation-labels';
 import { formatRupiah } from '@/lib/format';
 import { processReturnAction } from '@/server/actions/returns';
 import {
-  initialRows, previewReturn, toReturnInput, type ReturnableItem, type ReturnRowState,
+  conditionPatch, initialRows, previewReturn, toReturnInput, type ReturnableItem, type ReturnRowState,
 } from './return-preview';
 
 
@@ -74,7 +74,7 @@ export function ReturnForm({
                   id={`kondisi-${item.id}`}
                   value={row.condition}
                   disabled={!row.selected}
-                  onChange={(event) => update(item.id, { condition: event.target.value as ReturnCondition })}
+                  onChange={(event) => update(item.id, conditionPatch(item, event.target.value as ReturnCondition))}
                   className={CONTROL}
                 >
                   {RETURN_CONDITION_OPTIONS.map((option) => (
@@ -89,8 +89,7 @@ export function ReturnForm({
                     <input
                       id={`ganti-${item.id}`}
                       inputMode="numeric"
-                      value={row.replacementFee}
-                      onChange={(event) => update(item.id, { replacementFee: event.target.value })}
+                      value={row.replacementFee}                      onChange={(event) => update(item.id, { replacementFee: event.target.value })}
                       className={`${CONTROL} w-full`}
                     />
                     <p className="mt-1 text-xs text-[var(--color-ink-500)]">Harga katalog {formatRupiah(item.bookPrice)}.</p>

@@ -17,7 +17,6 @@ export interface LibrarySettings {
 
 export interface StudentSnapshot {
   id: string;
-  nis: string;
   name: string;
   className: string;
   status: RecordStatus;
@@ -40,7 +39,7 @@ export interface OpenLoanSnapshot {
 
 export interface BorrowerSnapshot {
   name: string;
-  nis: string;
+  className: string;
   dueDate: IsoDate;
 }
 

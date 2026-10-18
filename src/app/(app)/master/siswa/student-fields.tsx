@@ -23,8 +23,7 @@ export function StudentFields({
 
   return (
     <>
-      <TextField name="nis" label="NIS" defaultValue={student?.nis} required autoFocus={!student} maxLength={30} />
-      <TextField name="name" label="Nama lengkap" defaultValue={student?.name} required maxLength={150} />
+      <TextField name="name" label="Nama lengkap" defaultValue={student?.name} required autoFocus={!student} maxLength={150} />
       <div className="grid gap-4 sm:grid-cols-2">
         <TextField
           name="className"
@@ -36,23 +35,13 @@ export function StudentFields({
         />
         <TextField name="major" label="Jurusan" defaultValue={student?.major ?? ''} maxLength={50} />
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <SelectField
-          name="gender"
-          label="Jenis kelamin"
-          placeholder="— Tidak diisi —"
-          defaultValue={student?.gender ?? ''}
-          options={GENDER_OPTIONS}
-        />
-        <TextField
-          name="phone"
-          label="Nomor telepon"
-          type="tel"
-          inputMode="tel"
-          defaultValue={student?.phone ?? ''}
-          maxLength={20}
-        />
-      </div>
+      <SelectField
+        name="gender"
+        label="Jenis kelamin"
+        placeholder="— Tidak diisi —"
+        defaultValue={student?.gender ?? ''}
+        options={GENDER_OPTIONS}
+      />
       <SelectField
         name="academicYearId"
         label="Tahun ajaran"

@@ -83,7 +83,6 @@ describe('listDueToday', () => {
         id: partial.id,
         transactionNumber: partial.transactionNumber,
         studentName: 'UJI Siswa Satu',
-        studentNis: 'UJI-S1',
         studentClass: 'XI UJI 1',
         openCount: 1,
       }]);

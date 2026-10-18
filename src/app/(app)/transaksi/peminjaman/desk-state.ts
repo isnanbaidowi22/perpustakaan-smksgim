@@ -127,3 +127,17 @@ export function cardWarnings(card: BorrowerCard): CardWarning[] {
   }
   return warnings.length > 0 ? warnings : [{ tone: 'ok', text: 'Tidak ada keterlambatan atau tunggakan denda.' }];
 }
+
+/**
+ * Sorotan saran judul setelah ↓ (step 1) atau ↑ (step -1), memutar di ujung
+ * daftar dan melompati judul tanpa eksemplar tersedia. -1 bila tidak ada yang dapat dipilih.
+ */
+export function moveHighlight(books: { availableCount: number }[], current: number, step: 1 | -1): number {
+  const count = books.length;
+  let index = current < 0 && step === -1 ? count : current;
+  for (let tried = 0; tried < count; tried += 1) {
+    index = (index + step + count) % count;
+    if (books[index].availableCount > 0) return index;
+  }
+  return -1;
+}

@@ -14,7 +14,7 @@ vi.mock('@/server/auth/guard', () => ({
 import ReturnPage from './page';
 
 const candidate = {
-  id: 'l1', transactionNumber: 'PJM-20900302-0001', studentName: 'Ahmad Fauzi', studentNis: '202600123',
+  id: 'l1', transactionNumber: 'PJM-20900302-0001', studentName: 'Ahmad Fauzi',
   studentClass: 'XI RPL 1', loanDate: '2090-03-02', dueDate: '2090-03-05', openCount: 1, daysOverdue: 4,
 };
 

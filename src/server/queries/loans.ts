@@ -45,7 +45,6 @@ export interface LoanDetail {
   notes: string | null;
   studentId: string;
   studentName: string;
-  studentNis: string;
   /** Snapshot kelas saat meminjam (spec 4.2), bukan kelas siswa sekarang. */
   studentClass: string;
   academicYearName: string;
@@ -76,7 +75,6 @@ export async function getLoanDetail(id: string, today: IsoDate, executor: Execut
       notes: loans.notes,
       studentId: students.id,
       studentName: students.name,
-      studentNis: students.nis,
       studentClass: loans.studentClass,
       academicYearName: academicYears.name,
       createdByName: profiles.fullName,
@@ -148,7 +146,6 @@ export interface ReturnCandidate {
   id: string;
   transactionNumber: string;
   studentName: string;
-  studentNis: string;
   studentClass: string;
   loanDate: string;
   dueDate: string;
@@ -186,7 +183,6 @@ export async function findLoansForReturn(
       id: loans.id,
       transactionNumber: loans.transactionNumber,
       studentName: students.name,
-      studentNis: students.nis,
       studentClass: loans.studentClass,
       loanDate: loans.loanDate,
       dueDate: loans.dueDate,
@@ -198,7 +194,6 @@ export async function findLoansForReturn(
     .innerJoin(openItems, eq(openItems.loanId, loans.id))
     .where(or(
       eq(loans.transactionNumber, transactionMatch),
-      eq(students.nis, keyword),
       ilike(students.name, containsPattern(keyword)),
       inArray(loans.id, byBarcode),
     ))
@@ -219,7 +214,6 @@ export interface LoanRow {
   dueDate: string;
   status: LoanStatus;
   studentName: string;
-  studentNis: string;
   studentClass: string;
   itemCount: number;
   openCount: number;
@@ -265,7 +259,6 @@ export async function listLoans(
     keyword
       ? or(
           eq(loans.transactionNumber, normalizeTransactionNumber(keyword) ?? keyword.toUpperCase()),
-          eq(students.nis, keyword),
           ilike(students.name, containsPattern(keyword)),
         )
       : undefined,
@@ -280,7 +273,6 @@ export async function listLoans(
       dueDate: loans.dueDate,
       status: loans.status,
       studentName: students.name,
-      studentNis: students.nis,
       studentClass: loans.studentClass,
       itemCount: itemCounts.itemCount,
       openCount: itemCounts.openCount,

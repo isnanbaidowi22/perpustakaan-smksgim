@@ -16,7 +16,7 @@ export default async function LoanPage() {
     <>
       <PageHeader
         title="Peminjaman"
-        description="Pindai kartu siswa, lalu pindai barcode setiap buku. Tekan Ctrl+Enter untuk menyimpan."
+        description="Pindai kartu siswa, lalu pindai barcode atau ketik judul/ISBN setiap buku. Tekan Ctrl+Enter untuk menyimpan."
       />
       {!activeYear && (
         <Notice tone="danger" role="alert" className="mb-4">

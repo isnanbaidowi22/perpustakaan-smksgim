@@ -30,7 +30,6 @@ const baseLoan = {
   notes: null,
   studentId: 's1',
   studentName: 'Ahmad Fauzi',
-  studentNis: '202600123',
   studentClass: 'XI RPL 1',
   academicYearName: '2089/2090',
   createdByName: 'Petugas Perpustakaan',

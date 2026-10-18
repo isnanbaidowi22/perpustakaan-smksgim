@@ -17,7 +17,7 @@ import LoanReportPage from './page';
 
 const row = {
   id: 'l1', transactionNumber: 'PJM-20900301-0001', loanDate: '2090-03-01', dueDate: '2090-03-04',
-  status: 'AKTIF' as const, studentName: 'Ahmad Fauzi', studentNis: '202600123', studentClass: 'XI RPL 1',
+  status: 'AKTIF' as const, studentName: 'Ahmad Fauzi', studentClass: 'XI RPL 1',
   itemCount: 2, openCount: 2, daysOverdue: 2,
 };
 

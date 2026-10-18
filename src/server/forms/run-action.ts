@@ -65,7 +65,7 @@ function withoutFields(values: Record<string, string>, fields: string[]): Record
   return Object.fromEntries(Object.entries(values).filter(([key]) => !fields.includes(key)));
 }
 
-function fieldErrorsOf(error: z.ZodError): FieldErrors {
+export function fieldErrorsOf(error: z.ZodError): FieldErrors {
   const errors: FieldErrors = {};
   for (const issue of error.issues) {
     const field = String(issue.path[0] ?? '');

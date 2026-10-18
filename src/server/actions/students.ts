@@ -1,51 +1,21 @@
 'use server';
 
-import type { RecordStatus } from '@/domain/shared/types';
-import { formError, type FormState } from '@/lib/form-state';
-import { runCommand, runFormAction } from '@/server/forms/run-action';
-import { createStudent, setStudentStatus, updateStudent } from '@/server/services/students';
-import { isRecordStatus } from '@/server/validation/common';
+import type { FormState } from '@/lib/form-state';
+import { runFormAction } from '@/server/forms/run-action';
+import { updateStudent } from '@/server/services/students';
 import { studentSchema } from '@/server/validation/student';
 
-const LIST = '/master/siswa';
-const INVALID = 'Data siswa belum dapat disimpan. Periksa kolom yang ditandai.';
-
-export async function createStudentAction(_state: FormState, formData: FormData): Promise<FormState> {
-  return runFormAction({
-    schema: studentSchema,
-    formData,
-    invalidMessage: INVALID,
-    execute: (data, actor) => createStudent(data, actor),
-    successMessage: 'Siswa berhasil ditambahkan.',
-    revalidate: [LIST],
-    redirectTo: LIST,
-  });
-}
+/** Siswa didaftarkan dan diubah dari meja peminjaman, jadi ke sanalah petugas kembali. */
+const DESK = '/transaksi/peminjaman';
 
 export async function updateStudentAction(id: string, _state: FormState, formData: FormData): Promise<FormState> {
   return runFormAction({
     schema: studentSchema,
     formData,
-    invalidMessage: INVALID,
+    invalidMessage: 'Data siswa belum dapat disimpan. Periksa kolom yang ditandai.',
     execute: (data, actor) => updateStudent(id, data, actor),
     successMessage: 'Perubahan data siswa tersimpan.',
-    revalidate: [LIST],
-    redirectTo: LIST,
-  });
-}
-
-export async function setStudentStatusAction(
-  id: string,
-  status: RecordStatus,
-  _state: FormState,
-  _formData: FormData,
-): Promise<FormState> {
-  if (!isRecordStatus(status)) {
-    return formError('Status siswa tidak dikenal. Muat ulang halaman lalu coba lagi.');
-  }
-  return runCommand({
-    execute: (actor) => setStudentStatus(id, status, actor),
-    successMessage: status === 'active' ? 'Siswa diaktifkan.' : 'Siswa dinonaktifkan.',
-    revalidate: [LIST],
+    revalidate: [DESK],
+    redirectTo: DESK,
   });
 }

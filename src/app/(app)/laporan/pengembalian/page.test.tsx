@@ -17,7 +17,7 @@ import ReturnReportPage from './page';
 
 const row = {
   id: 'i1', returnedAt: new Date('2090-03-02T02:00:00Z'), loanId: 'l1', transactionNumber: 'PJM-20900225-0001',
-  studentName: 'Ahmad Fauzi', studentNis: '202600123', studentClass: 'XI RPL 1', barcode: 'BK-000001',
+  studentName: 'Ahmad Fauzi', studentClass: 'XI RPL 1', barcode: 'BK-000001',
   bookTitle: 'Pemrograman Web', condition: 'RUSAK' as const, daysLate: 2, lateFine: 2000, replacementFee: 50000,
 };
 

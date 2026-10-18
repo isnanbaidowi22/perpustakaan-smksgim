@@ -31,7 +31,6 @@ const loan = {
   notes: null,
   studentId: 's1',
   studentName: 'Ahmad Fauzi',
-  studentNis: '202600123',
   studentClass: 'XI RPL 1',
   academicYearName: '2089/2090',
   createdByName: 'Siti Petugas',
@@ -80,7 +79,7 @@ describe('ReceiptPage', () => {
     expect(html).toContain('STRUK PEMINJAMAN BUKU');
     expect(html).toContain('PJM-20900302-0001');
     expect(html).toContain('Ahmad Fauzi');
-    expect(html).toContain('202600123');
+    expect(html).not.toContain('NIS');
     expect(html).toContain('XI RPL 1');
     expect(html).toContain('02/03/2090');
     expect(html).toContain('05/03/2090');

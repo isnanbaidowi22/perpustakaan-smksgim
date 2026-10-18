@@ -43,7 +43,7 @@ export default async function AuditLogPage({ searchParams }: { searchParams: Sea
         title="Audit Log"
         description="Jejak setiap perubahan data: siapa, kapan, dan apa. Catatan ini tidak dapat diubah atau dihapus."
       />
-      <FilterBar q={q} placeholder="Cari no. transaksi, barcode, NIS, judul, atau username">
+      <FilterBar q={q} placeholder="Cari no. transaksi, barcode, nama siswa, judul, atau username">
         <FilterSelect name="jenis" label="Jenis data" value={kind} options={AUDIT_KIND_OPTIONS} />
         <input type="date" name="tanggal" defaultValue={date ?? ''} aria-label="Tanggal" className={CONTROL} />
       </FilterBar>

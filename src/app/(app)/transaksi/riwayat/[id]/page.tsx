@@ -43,7 +43,7 @@ export default async function LoanDetailPage({
     <>
       <PageHeader
         title={loan.transactionNumber}
-        description={`${loan.studentName} · NIS ${loan.studentNis} · ${loan.studentClass}`}
+        description={`${loan.studentName} · ${loan.studentClass}`}
         actions={(
           <>
             <Link href={`/cetak/struk/${loan.id}`} className={buttonClass('secondary')}>Cetak Struk</Link>

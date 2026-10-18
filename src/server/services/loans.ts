@@ -21,7 +21,7 @@ export type LoanResult =
   | { ok: false; violations: Violation[] }
   | { ok: false; message: string };
 
-const STUDENT_NOT_FOUND = 'Siswa tidak ditemukan. Cari ulang siswa dengan NIS atau nama.';
+const STUDENT_NOT_FOUND = 'Siswa tidak ditemukan. Cari ulang siswa dengan nama.';
 const COPY_NOT_FOUND = 'Salah satu eksemplar tidak ditemukan. Pindai ulang barcode bukunya.';
 const COPY_RACE = 'Salah satu eksemplar baru saja dipinjam di transaksi lain. Periksa daftar buku lalu simpan kembali.';
 
@@ -97,7 +97,6 @@ export async function createLoan(
       const [student] = await tx
         .select({
           id: students.id,
-          nis: students.nis,
           name: students.name,
           className: students.className,
           status: students.status,
@@ -159,7 +158,6 @@ export async function createLoan(
         entityId: loan.id,
         metadata: {
           transactionNumber,
-          studentNis: student.nis,
           barcodes: requestedCopies.map((copy) => copy.barcode),
           dueDate,
         },

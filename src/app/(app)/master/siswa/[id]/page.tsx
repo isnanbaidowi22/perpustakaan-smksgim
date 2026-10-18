@@ -15,11 +15,11 @@ export default async function EditStudentPage({ params }: { params: Promise<{ id
 
   return (
     <>
-      <PageHeader title="Ubah Data Siswa" description={`${student.nis} · ${student.name}`} />
+      <PageHeader title="Ubah Data Siswa" description={`${student.name} · ${student.className}`} />
       <ActionForm
         action={updateStudentAction.bind(null, student.id)}
         submitLabel="Simpan Perubahan"
-        cancelHref="/master/siswa"
+        cancelHref="/transaksi/peminjaman"
       >
         <StudentFields student={student} yearOptions={yearOptions} defaultYearId={null} />
       </ActionForm>

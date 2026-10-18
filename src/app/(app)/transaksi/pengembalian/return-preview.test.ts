@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  initialRows, parseRupiahInput, previewReturn, toReturnInput, type ReturnableItem,
+  conditionPatch, initialRows, parseRupiahInput, previewReturn, toReturnInput, type ReturnableItem,
 } from './return-preview';
 
 const items: ReturnableItem[] = [
@@ -109,5 +109,27 @@ describe('toReturnInput', () => {
   it('mengirim biaya ganti null untuk buku dalam kondisi baik', () => {
     expect(toReturnInput('l1', [items[0]], initialRows([items[0]])).items[0])
       .toEqual({ loanItemId: 'i1', condition: 'BAIK', replacementFee: null, note: null });
+  });
+});
+
+describe('conditionPatch', () => {
+  it('mengembalikan biaya ganti ke harga katalog saat kondisi diubah ke HILANG', () => {
+    expect(conditionPatch(items[0], 'HILANG')).toEqual({ condition: 'HILANG', replacementFee: '85000' });
+  });
+
+  it('mengosongkan biaya ganti saat RUSAK agar petugas mengisinya sendiri', () => {
+    expect(conditionPatch(items[0], 'RUSAK')).toEqual({ condition: 'RUSAK', replacementFee: '' });
+  });
+
+  it('membiarkan isian biaya ganti saat kondisi BAIK', () => {
+    expect(conditionPatch(items[0], 'BAIK')).toEqual({ condition: 'BAIK' });
+  });
+
+  it('menahan penyimpanan selama biaya buku rusak belum diisi', () => {
+    const rows = initialRows([items[0]]);
+    rows.i1 = { ...rows.i1, ...conditionPatch(items[0], 'RUSAK') };
+    expect(previewReturn([items[0]], rows, context).problems).toEqual([
+      'Isi biaya ganti BK-000001 dengan angka, misalnya 50.000.',
+    ]);
   });
 });

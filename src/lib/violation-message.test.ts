@@ -11,8 +11,8 @@ describe('describeViolation', () => {
   it('menyebut peminjam dan jatuh temponya untuk eksemplar yang sedang dipinjam (spec §9)', () => {
     expect(text({
       code: 'COPY_UNAVAILABLE', barcode: 'BK-000123', bookTitle: 'Pemrograman Web', status: 'DIPINJAM',
-      borrowedBy: { name: 'Ahmad Fauzi', nis: '202600123', dueDate: '2026-09-24' },
-    })).toBe('Eksemplar BK-000123 sedang dipinjam — Ahmad Fauzi (NIS 202600123), jatuh tempo 24/09/2026. Pilih eksemplar lain.');
+      borrowedBy: { name: 'Ahmad Fauzi', className: 'XI RPL 1', dueDate: '2026-09-24' },
+    })).toBe('Eksemplar BK-000123 sedang dipinjam — Ahmad Fauzi (XI RPL 1), jatuh tempo 24/09/2026. Pilih eksemplar lain.');
   });
 
   it('menyebut status eksemplar yang rusak, hilang, atau ditarik', () => {

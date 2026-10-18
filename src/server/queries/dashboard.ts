@@ -31,7 +31,6 @@ export interface DueTodayRow {
   id: string;
   transactionNumber: string;
   studentName: string;
-  studentNis: string;
   studentClass: string;
   openCount: number;
 }
@@ -102,7 +101,6 @@ export async function listDueToday(today: IsoDate, executor: Executor = db): Pro
       id: loans.id,
       transactionNumber: loans.transactionNumber,
       studentName: students.name,
-      studentNis: students.nis,
       studentClass: loans.studentClass,
       openCount: open.openCount,
     })

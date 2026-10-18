@@ -79,7 +79,6 @@ export default async function LoanReportPage({ searchParams }: { searchParams: S
               </td>
               <td className={TD}>
                 {row.studentName}
-                <span className="block font-mono text-xs text-[var(--color-ink-500)]">{row.studentNis}</span>
               </td>
               <td className={TD}>{row.studentClass}</td>
               <td className={`${TD} tabular`}>

@@ -16,7 +16,7 @@ vi.mock('@/lib/school-date', () => ({ schoolToday: () => '2090-03-06', formatSch
 import OverdueReportPage from './page';
 
 const row = {
-  id: 'i1', loanId: 'l1', transactionNumber: 'PJM-20900220-0001', studentName: 'Ahmad Fauzi', studentNis: '202600123',
+  id: 'i1', loanId: 'l1', transactionNumber: 'PJM-20900220-0001', studentName: 'Ahmad Fauzi',
   studentClass: 'XI RPL 1', barcode: 'BK-000001', bookTitle: 'Pemrograman Web', dueDate: '2090-02-23', daysLate: 11,
   estimatedFine: 11000,
 };
