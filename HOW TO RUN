@@ -1,0 +1,3 @@
+cd "D:\Dokumen\Abang Punya\Kerjaa!!\05 - Kerja GIM\fajar"
+$env:Path = "D:\nvm\nodejs;" + $env:Path
+npm run dev
