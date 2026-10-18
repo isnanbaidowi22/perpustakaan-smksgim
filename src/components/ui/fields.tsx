@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import type { Option } from '@/lib/options';
 import { useField } from './action-form';
 import { CONTROL as BASE_CONTROL, LABEL } from './form-styles';
+import { PasswordInput } from './password-input';
 
 const CONTROL = `w-full ${BASE_CONTROL}`;
 
@@ -50,22 +51,22 @@ export function TextField({
   autoComplete?: string;
 }) {
   const { value, error } = useField(name, defaultValue);
+  const props = {
+    id: name,
+    name,
+    inputMode,
+    autoFocus,
+    maxLength,
+    autoComplete,
+    required,
+    defaultValue: value,
+    'aria-invalid': error ? true : undefined,
+    'aria-describedby': describedBy(name, error, hint),
+    className: CONTROL,
+  };
   return (
     <FieldShell name={name} label={label} hint={hint} required={required} error={error}>
-      <input
-        id={name}
-        name={name}
-        type={type}
-        inputMode={inputMode}
-        autoFocus={autoFocus}
-        maxLength={maxLength}
-        autoComplete={autoComplete}
-        required={required}
-        defaultValue={value}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={describedBy(name, error, hint)}
-        className={CONTROL}
-      />
+      {type === 'password' ? <PasswordInput {...props} /> : <input {...props} type={type} />}
     </FieldShell>
   );
 }

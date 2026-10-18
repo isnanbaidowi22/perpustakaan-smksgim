@@ -6,6 +6,7 @@ import { buttonClass } from '@/components/ui/button-styles';
 import { CARD } from '@/components/ui/card-styles';
 import { CONTROL, LABEL } from '@/components/ui/form-styles';
 import { Notice } from '@/components/ui/notice';
+import { PasswordInput } from '@/components/ui/password-input';
 import { signIn } from '@/server/actions/auth';
 
 export default function LoginPage() {
@@ -37,8 +38,8 @@ export default function LoginPage() {
 
           <div>
             <label htmlFor="password" className={LABEL}>Kata Sandi</label>
-            <input
-              id="password" name="password" type="password" required autoComplete="current-password"
+            <PasswordInput
+              id="password" name="password" required autoComplete="current-password"
               className={`${CONTROL} w-full`}
             />
           </div>
